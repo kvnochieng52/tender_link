@@ -1,237 +1,228 @@
 <script setup>
-import { ref } from 'vue';
-import { Head } from '@inertiajs/vue3';
-import DashboardLayout from '../Layouts/DashboardLayout.vue';
-import StatCard from '../Components/Dashboard/StatCard.vue';
-import ChartBox from '../Components/Dashboard/ChartBox.vue';
-import TableCard from '../Components/Dashboard/TableCard.vue';
+import { Head, Link } from "@inertiajs/vue3";
+import DashboardLayout from "../Layouts/DashboardLayout.vue";
 
-// Get stats from props with fallback defaults
-const props = defineProps({
-  stats: {
-    type: Object,
-    default() {
-      return {
-        smsSent: 1250,
-        recipients: 150,
-        failedDeliveries: 12,
-        smsCredit: 3500
-      };
-    }
-  }
-});
-
-// Format numbers with commas
-function formatNumber(num) {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-// Chart data with simplified, attractive colors
-const deliveryChartData = {
-  type: 'pie',
-  data: {
-    labels: ['Delivered', 'Failed', 'Pending'],
-    datasets: [{
-      data: [85, 5, 10],
-      backgroundColor: ['#2563eb', '#ef4444', '#f59e0b'],
-      borderWidth: 0
-    }]
-  }
-};
-
-const monthlyChartData = {
-  type: 'bar',
-  data: {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    datasets: [{
-      label: 'SMS Sent',
-      data: [356, 289, 475, 310, 419, 245],
-      backgroundColor: '#2563eb',
-      borderRadius: 6,
-      maxBarThickness: 40
-    }]
-  }
-};
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      position: 'top',
-    },
-    tooltip: {
-      backgroundColor: '#1f2937',
-      padding: 12,
-      cornerRadius: 8
-    }
-  }
-};
-
-// Table data
-const smsColumns = [
-  { field: 'recipient', label: 'Recipient' },
-  { field: 'message', label: 'Message' },
-  { field: 'status', label: 'Status' },
-  { field: 'sentAt', label: 'Sent At' }
+const dashboardStats = [
+  {
+    title: "Active Tenders",
+    value: "148",
+    note: "Open opportunities",
+    icon: "fas fa-briefcase",
+  },
+  {
+    title: "Applications",
+    value: "1,276",
+    note: "Submitted this month",
+    icon: "fas fa-file-signature",
+  },
+  {
+    title: "Evaluations",
+    value: "92",
+    note: "In progress",
+    icon: "fas fa-clipboard-check",
+  },
+  {
+    title: "Awards Issued",
+    value: "34",
+    note: "This quarter",
+    icon: "fas fa-award",
+  },
 ];
 
-const recentSms = ref([
-  { id: 1, recipient: '+255 712 345 678', message: 'Your subscription has been renewed', status: 'Delivered', sentAt: '2023-05-01 14:30' },
-  { id: 2, recipient: '+255 765 432 109', message: 'Payment confirmation', status: 'Failed', sentAt: '2023-05-02 09:15' },
-  { id: 3, recipient: '+255 733 221 444', message: 'New content available', status: 'Delivered', sentAt: '2023-05-02 16:45' },
-  { id: 4, recipient: '+255 788 123 456', message: 'Account verification code', status: 'Pending', sentAt: '2023-05-03 10:20' },
-  { id: 5, recipient: '+255 744 555 666', message: 'Special offer notification', status: 'Delivered', sentAt: '2023-05-03 13:10' }
-]);
-
-// Event handlers
-function handleStatClick(type) {
-  console.log(`Stat clicked: ${type}`);
-}
-
-function viewSms(sms) {
-  console.log('View SMS:', sms);
-}
-
-function editSms(sms) {
-  console.log('Edit SMS:', sms);
-}
-
-function deleteSms(sms) {
-  console.log('Delete SMS:', sms);
-}
+const recentTenders = [
+  {
+    title: "Supply of Medical Equipment",
+    category: "Supply",
+    county: "Nairobi",
+    deadline: "5 days left",
+    status: "Open",
+  },
+  {
+    title: "County ICT Infrastructure Upgrade",
+    category: "ICT",
+    county: "Kisumu",
+    deadline: "3 days left",
+    status: "Evaluation",
+  },
+  {
+    title: "Road Rehabilitation Works",
+    category: "Construction",
+    county: "Mombasa",
+    deadline: "11 days left",
+    status: "Shortlisting",
+  },
+  {
+    title: "Water Pipeline Extension Project",
+    category: "Infrastructure",
+    county: "Kiambu",
+    deadline: "14 days left",
+    status: "Open",
+  },
+];
 </script>
 
 <template>
-  <Head title="Dashboard" />
-  
+  <Head title="Tender Portal Dashboard" />
+
   <DashboardLayout>
-    <!-- Welcome Banner -->
+    <div class="card border-0 shadow-sm dashboard-hero-card mb-4">
+      <div
+        class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between py-4"
+      >
+        <div class="mb-3 mb-md-0">
+          <h2 class="h4 font-weight-bold mb-1 text-white">
+            Tender Portal Control Center
+          </h2>
+          <p class="mb-0 text-white-50">
+            Manage listings, shortlisting, evaluations, awards, and
+            notifications from one place.
+          </p>
+        </div>
+        <div class="d-flex flex-wrap">
+          <Link
+            :href="route('tenders.create')"
+            class="btn btn-light mr-2 mb-2 mb-md-0"
+          >
+            <i class="fas fa-plus mr-1"></i> New Tender
+          </Link>
+          <button type="button" class="btn btn-outline-light mb-2 mb-md-0">
+            <i class="fas fa-bell mr-1"></i> Notifications
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="row mb-4">
-      <div class="col-12">
-        <div class="card bg-primary">
-          <div class="card-body d-flex align-items-center p-4">
-            <div>
-              <h2 class="mb-1 text-white">Welcome to Azam TV Bulk SMS Dashboard</h2>
-              <p class="mb-0 text-white opacity-75">Monitor your SMS campaigns and analytics in one place</p>
-            </div>
-            <div class="ml-auto">
-              <button class="btn btn-light"><i class="fas fa-paper-plane mr-2"></i> Send New Campaign</button>
+      <div
+        v-for="item in dashboardStats"
+        :key="item.title"
+        class="col-md-6 col-xl-3 mb-3"
+      >
+        <div class="card border-0 shadow-sm h-100 stat-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <p class="text-muted small mb-1">{{ item.title }}</p>
+                <h3 class="font-weight-bold mb-1 text-dark">
+                  {{ item.value }}
+                </h3>
+                <p class="mb-0 small text-muted">{{ item.note }}</p>
+              </div>
+              <span class="stat-icon"><i :class="item.icon"></i></span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Stats Row with custom colors -->
-    <div class="row mb-4">
-      <StatCard 
-        title="Total SMS Sent" 
-        :value="formatNumber(stats.smsSent)" 
-        icon="fas fa-envelope" 
-        bg-color="bg-info"
-        link-text="View All Messages"
-        @click="handleStatClick('sms-sent')" 
-      />
-      <StatCard 
-        title="Recipients" 
-        :value="formatNumber(stats.recipients)" 
-        icon="fas fa-users" 
-        bg-color="bg-primary"
-        link-text="Manage Recipients"
-        @click="handleStatClick('recipients')" 
-      />
-      <StatCard 
-        title="Failed Deliveries" 
-        :value="formatNumber(stats.failedDeliveries)" 
-        icon="fas fa-exclamation-circle" 
-        bg-color="bg-warning"
-        link-text="View Failed Messages"
-        @click="handleStatClick('failed')" 
-      />
-      <StatCard 
-        title="SMS Credit" 
-        :value="formatNumber(stats.smsCredit)" 
-        icon="fas fa-credit-card" 
-        bg-color="bg-success"
-        link-text="Buy More Credits"
-        @click="handleStatClick('credit')" 
-      />
-    </div>
 
-    <!-- Charts Row with better spacing -->
     <div class="row mb-4">
-      <div class="col-md-6">
-        <ChartBox 
-          title="SMS Delivery Statistics" 
-          chart-id="deliveryChart"
-          :chart-data="deliveryChartData"
-          :chart-options="chartOptions"
-        />
+      <div class="col-lg-7 mb-3 mb-lg-0">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pb-0">
+            <h5 class="font-weight-bold mb-0">Recent Tenders</h5>
+          </div>
+          <div class="card-body">
+            <div
+              v-for="tender in recentTenders"
+              :key="tender.title"
+              class="d-flex flex-column flex-md-row justify-content-between align-items-md-center py-2 border-bottom tender-row"
+            >
+              <div class="pr-md-3">
+                <h6 class="mb-1 font-weight-bold text-dark">
+                  {{ tender.title }}
+                </h6>
+                <p class="mb-0 text-muted small">
+                  {{ tender.category }} • {{ tender.county }} •
+                  {{ tender.deadline }}
+                </p>
+              </div>
+              <span class="badge badge-pill tender-status mt-2 mt-md-0">{{
+                tender.status
+              }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-md-6">
-        <ChartBox 
-          title="SMS Sent Per Month" 
-          chart-id="monthlyChart"
-          :chart-data="monthlyChartData"
-          :chart-options="chartOptions"
-        />
-      </div>
-    </div>
 
-    <!-- Quick Actions Section -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Quick Actions</h3>
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-0 pb-0">
+            <h5 class="font-weight-bold mb-0">Quick Actions</h5>
           </div>
           <div class="card-body">
             <div class="row">
-              <div class="col-md-3 col-sm-6">
-                <a href="#" class="btn btn-lg btn-block btn-outline-primary mb-3">
-                  <i class="fas fa-paper-plane mb-2 d-block" style="font-size: 24px;"></i>
-                  Send SMS
-                </a>
+              <div class="col-6 mb-3">
+                <button
+                  class="btn btn-outline-success btn-block py-3"
+                  type="button"
+                >
+                  <i class="fas fa-bullhorn d-block mb-2"></i>
+                  Advertise
+                </button>
               </div>
-              <div class="col-md-3 col-sm-6">
-                <a href="#" class="btn btn-lg btn-block btn-outline-info mb-3">
-                  <i class="fas fa-users mb-2 d-block" style="font-size: 24px;"></i>
-                  Add Recipients
-                </a>
+              <div class="col-6 mb-3">
+                <button
+                  class="btn btn-outline-success btn-block py-3"
+                  type="button"
+                >
+                  <i class="fas fa-filter d-block mb-2"></i>
+                  Shortlist
+                </button>
               </div>
-              <div class="col-md-3 col-sm-6">
-                <a href="#" class="btn btn-lg btn-block btn-outline-success mb-3">
-                  <i class="fas fa-file-alt mb-2 d-block" style="font-size: 24px;"></i>
-                  Templates
-                </a>
+              <div class="col-6">
+                <button
+                  class="btn btn-outline-success btn-block py-3"
+                  type="button"
+                >
+                  <i class="fas fa-tasks d-block mb-2"></i>
+                  Evaluate
+                </button>
               </div>
-              <div class="col-md-3 col-sm-6">
-                <a href="#" class="btn btn-lg btn-block btn-outline-secondary mb-3">
-                  <i class="fas fa-chart-line mb-2 d-block" style="font-size: 24px;"></i>
-                  Reports
-                </a>
+              <div class="col-6">
+                <button
+                  class="btn btn-outline-success btn-block py-3"
+                  type="button"
+                >
+                  <i class="fas fa-paper-plane d-block mb-2"></i>
+                  Notify
+                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Recent SMS Table with improved styling -->
-    <div class="row">
-      <div class="col-md-12">
-        <TableCard
-          title="Recent SMS Messages"
-          :columns="smsColumns"
-          :items="recentSms"
-          show-search
-          has-pagination
-          @view="viewSms"
-          @edit="editSms"
-          @delete="deleteSms"
-        />
       </div>
     </div>
   </DashboardLayout>
 </template>
+
+<style scoped>
+.dashboard-hero-card {
+  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  border-radius: 0.8rem;
+}
+
+.stat-card {
+  border-left: 3px solid rgba(40, 167, 69, 0.35);
+}
+
+.stat-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: rgba(40, 167, 69, 0.14);
+  color: #1f8f53;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tender-row:last-child {
+  border-bottom: 0 !important;
+}
+
+.tender-status {
+  background: rgba(40, 167, 69, 0.14);
+  color: #1f8f53;
+  font-weight: 700;
+}
+</style>

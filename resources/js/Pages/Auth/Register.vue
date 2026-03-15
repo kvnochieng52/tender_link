@@ -1,185 +1,189 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from "@inertiajs/vue3";
 
 const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
+  name: "",
+  telephone: "",
+  email: "",
+  password: "",
 });
 
 const submit = () => {
-    form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
-    });
+  form.post(route("register"), {
+    onFinish: () => form.reset("password"),
+  });
 };
 </script>
 
 <template>
-    <Head title="Register" />
-    
-    <div class="hold-transition register-page">
-        <div class="register-box">
-            <!-- Logo -->
-            <div class="register-logo text-center mb-4">
-                <img src="/images/logo.png" alt="Azam TV Logo" class="img-fluid mb-2" style="max-width: 140px;">
-                <h1 class="h4 font-weight-bold">Azam TV <span class="text-primary">SMS</span></h1>
+  <Head title="Register" />
+
+  <div class="auth-page">
+    <div class="auth-card-wrap">
+      <div class="text-center mb-4">
+        <img
+          src="/images/tender-link-logo.svg"
+          alt="Tender Link"
+          class="auth-logo"
+        />
+      </div>
+
+      <div class="card auth-card border-0">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h4 font-weight-bold mb-1 text-center text-dark">
+            Create Account
+          </h1>
+          <p class="text-muted text-center mb-4">
+            Register to start discovering tenders
+          </p>
+
+          <form @submit.prevent="submit">
+            <div class="form-group mb-3">
+              <label for="name" class="small font-weight-semibold"
+                >Full Names</label
+              >
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                class="form-control"
+                required
+                autofocus
+                autocomplete="name"
+                placeholder="Enter full names"
+                :class="{ 'is-invalid': form.errors.name }"
+              />
+              <div v-if="form.errors.name" class="invalid-feedback d-block">
+                {{ form.errors.name }}
+              </div>
             </div>
-            
-            <!-- Register Card -->
-            <div class="card">
-                <div class="card-body register-card-body">
-                    <p class="register-box-msg">Register a new account</p>
-                    
-                    <form @submit.prevent="submit">
-                        <!-- Name -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="name"
-                                type="text"
-                                class="form-control"
-                                placeholder="Full name"
-                                v-model="form.name"
-                                required
-                                autofocus
-                                autocomplete="name"
-                                :class="{ 'is-invalid': form.errors.name }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-user"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.name" class="invalid-feedback">
-                                {{ form.errors.name }}
-                            </div>
-                        </div>
-                        
-                        <!-- Email -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="email"
-                                type="email"
-                                class="form-control"
-                                placeholder="Email"
-                                v-model="form.email"
-                                required
-                                autocomplete="username"
-                                :class="{ 'is-invalid': form.errors.email }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-envelope"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.email" class="invalid-feedback">
-                                {{ form.errors.email }}
-                            </div>
-                        </div>
-                        
-                        <!-- Password -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="password"
-                                type="password"
-                                class="form-control"
-                                placeholder="Password"
-                                v-model="form.password"
-                                required
-                                autocomplete="new-password"
-                                :class="{ 'is-invalid': form.errors.password }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-lock"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.password" class="invalid-feedback">
-                                {{ form.errors.password }}
-                            </div>
-                        </div>
-                        
-                        <!-- Confirm Password -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="password_confirmation"
-                                type="password"
-                                class="form-control"
-                                placeholder="Confirm password"
-                                v-model="form.password_confirmation"
-                                required
-                                autocomplete="new-password"
-                                :class="{ 'is-invalid': form.errors.password_confirmation }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-lock"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.password_confirmation" class="invalid-feedback">
-                                {{ form.errors.password_confirmation }}
-                            </div>
-                        </div>
-                        
-                        <!-- Register Button -->
-                        <div class="row">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary btn-block"
-                                    :disabled="form.processing">
-                                    <span v-if="form.processing">
-                                        <i class="fas fa-spinner fa-spin"></i>
-                                    </span>
-                                    <span v-else>Register</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- Login Link -->
-                    <div class="text-center mt-3">
-                        <Link :href="route('login')" class="text-center">
-                            Already have an account? Sign in
-                        </Link>
-                    </div>
-                </div>
+
+            <div class="form-group mb-3">
+              <label for="telephone" class="small font-weight-semibold"
+                >Telephone</label
+              >
+              <input
+                id="telephone"
+                v-model="form.telephone"
+                type="tel"
+                class="form-control"
+                required
+                autocomplete="tel"
+                placeholder="e.g. 0712345678"
+                :class="{ 'is-invalid': form.errors.telephone }"
+              />
+              <div
+                v-if="form.errors.telephone"
+                class="invalid-feedback d-block"
+              >
+                {{ form.errors.telephone }}
+              </div>
             </div>
+
+            <div class="form-group mb-3">
+              <label for="email" class="small font-weight-semibold"
+                >Email</label
+              >
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="form-control"
+                required
+                autocomplete="username"
+                placeholder="you@example.com"
+                :class="{ 'is-invalid': form.errors.email }"
+              />
+              <div v-if="form.errors.email" class="invalid-feedback d-block">
+                {{ form.errors.email }}
+              </div>
+            </div>
+
+            <div class="form-group mb-4">
+              <label for="password" class="small font-weight-semibold"
+                >Password</label
+              >
+              <input
+                id="password"
+                v-model="form.password"
+                type="password"
+                class="form-control"
+                required
+                autocomplete="new-password"
+                placeholder="Create password"
+                :class="{ 'is-invalid': form.errors.password }"
+              />
+              <div v-if="form.errors.password" class="invalid-feedback d-block">
+                {{ form.errors.password }}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-success btn-block"
+              :disabled="form.processing"
+            >
+              <span v-if="form.processing"
+                ><i class="fas fa-spinner fa-spin mr-1"></i>Creating...</span
+              >
+              <span v-else>Register</span>
+            </button>
+          </form>
+
+          <div class="d-flex flex-wrap mt-4 auth-actions">
+            <Link
+              :href="route('login')"
+              class="btn btn-outline-success btn-sm mr-2 mb-2"
+              >Already have account? Login</Link
+            >
+            <Link
+              :href="route('welcome')"
+              class="btn btn-light btn-sm border mb-2"
+              >Back Home</Link
+            >
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
-<style>
-/* AdminLTE Register Page Styles */
-.register-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f4f6f9;
+<style scoped>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #f0faf4 0%, #ffffff 65%);
+  padding: 1.25rem;
 }
 
-.register-box {
-    width: 400px;
-    margin: 0 auto;
+.auth-card-wrap {
+  width: 100%;
+  max-width: 470px;
 }
 
-.register-logo {
-    margin-bottom: 1.5rem;
+.auth-logo {
+  height: 48px;
+  width: auto;
 }
 
-.register-card-body {
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.auth-card {
+  border-radius: 0.9rem;
+  box-shadow: 0 12px 35px rgba(40, 167, 69, 0.15);
 }
 
-.register-box-msg {
-    color: #666;
-    margin-bottom: 1.5rem;
-    text-align: center;
+.form-control {
+  border-radius: 0.55rem;
+  border-color: #d5e5da;
 }
 
-/* Ensure the page fills the entire viewport */
-html, body {
-    height: 100%;
-    margin: 0;
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+}
+
+.auth-actions {
+  justify-content: center;
 }
 </style>

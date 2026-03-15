@@ -1,176 +1,204 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from "@inertiajs/vue3";
 
 defineProps({
-    canResetPassword: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
+  canResetPassword: {
+    type: Boolean,
+  },
+  status: {
+    type: String,
+  },
 });
 
 const form = useForm({
-    email: '',
-    password: '',
-    remember: false,
+  email: "",
+  password: "",
+  remember: false,
 });
 
 const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
+  form.post(route("login"), {
+    onFinish: () => form.reset("password"),
+  });
 };
 </script>
 
 <template>
-    <Head title="Log in" />
-    
-    <div class="hold-transition login-page">
-        <div class="login-box">
-            <!-- Logo -->
-            <div class="login-logo text-center mb-4">
-                <img src="/images/logo.png" alt="Azam TV Logo" class="img-fluid mb-2" style="max-width: 140px;">
-                <h1 class="h4 font-weight-bold">Azam TV <span class="text-primary">SMS</span></h1>
+  <Head title="Login" />
+
+  <div class="auth-page">
+    <div class="auth-card-wrap">
+      <div class="text-center mb-4">
+        <img
+          src="/images/tender-link-logo.svg"
+          alt="Tender Link"
+          class="auth-logo"
+        />
+      </div>
+
+      <div class="card auth-card border-0">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h4 font-weight-bold mb-1 text-center text-dark">
+            Welcome Back
+          </h1>
+          <p class="text-muted text-center mb-4">
+            Login to continue to Tender Link
+          </p>
+
+          <div v-if="status" class="alert alert-success mb-3">
+            {{ status }}
+          </div>
+
+          <form @submit.prevent="submit">
+            <div class="form-group mb-3">
+              <label for="email" class="small font-weight-semibold"
+                >Email</label
+              >
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="form-control"
+                required
+                autofocus
+                autocomplete="username"
+                placeholder="you@example.com"
+                :class="{ 'is-invalid': form.errors.email }"
+              />
+              <div v-if="form.errors.email" class="invalid-feedback d-block">
+                {{ form.errors.email }}
+              </div>
             </div>
-            
-            <!-- Login Card -->
-            <div class="card">
-                <div class="card-body login-card-body">
-                    <p class="login-box-msg">Sign in to start your session</p>
-                    
-                    <!-- Success Message -->
-                    <div v-if="status" class="alert alert-success mb-3">
-                        {{ status }}
-                    </div>
-                    
-                    <form @submit.prevent="submit">
-                        <!-- Email -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="email"
-                                type="email"
-                                class="form-control"
-                                placeholder="Email"
-                                v-model="form.email"
-                                required
-                                autofocus
-                                autocomplete="username"
-                                :class="{ 'is-invalid': form.errors.email }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-envelope"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.email" class="invalid-feedback">
-                                {{ form.errors.email }}
-                            </div>
-                        </div>
-                        
-                        <!-- Password -->
-                        <div class="input-group mb-3">
-                            <input 
-                                id="password"
-                                type="password"
-                                class="form-control"
-                                placeholder="Password"
-                                v-model="form.password"
-                                required
-                                autocomplete="current-password"
-                                :class="{ 'is-invalid': form.errors.password }"
-                            >
-                            <div class="input-group-append">
-                                <div class="input-group-text">
-                                    <span class="fas fa-lock"></span>
-                                </div>
-                            </div>
-                            <div v-if="form.errors.password" class="invalid-feedback">
-                                {{ form.errors.password }}
-                            </div>
-                        </div>
-                        
-                        <!-- Remember Me -->
-                        <div class="row mb-3">
-                            <div class="col-8">
-                                <div class="icheck-primary">
-                                    <input type="checkbox" id="remember" name="remember" v-model="form.remember">
-                                    <label for="remember">
-                                        Remember Me
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <!-- Submit Button -->
-                            <div class="col-4">
-                                <button type="submit" class="btn btn-primary btn-block"
-                                    :disabled="form.processing">
-                                    <span v-if="form.processing">
-                                        <i class="fas fa-spinner fa-spin"></i>
-                                    </span>
-                                    <span v-else>Sign In</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- Forgot Password -->
-                    <p class="mb-1" v-if="canResetPassword">
-                        <Link :href="route('password.request')" class="text-center">
-                            Forgot your password?
-                        </Link>
-                    </p>
-                    
-                    <!-- Register Link -->
-                    <p class="mb-0">
-                        <Link :href="route('register')" class="text-center">
-                            Register a new account
-                        </Link>
-                    </p>
-                </div>
+
+            <div class="form-group mb-3">
+              <label for="password" class="small font-weight-semibold"
+                >Password</label
+              >
+              <input
+                id="password"
+                v-model="form.password"
+                type="password"
+                class="form-control"
+                required
+                autocomplete="current-password"
+                placeholder="Enter password"
+                :class="{ 'is-invalid': form.errors.password }"
+              />
+              <div v-if="form.errors.password" class="invalid-feedback d-block">
+                {{ form.errors.password }}
+              </div>
             </div>
+
+            <div
+              class="d-flex justify-content-between align-items-center mb-3 flex-wrap"
+            >
+              <div class="custom-control custom-checkbox mb-2 mb-sm-0">
+                <input
+                  id="remember"
+                  v-model="form.remember"
+                  type="checkbox"
+                  class="custom-control-input"
+                />
+                <label for="remember" class="custom-control-label"
+                  >Remember me</label
+                >
+              </div>
+
+              <Link
+                v-if="canResetPassword"
+                :href="route('password.request')"
+                class="small auth-link"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-success btn-block"
+              :disabled="form.processing"
+            >
+              <span v-if="form.processing"
+                ><i class="fas fa-spinner fa-spin mr-1"></i>Signing in...</span
+              >
+              <span v-else>Login</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-block mt-2 google-btn"
+            >
+              <i class="fab fa-google text-danger mr-2"></i>Login with Gmail
+            </button>
+          </form>
+
+          <div class="d-flex flex-wrap mt-4 auth-actions">
+            <Link
+              :href="route('register')"
+              class="btn btn-outline-success btn-sm mr-2 mb-2"
+              >Register</Link
+            >
+            <Link
+              :href="route('welcome')"
+              class="btn btn-light btn-sm border mb-2"
+              >Back Home</Link
+            >
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
-<style>
-/* AdminLTE Login Page Styles */
-.login-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f4f6f9;
+<style scoped>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #f0faf4 0%, #ffffff 65%);
+  padding: 1.25rem;
 }
 
-.login-box {
-    width: 360px;
-    margin: 0 auto;
+.auth-card-wrap {
+  width: 100%;
+  max-width: 430px;
 }
 
-.login-logo {
-    margin-bottom: 1.5rem;
+.auth-logo {
+  height: 48px;
+  width: auto;
 }
 
-.login-card-body {
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+.auth-card {
+  border-radius: 0.9rem;
+  box-shadow: 0 12px 35px rgba(40, 167, 69, 0.15);
 }
 
-.login-box-msg {
-    color: #666;
-    margin-bottom: 1.5rem;
-    text-align: center;
+.form-control {
+  border-radius: 0.55rem;
+  border-color: #d5e5da;
 }
 
-.icheck-primary input:checked ~ label::before {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
 }
 
-/* Ensure the page fills the entire viewport */
-html, body {
-    height: 100%;
-    margin: 0;
+.auth-link {
+  color: #1f8f53;
+}
+
+.auth-link:hover {
+  color: #28a745;
+  text-decoration: underline;
+}
+
+.google-btn {
+  border-color: #d8d8d8;
+}
+
+.auth-actions {
+  justify-content: center;
 }
 </style>

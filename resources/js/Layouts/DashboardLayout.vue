@@ -1,381 +1,265 @@
+<script setup>
+import { computed, ref } from "vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
+import LoadingBar from "@/Components/LoadingBar.vue";
+
+const sidebarOpen = ref(false);
+
+const user = computed(() => usePage().props.auth.user);
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
+
+const closeSidebar = () => {
+  sidebarOpen.value = false;
+};
+
+const logout = () => {
+  router.post(route("logout"));
+};
+</script>
+
 <template>
-  <div class="wrapper">
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-      <!-- Left navbar links -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-          <a href="#" class="nav-link">Home</a>
-        </li>
-      </ul>
+  <LoadingBar />
 
-      <!-- Right navbar links -->
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-          </a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user-circle"></i>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-            <div class="dropdown-header text-center pb-2 pt-2 border-bottom">
-              <strong>{{ user?.name || 'Administrator' }}</strong>
-            </div>
-            <a href="#" class="dropdown-item py-2">
-              <i class="fas fa-user mr-2 text-primary"></i> My Profile
-            </a>
-            <a href="#" class="dropdown-item py-2">
-              <i class="fas fa-cog mr-2 text-secondary"></i> Settings
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="#" class="dropdown-item py-2" @click.prevent="logout">
-              <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Sign Out
-            </a>
-          </div>
-        </li>
-      </ul>
+  <div class="dashboard-shell bg-light">
+    <nav
+      class="navbar navbar-expand-md navbar-white bg-white border-bottom shadow-sm sticky-top px-0"
+    >
+      <div
+        class="container d-flex align-items-center justify-content-between flex-wrap"
+      >
+        <div class="d-flex align-items-center">
+          <button
+            class="btn btn-light border d-md-none mr-2"
+            type="button"
+            @click="toggleSidebar"
+            aria-label="Toggle sidebar"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+          <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
+            <img
+              src="/images/tender-link-logo.svg"
+              alt="Tender Link"
+              class="brand-logo-full"
+            />
+          </Link>
+        </div>
+
+        <div class="top-nav-links d-none d-md-flex align-items-center">
+          <Link :href="route('welcome')" class="nav-link px-2">Home</Link>
+          <a href="#" class="nav-link px-2">About Us</a>
+          <a href="#" class="nav-link px-2">Services</a>
+          <a href="#" class="nav-link px-2">Browse Tenders</a>
+          <a href="#" class="nav-link px-2">Contact Us</a>
+        </div>
+
+        <div class="d-flex align-items-center flex-wrap py-2">
+          <Link
+            :href="route('profile.edit')"
+            class="btn btn-outline-success btn-sm mr-2 mb-1 mb-md-0"
+          >
+            {{ user?.name || "My Profile" }}
+          </Link>
+          <button
+            class="btn btn-success btn-sm mb-1 mb-md-0"
+            type="button"
+            @click="logout"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </nav>
-    <!-- /.navbar -->
 
-    <!-- Main Sidebar Container -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="/" class="brand-link text-center py-3">
-        <img src="/images/logo.png" alt="Azam TV Logo" class="img-fluid" style="max-width: 140px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;">
-        <!-- <span class="brand-text font-weight-bold" style="font-size: 1.2rem;">SMS</span> -->
-      </a>
-
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <!-- Sidebar user panel with dropdown -->
-        <div class="user-panel mt-3 pb-2 mb-2">
-          <div class="d-flex align-items-center">
-            <div class="image pl-2">
-              <i class="fas fa-user-circle fa-2x text-light"></i>
-            </div>
-            <div class="info">
-              <a href="#" class="d-block dropdown-toggle" data-toggle="collapse" data-target="#userOptions">
-                {{ user?.name || 'Administrator' }}
-              </a>
-            </div>
-          </div>
-          
-          <!-- User options dropdown -->
-          <div id="userOptions" class="collapse mt-2">
-            <div class="bg-dark rounded p-2 ml-2">
-              <a href="#" class="text-white d-block py-1 px-2 rounded hover-bg-light">
-                <i class="fas fa-user-edit mr-2"></i> Edit Profile
-              </a>
-              <a href="#" class="text-white d-block py-1 px-2 rounded hover-bg-light" @click.prevent="logout">
-                <i class="fas fa-sign-out-alt mr-2"></i> Logout
-              </a>
-            </div>
-          </div>
+    <div class="dashboard-body">
+      <aside :class="['dashboard-sidebar', sidebarOpen ? 'is-open' : '']">
+        <div
+          class="sidebar-header d-flex justify-content-between align-items-center"
+        >
+          <h6 class="mb-0 font-weight-bold text-success">Manage Portal</h6>
+          <button
+            class="btn btn-sm btn-light border d-md-none"
+            type="button"
+            @click="closeSidebar"
+          >
+            <i class="fas fa-times"></i>
+          </button>
         </div>
 
-        <!-- Sidebar Menu -->
-        <nav class="mt-2">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-            <li class="nav-item">
-              <a href="/" class="nav-link active">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
-                <p>Dashboard</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-sms"></i>
-                <p>
-                  SMS Management
-                  <i class="fas fa-angle-left right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="/sms/send" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Send SMS</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/sms/templates" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>SMS Templates</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/sms/logs" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>SMS Logs</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a href="/recipients" class="nav-link">
-                <i class="nav-icon fas fa-users"></i>
-                <p>Recipients</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/settings" class="nav-link">
-                <i class="nav-icon fas fa-cog"></i>
-                <p>Settings</p>
-              </a>
-            </li>
-          </ul>
+        <nav class="sidebar-nav mt-3">
+          <Link
+            :href="route('dashboard')"
+            :class="[
+              'sidebar-link',
+              {
+                active:
+                  route().current('dashboard') ||
+                  route().current('home.dashboard') ||
+                  route().current('home'),
+              },
+            ]"
+            @click="closeSidebar"
+          >
+            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard Overview
+          </Link>
+          <Link
+            :href="route('tenders.index')"
+            :class="[
+              'sidebar-link',
+              { active: route().current('tenders.index') },
+            ]"
+            @click="closeSidebar"
+          >
+            <i class="fas fa-list mr-2"></i> Tender List
+          </Link>
+          <Link
+            :href="route('tenders.create')"
+            :class="[
+              'sidebar-link',
+              { active: route().current('tenders.create') },
+            ]"
+            @click="closeSidebar"
+          >
+            <i class="fas fa-bullhorn mr-2"></i> New Tender
+          </Link>
+          <Link
+            :href="route('institutions.index')"
+            :class="[
+              'sidebar-link',
+              { active: route().current('institutions.*') },
+            ]"
+            @click="closeSidebar"
+          >
+            <i class="fas fa-building mr-2"></i> Institutions
+          </Link>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-list-check mr-2"></i> Applications
+          </a>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-clipboard-check mr-2"></i> Evaluation
+          </a>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-award mr-2"></i> Award & Notification
+          </a>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-users mr-2"></i> User Management
+          </a>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-chart-line mr-2"></i> Reports
+          </a>
+          <a href="#" class="sidebar-link" @click="closeSidebar">
+            <i class="fas fa-cog mr-2"></i> Settings
+          </a>
         </nav>
-        <!-- /.sidebar-menu -->
-      </div>
-      <!-- /.sidebar -->
-    </aside>
+      </aside>
 
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-      <!-- Main content with no header or title -->
-      <div class="content pt-4">
-        <div class="container-fluid">
-          <slot></slot>
-        </div>
-      </div>
-      <!-- /.content -->
+      <main class="dashboard-content">
+        <slot />
+      </main>
     </div>
-    <!-- /.content-wrapper -->
 
-    <!-- Main Footer -->
-    <footer class="main-footer">
-      <strong>Copyright &copy; {{ new Date().getFullYear() }} <a href="#">Azam TV Bulk SMS</a>.</strong>
-      All rights reserved.
-      <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 1.0.0
+    <footer class="dashboard-footer border-top">
+      <div class="container d-flex justify-content-between flex-wrap py-2">
+        <small class="text-muted"
+          >© {{ new Date().getFullYear() }} Tender Link</small
+        >
+        <small class="text-muted">Smart Tender Discovery Platform</small>
       </div>
     </footer>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
-
-const props = defineProps({
-  title: {
-    type: String,
-    default: 'Dashboard'
-  }
-});
-
-// Get the authenticated user from Laravel
-const user = computed(() => usePage().props.auth.user);
-
-function logout() {
-  router.post(route('logout'));
+<style scoped>
+.dashboard-shell {
+  min-height: 100vh;
 }
 
-// Function to initialize AdminLTE components
-function initAdminLTE() {
-  // Better implementation for dropdown toggle
-  setupUserDropdown();
-  
-  // Initialize all AdminLTE features if available
-  if (window.$ && window.$.AdminLTE) {
-    window.$.AdminLTE.init();
-  }
-}
-
-// Handle the user dropdown menu specifically
-function setupUserDropdown() {
-  // First, remove any existing click handlers to prevent duplicates
-  const userDropdownToggle = document.getElementById('userDropdown');
-  
-  if (userDropdownToggle) {
-    // Remove old event listeners
-    userDropdownToggle.removeEventListener('click', toggleDropdown);
-    
-    // Add fresh event listener
-    userDropdownToggle.addEventListener('click', toggleDropdown);
-  }
-  
-  // Set up document-level click listener for closing dropdowns
-  document.removeEventListener('click', closeDropdownOutside);
-  document.addEventListener('click', closeDropdownOutside);
-}
-
-// Toggle dropdown function
-function toggleDropdown(e) {
-  e.preventDefault();
-  // Use event target instead of 'this' for more reliable behavior
-  const toggle = e.currentTarget;
-  const dropdownMenu = toggle.nextElementSibling;
-  if (dropdownMenu) {
-    dropdownMenu.classList.toggle('show');
-    toggle.setAttribute('aria-expanded', dropdownMenu.classList.contains('show'));
-  }
-}
-
-// Function to handle closing dropdown when clicking outside
-function closeDropdownOutside(e) {
-  const userDropdownToggle = document.getElementById('userDropdown');
-  if (userDropdownToggle && !userDropdownToggle.contains(e.target)) {
-    const dropdownMenu = userDropdownToggle.nextElementSibling;
-    if (dropdownMenu && dropdownMenu.classList.contains('show')) {
-      dropdownMenu.classList.remove('show');
-      userDropdownToggle.setAttribute('aria-expanded', 'false');
-    }
-  }
-}
-
-// Initialize AdminLTE JS functionality after component is mounted
-onMounted(() => {
-  // Initialize on first load
-  initAdminLTE();
-  
-  // Also initialize after each Inertia navigation
-  router.on('finish', () => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
-      initAdminLTE();
-    }, 50);
-  });
-  
-  // Toggle sidebar menu items
-  document.querySelectorAll('.nav-treeview').forEach(el => {
-    // Initialize with closed state
-    el.style.display = 'none';
-  });
-
-  // Add click handlers to menu items with submenu
-  document.querySelectorAll('.nav-item a').forEach(el => {
-    if (el.nextElementSibling && el.nextElementSibling.classList.contains('nav-treeview')) {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        const submenu = el.nextElementSibling;
-        if (submenu.style.display === 'none' || submenu.style.display === '') {
-          submenu.style.display = 'block';
-          el.classList.add('active');
-        } else {
-          submenu.style.display = 'none';
-          el.classList.remove('active');
-        }
-      });
-    }
-  });
-
-  // Initialize other AdminLTE components
-  if (window.$.AdminLTE) {
-    window.$.AdminLTE.init();
-  } else if (window.AdminLTE) {
-    // For AdminLTE 3.x
-    document.querySelectorAll('[data-widget="pushmenu"]').forEach(el => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.body.classList.toggle('sidebar-collapse');
-        document.body.classList.toggle('sidebar-open');
-      });
-    });
-  }
-});
-</script>
-
-<style>
-/* Ultimate fix for menu alignment and arrows */
-.nav-sidebar .nav-link {
-  display: flex !important;
-  align-items: center !important;
-  position: relative !important;
-  padding-right: 30px !important; /* Ensure space for arrow */
-}
-
-.nav-sidebar .nav-link .nav-icon {
-  margin-right: 0.5rem !important;
-  align-self: center !important;
-}
-
-.nav-sidebar .nav-link p {
-  display: flex !important;
-  align-items: center !important;
-  margin-bottom: 0 !important;
-  overflow: visible !important;
-}
-
-/* Force the arrow to be absolutely positioned and stay in place */
-.nav-sidebar .nav-item .nav-link .right, 
-.nav-sidebar .nav-item .nav-link p .fa-angle-left.right,
-.nav-sidebar .nav-item .nav-link p > i.right,
-.nav-treeview .nav-item .nav-link p > i.right {
-  position: absolute !important;
-  right: 10px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  transition: transform 0.3s ease !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  float: none !important;
-  line-height: 1 !important;
-}
-
-/* Fix arrow rotation animation when menu opens */
-.nav-sidebar .nav-item.menu-open > .nav-link .fa-angle-left.right,
-.nav-sidebar .nav-item.menu-is-opening > .nav-link .fa-angle-left.right {
-  transform: translateY(-50%) rotate(-90deg) !important;
-}
-
-/* Override any AdminLTE hover states that might affect positioning */
-.nav-sidebar .nav-link:hover .right,
-.nav-sidebar .nav-link:focus .right,
-.nav-sidebar .nav-link:active .right {
-  position: absolute !important;
-  right: 10px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-}
-
-/* Custom styling for the dashboard layout */
-.hover-bg-light:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s;
-}
-
-/* Make sure dropdown toggle has a pointer cursor */
-.dropdown-toggle {
-  cursor: pointer;
-}
-
-/* Add some animation to the dropdown */
-#userOptions {
-  transition: all 0.3s ease;
-}
-
-/* Dropdown styles for navbar user menu */
-.dropdown-menu.show {
+.brand-logo-full {
+  height: 44px;
+  width: auto;
   display: block;
-  transform: translate3d(0, 38px, 0) !important;
-  top: 0 !important;
-  right: 0 !important;
-  left: auto !important;
-  animation: fadeIn 0.2s ease-in;
 }
 
-.dropdown-item {
-  transition: background-color 0.2s;
+.top-nav-links .nav-link {
+  color: #2f3e46;
+  font-weight: 600;
 }
 
-.dropdown-item:hover {
-  background-color: #f8f9fa;
+.top-nav-links .nav-link:hover {
+  color: #1f8f53;
 }
 
-.dropdown-header {
-  color: #6c757d;
-  background-color: #f8f9fa;
+.dashboard-body {
+  display: flex;
+  min-height: calc(100vh - 124px);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.dashboard-sidebar {
+  width: 280px;
+  background: #f4f7f5;
+  border-right: 1px solid #e1e8e3;
+  padding: 1rem;
+}
+
+.sidebar-header {
+  padding: 0.5rem 0.35rem;
+  border-bottom: 1px solid #e5ece7;
+}
+
+.sidebar-link {
+  display: block;
+  border-radius: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  color: #415149;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background: rgba(40, 167, 69, 0.1);
+  color: #1f8f53;
+}
+
+.sidebar-link.active {
+  background: rgba(40, 167, 69, 0.15);
+  color: #1f8f53;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 1.15rem;
+}
+
+.dashboard-footer {
+  background: #fff;
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-body {
+    position: relative;
+  }
+
+  .dashboard-sidebar {
+    position: fixed;
+    top: 74px;
+    left: -300px;
+    bottom: 0;
+    z-index: 1030;
+    box-shadow: 0.5rem 0 1.3rem rgba(0, 0, 0, 0.08);
+    transition: left 0.25s ease;
+  }
+
+  .dashboard-sidebar.is-open {
+    left: 0;
+  }
+
+  .dashboard-content {
+    padding: 0.95rem;
+  }
 }
 </style>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan route:list:*)",
+      "Read(//c/laragon/www/azam_tv_bulk_sms/resources/js/**)",
+      "Read(//c/laragon/www/azam_tv_bulk_sms/resources/js/Layouts/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

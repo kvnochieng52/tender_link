@@ -18,8 +18,13 @@
         "@fortawesome/fontawesome-free": "^6.7.2",
         "@inertiajs/vue3": "^2.0.9",
         "@vitejs/plugin-vue": "^5.2.4",
+        "@vueup/vue-quill": "^1.2.0",
         "admin-lte": "3.2",
         "chart.js": "^4.4.0",
-        "vue": "^3.5.13"
+        "flatpickr": "^4.6.13",
+        "vue": "^3.5.13",
+        "vue-flatpickr-component": "^12.0.0",
+        "vue-select": "^4.0.0-beta.6",
+        "vue-toastification": "^2.0.0-rc.5"
     }
 }
