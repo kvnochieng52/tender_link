@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, nextTick } from "vue";
 import { Head, Link, useForm, usePage } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
 import axios from "axios";
@@ -49,6 +49,7 @@ const customRequirementMandatory = ref(true);
 const customRequirements = ref([]);
 const showCustomRequirementForm = ref(false);
 const editingRequirementTarget = ref(null);
+const editingInlineIndex = ref(null);
 
 const commonRequirementLibrary = [
   {
@@ -507,6 +508,10 @@ const nextToRequirements = () => {
   }
 
   currentStep.value = 2;
+
+  nextTick(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 };
 
 const backToStepOne = () => {
@@ -519,6 +524,7 @@ const resetCustomRequirementForm = () => {
   customRequirementMandatory.value = true;
   editingRequirementTarget.value = null;
   showCustomRequirementForm.value = false;
+  editingInlineIndex.value = null;
 };
 
 const openCustomRequirementForm = () => {
@@ -528,6 +534,7 @@ const openCustomRequirementForm = () => {
     customRequirementMandatory.value = true;
     editingRequirementTarget.value = null;
   }
+  editingInlineIndex.value = null;
   showCustomRequirementForm.value = !showCustomRequirementForm.value;
 };
 
@@ -577,7 +584,7 @@ const removeCustomRequirement = (index) => {
   );
 };
 
-const editRequirement = (item) => {
+const editRequirement = (item, index) => {
   customRequirementTitle.value = item.title || "";
   customRequirementNotes.value = item.notes || "";
   customRequirementMandatory.value = Boolean(item.mandatory);
@@ -586,6 +593,7 @@ const editRequirement = (item) => {
     sourceIndex: item.sourceIndex,
     id: item.id,
   };
+  editingInlineIndex.value = index;
   showCustomRequirementForm.value = true;
 };
 
@@ -1551,30 +1559,48 @@ const submit = () => {
                   <h5 class="font-weight-bold mb-0">Common Requirements</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row">
-                    <div
-                      v-for="item in commonRequirementLibrary"
-                      :key="item.id"
-                      class="col-12 mb-3"
-                    >
-                      <label class="library-item w-100 mb-0">
-                        <div class="d-flex align-items-start">
-                          <input
-                            v-model="selectedLibraryRequirementIds"
-                            :value="item.id"
-                            type="checkbox"
-                            class="mt-1 mr-2"
-                          />
-                          <div>
-                            <div class="font-weight-semibold text-dark">
-                              {{ item.title }}
+                  <div class="mb-2">
+                    <input
+                      v-model="commonRequirementSearch"
+                      type="search"
+                      class="form-control form-control-sm"
+                      placeholder="Search common requirements..."
+                    />
+                  </div>
+
+                  <div
+                    class="common-library-list"
+                    style="
+                      max-height: 720px;
+                      overflow-y: auto;
+                      overflow-x: hidden;
+                    "
+                  >
+                    <div class="row">
+                      <div
+                        v-for="item in filteredCommonRequirements"
+                        :key="item.id"
+                        class="col-12 mb-3"
+                      >
+                        <label class="library-item w-100 mb-0">
+                          <div class="d-flex align-items-start">
+                            <input
+                              v-model="selectedLibraryRequirementIds"
+                              :value="item.id"
+                              type="checkbox"
+                              class="mt-1 mr-2"
+                            />
+                            <div>
+                              <div class="font-weight-semibold text-dark">
+                                {{ item.title }}
+                              </div>
+                              <small class="text-muted d-block">{{
+                                item.notes
+                              }}</small>
                             </div>
-                            <small class="text-muted d-block">{{
-                              item.notes
-                            }}</small>
                           </div>
-                        </div>
-                      </label>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1611,48 +1637,147 @@ const submit = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr
+                      <template
                         v-for="(item, index) in allRequirementItems"
                         :key="`${item.source}-${item.title}-${index}`"
                       >
-                        <td>{{ index + 1 }}</td>
-                        <td>
-                          <div class="font-weight-semibold text-dark">
-                            {{ item.title }}
-                          </div>
-                          <small class="text-muted d-block mt-1">
-                            {{ item.notes || "No notes provided." }}
-                          </small>
-                          <span
-                            class="mt-2 d-inline-block"
-                            :class="
-                              item.mandatory
-                                ? 'badge badge-danger'
-                                : 'badge badge-secondary'
-                            "
-                          >
-                            {{ item.mandatory ? "Mandatory" : "Optional" }}
-                          </span>
-                        </td>
-                        <td class="text-right">
-                          <button
-                            type="button"
-                            class="btn btn-sm btn-outline-primary mr-2"
-                            @click="editRequirement(item)"
-                            title="Edit requirement"
-                          >
-                            <i class="fas fa-pen"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-sm btn-light border"
-                            @click="deleteRequirement(item)"
-                            title="Delete requirement"
-                          >
-                            <i class="fas fa-trash-alt text-danger"></i>
-                          </button>
-                        </td>
-                      </tr>
+                        <tr>
+                          <td>{{ index + 1 }}</td>
+                          <td>
+                            <div class="font-weight-semibold text-dark">
+                              {{ item.title }}
+                            </div>
+                            <small class="text-muted d-block mt-1">
+                              {{ item.notes || "No notes provided." }}
+                            </small>
+                            <span
+                              class="mt-2 d-inline-block"
+                              :class="
+                                item.mandatory
+                                  ? 'badge badge-danger'
+                                  : 'badge badge-secondary'
+                              "
+                            >
+                              {{ item.mandatory ? "Mandatory" : "Optional" }}
+                            </span>
+                          </td>
+                          <td class="text-right">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-primary mr-2"
+                              @click="editRequirement(item, index)"
+                              title="Edit requirement"
+                            >
+                              <i class="fas fa-pen"></i>
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-light border"
+                              @click="deleteRequirement(item)"
+                              title="Delete requirement"
+                            >
+                              <i class="fas fa-trash-alt text-danger"></i>
+                            </button>
+                          </td>
+                        </tr>
+
+                        <tr v-if="editingInlineIndex === index">
+                          <td colspan="3">
+                            <div class="p-2">
+                              <div
+                                class="card border-0 shadow-sm requirements-card custom-requirement-card custom-requirement-form"
+                              >
+                                <div class="card-body py-2">
+                                  <div class="form-row">
+                                    <div class="col-12 mb-2">
+                                      <input
+                                        v-model="customRequirementTitle"
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        placeholder="Requirement title"
+                                      />
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                      <label
+                                        class="font-weight-semibold d-block"
+                                        >Requirement Type</label
+                                      >
+                                      <div
+                                        class="form-check form-check-inline mr-3"
+                                      >
+                                        <input
+                                          id="inlineReqMandatory"
+                                          v-model="customRequirementMandatory"
+                                          :value="true"
+                                          class="form-check-input"
+                                          type="radio"
+                                        />
+                                        <label
+                                          class="form-check-label"
+                                          for="inlineReqMandatory"
+                                          >Mandatory</label
+                                        >
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input
+                                          id="inlineReqOptional"
+                                          v-model="customRequirementMandatory"
+                                          :value="false"
+                                          class="form-check-input"
+                                          type="radio"
+                                        />
+                                        <label
+                                          class="form-check-label"
+                                          for="inlineReqOptional"
+                                          >Optional</label
+                                        >
+                                      </div>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                      <textarea
+                                        v-model="customRequirementNotes"
+                                        class="form-control form-control-sm"
+                                        rows="2"
+                                        placeholder="Notes (optional)"
+                                      ></textarea>
+                                    </div>
+                                    <div
+                                      class="col-12 d-flex justify-content-end"
+                                    >
+                                      <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-success mr-2"
+                                        @click="addCustomRequirement"
+                                      >
+                                        <i
+                                          class="fas"
+                                          :class="
+                                            editingRequirementTarget
+                                              ? 'fa-save'
+                                              : 'fa-plus'
+                                          "
+                                        ></i>
+                                        {{
+                                          editingRequirementTarget
+                                            ? "Save"
+                                            : "Add"
+                                        }}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        class="btn btn-sm btn-light border"
+                                        @click="resetCustomRequirementForm"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
                     </tbody>
                   </table>
                 </div>
@@ -1668,11 +1793,16 @@ const submit = () => {
                     :class="showCustomRequirementForm ? 'fa-minus' : 'fa-plus'"
                   ></i>
                   {{
-                    showCustomRequirementForm ? "Hide Form" : "New Requirement"
+                    showCustomRequirementForm && editingInlineIndex === null
+                      ? "Hide Form"
+                      : "New Requirement"
                   }}
                 </button>
               </div>
-              <div v-if="showCustomRequirementForm" class="px-3 pb-3">
+              <div
+                v-if="showCustomRequirementForm && editingInlineIndex === null"
+                class="px-3 pb-3"
+              >
                 <div
                   class="card border-0 shadow-sm requirements-card custom-requirement-card custom-requirement-form"
                 >
