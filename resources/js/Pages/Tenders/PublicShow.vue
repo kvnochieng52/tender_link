@@ -546,7 +546,10 @@ const submitApplication = async () => {
                     <span class="badge badge-success-light">{{
                       tender.institution?.institution_type?.name || "—"
                     }}</span>
-                    <div v-if="tender.institution?.address" class="small text-muted mt-1">
+                    <div
+                      v-if="tender.institution?.address"
+                      class="small text-muted mt-1"
+                    >
                       <i class="fas fa-map-marker-alt text-success mr-1"></i>
                       {{ tender.institution.address }}
                     </div>
@@ -576,17 +579,21 @@ const submitApplication = async () => {
                     details.
                   </p>
                   <div
-                    class="d-flex justify-content-center"
-                    style="gap: 0.75rem"
+                    class="d-flex justify-content-center flex-column align-items-center"
+                    style="gap: 0.75rem; max-width: 260px; margin: 0 auto"
                   >
-                    <Link :href="route('login')" class="btn btn-success px-4">
-                      <i class="fas fa-sign-in-alt mr-1"></i> Login
-                    </Link>
-                    <Link
-                      :href="route('register')"
-                      class="btn btn-outline-success px-4"
+                    <a
+                      href="/auth/google"
+                      class="btn btn-outline-secondary btn-block px-4"
                     >
-                      <i class="fas fa-user-plus mr-1"></i> Register
+                      <i class="fab fa-google text-danger mr-1"></i> Login with
+                      Google
+                    </a>
+                    <Link
+                      :href="route('login')"
+                      class="btn btn-success btn-block px-4"
+                    >
+                      <i class="fas fa-sign-in-alt mr-1"></i> Login
                     </Link>
                   </div>
                 </template>
@@ -596,18 +603,28 @@ const submitApplication = async () => {
                   <div class="mb-3">
                     <span
                       class="d-inline-flex align-items-center justify-content-center rounded-circle"
-                      style="width:72px;height:72px;background:rgba(40,167,69,0.1)"
+                      style="
+                        width: 72px;
+                        height: 72px;
+                        background: rgba(40, 167, 69, 0.1);
+                      "
                     >
-                      <i class="fas fa-file-invoice-dollar fa-2x text-success"></i>
+                      <i
+                        class="fas fa-file-invoice-dollar fa-2x text-success"
+                      ></i>
                     </span>
                   </div>
-                  <h5 class="font-weight-bold text-uppercase mb-2">Payment Required</h5>
+                  <h5 class="font-weight-bold text-uppercase mb-2">
+                    Payment Required
+                  </h5>
                   <p class="text-muted mb-1">
                     To access the full details of this tender, a one-time tender
                     fee payment is required.
                   </p>
                   <div class="my-4">
-                    <span class="d-block text-muted small mb-1">Tender Access Fee</span>
+                    <span class="d-block text-muted small mb-1"
+                      >Tender Access Fee</span
+                    >
                     <span class="h2 font-weight-bold text-success">
                       KES
                       {{
@@ -619,7 +636,8 @@ const submitApplication = async () => {
                     </span>
                   </div>
                   <button class="btn btn-success btn-lg px-5">
-                    <i class="fas fa-credit-card mr-2"></i>Pay &amp; Unlock Tender
+                    <i class="fas fa-credit-card mr-2"></i>Pay &amp; Unlock
+                    Tender
                   </button>
                   <p class="text-muted small mt-3">
                     <i class="fas fa-shield-alt mr-1 text-success"></i>
@@ -629,7 +647,9 @@ const submitApplication = async () => {
 
                 <!-- Logged in — subscription plan required -->
                 <template v-else>
-                  <h5 class="font-weight-bold text-uppercase mb-3">Subscription Required</h5>
+                  <h5 class="font-weight-bold text-uppercase mb-3">
+                    Subscription Required
+                  </h5>
                   <p class="text-muted mb-4">
                     You need an active subscription plan to view tender details.
                     Choose a plan below.
@@ -641,23 +661,40 @@ const submitApplication = async () => {
                       class="plan-card"
                       :class="idx === 2 ? 'plan-card--featured' : ''"
                     >
-                      <div v-if="idx === 2" class="plan-popular-badge">Most Popular</div>
+                      <div v-if="idx === 2" class="plan-popular-badge">
+                        Most Popular
+                      </div>
                       <div class="plan-icon mb-2">
-                        <i class="fas fa-crown" v-if="idx === plans.length - 1"></i>
+                        <i
+                          class="fas fa-crown"
+                          v-if="idx === plans.length - 1"
+                        ></i>
                         <i class="fas fa-gem" v-else-if="idx === 2"></i>
                         <i class="fas fa-tag" v-else></i>
                       </div>
                       <div class="plan-name">{{ plan.plan_name }}</div>
                       <div class="plan-duration">
                         <i class="fas fa-calendar-alt mr-1"></i>
-                        {{ plan.period }} day{{ plan.period !== 1 ? 's' : '' }} access
+                        {{ plan.period }} day{{
+                          plan.period !== 1 ? "s" : ""
+                        }}
+                        access
                       </div>
                       <div class="plan-price">
                         <span class="plan-currency">KES</span>
-                        {{ Number(plan.amount).toLocaleString('en-KE', { minimumFractionDigits: 2 }) }}
+                        {{
+                          Number(plan.amount).toLocaleString("en-KE", {
+                            minimumFractionDigits: 2,
+                          })
+                        }}
                       </div>
-                      <p v-if="plan.description" class="plan-desc">{{ plan.description }}</p>
-                      <button class="plan-btn" :class="idx === 2 ? 'plan-btn--featured' : ''">
+                      <p v-if="plan.description" class="plan-desc">
+                        {{ plan.description }}
+                      </p>
+                      <button
+                        class="plan-btn"
+                        :class="idx === 2 ? 'plan-btn--featured' : ''"
+                      >
                         <i class="fas fa-check-circle mr-1"></i> Choose Plan
                       </button>
                     </div>
