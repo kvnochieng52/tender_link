@@ -1,62 +1,15 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch, toRefs } from "vue";
 import { Head, Link } from "@inertiajs/vue3";
 
-defineProps({
-  canLogin: {
-    type: Boolean,
-  },
-  canRegister: {
-    type: Boolean,
-  },
+const props = defineProps({
+  canLogin: { type: Boolean },
+  canRegister: { type: Boolean },
+  tenders: { type: Array, default: () => [] },
+  industries: { type: Array, default: () => [] },
+  counties: { type: Array, default: () => [] },
 });
-
-const categories = [
-  "Construction",
-  "Supply",
-  "ICT",
-  "Agro",
-  "Government",
-  "NGOs",
-];
-
-const sampleTenders = [
-  {
-    title: "Supply of Medical Equipment",
-    county: "Nairobi",
-    deadline: "5 days left",
-    budget: "KES 12M",
-    isSponsored: true,
-  },
-  {
-    title: "Road Rehabilitation Works",
-    county: "Mombasa",
-    deadline: "11 days left",
-    budget: "KES 58M",
-    isSponsored: false,
-  },
-  {
-    title: "County ICT Infrastructure Upgrade",
-    county: "Kisumu",
-    deadline: "3 days left",
-    budget: "KES 24M",
-    isSponsored: false,
-  },
-  {
-    title: "Supply & Delivery of School Furniture",
-    county: "Nakuru",
-    deadline: "8 days left",
-    budget: "KES 9M",
-    isSponsored: false,
-  },
-  {
-    title: "Water Pipeline Extension Project",
-    county: "Kiambu",
-    deadline: "14 days left",
-    budget: "KES 32M",
-    isSponsored: true,
-  },
-];
+const { tenders, industries, counties, canLogin, canRegister } = toRefs(props);
 
 const plans = [
   {
@@ -184,134 +137,160 @@ const closeMobileMenu = () => {
 };
 
 const currentYear = new Date().getFullYear();
+
+const formatDate = (d) => {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleString();
+  } catch (e) {
+    return d;
+  }
+};
+
+// local visible tenders to avoid accidental replacement with sample data
+const visibleTenders = ref([]);
+visibleTenders.value = tenders.value || [];
+watch(tenders, (n) => {
+  visibleTenders.value = n || [];
+});
+
+// Search form state
+const keyword = ref("");
+const industryFilter = ref("");
+const countyFilter = ref("");
+const deadlineFilter = ref("");
+
+const submitSearch = () => {
+  const params = {};
+  if (keyword.value) params.search = keyword.value;
+  if (industryFilter.value) params.industry_id = industryFilter.value;
+  if (countyFilter.value) params.county_id = countyFilter.value;
+  if (deadlineFilter.value) params.deadline = deadlineFilter.value;
+
+  const query = new URLSearchParams(params).toString();
+  const url = route("tenders.search") + (query ? `?${query}` : "");
+  window.location.href = url;
+};
 </script>
 
 <template>
   <Head title="Tender Portal" />
 
   <div class="landing-page bg-light">
-    <nav
-      class="navbar navbar-expand-md navbar-white bg-white border-bottom shadow-sm sticky-top px-0"
+    <div
+      class="container d-flex align-items-center justify-content-between flex-wrap"
     >
-      <div
-        class="container d-flex align-items-center justify-content-between flex-wrap"
+      <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
+        <img
+          src="/images/tender-link-logo.svg"
+          alt="Tender Link"
+          class="brand-logo-full"
+        />
+      </Link>
+
+      <button
+        class="navbar-toggler mobile-nav-toggler"
+        type="button"
+        aria-label="Toggle navigation"
+        :aria-expanded="mobileMenuOpen"
+        @click="toggleMobileMenu"
       >
-        <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
-          <img
-            src="/images/tender-link-logo.svg"
-            alt="Tender Link"
-            class="brand-logo-full"
-          />
-        </Link>
+        <i class="fas fa-bars"></i>
+      </button>
 
-        <button
-          class="navbar-toggler mobile-nav-toggler"
-          type="button"
-          aria-label="Toggle navigation"
-          :aria-expanded="mobileMenuOpen"
-          @click="toggleMobileMenu"
+      <div :class="['nav-mobile-collapse', mobileMenuOpen ? 'is-open' : '']">
+        <ul
+          class="navbar-nav nav-main-menu flex-row flex-wrap justify-content-center my-2 my-lg-0 mx-lg-auto"
         >
-          <i class="fas fa-bars"></i>
-        </button>
-
-        <div :class="['nav-mobile-collapse', mobileMenuOpen ? 'is-open' : '']">
-          <ul
-            class="navbar-nav nav-main-menu flex-row flex-wrap justify-content-center my-2 my-lg-0 mx-lg-auto"
-          >
-            <li class="nav-item">
-              <Link
-                :href="route('welcome')"
-                class="nav-link"
-                @click="closeMobileMenu"
-                >Home</Link
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu">About Us</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu">Services</a>
-            </li>
-            <li
-              :class="[
-                'nav-item',
-                'nav-item-dropdown',
-                tenderSubmenuOpen ? 'is-open' : '',
-              ]"
+          <li class="nav-item">
+            <Link
+              :href="route('welcome')"
+              class="nav-link"
+              @click="closeMobileMenu"
+              >Home</Link
             >
-              <a class="nav-link" href="#" @click="toggleTenderSubmenu">
-                Browse Tenders <i class="fas fa-angle-down ml-1"></i>
-              </a>
-              <div class="dropdown-menu-custom">
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >Construction</a
-                >
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >Supply</a
-                >
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >ICT</a
-                >
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >Agro</a
-                >
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >Government</a
-                >
-                <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                  >NGOs</a
-                >
-              </div>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu"
-                >Contact Us</a
-              >
-            </li>
-          </ul>
-
-          <div
-            class="auth-actions d-flex align-items-center flex-wrap justify-content-end py-2"
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="closeMobileMenu">About Us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="closeMobileMenu">Services</a>
+          </li>
+          <li
+            :class="[
+              'nav-item',
+              'nav-item-dropdown',
+              tenderSubmenuOpen ? 'is-open' : '',
+            ]"
           >
-            <template v-if="canLogin">
+            <a class="nav-link" href="#" @click="toggleTenderSubmenu">
+              Browse Tenders <i class="fas fa-angle-down ml-1"></i>
+            </a>
+            <div class="dropdown-menu-custom">
+              <a href="#" class="dropdown-item" @click="closeMobileMenu"
+                >Construction</a
+              >
+              <a href="#" class="dropdown-item" @click="closeMobileMenu"
+                >Supply</a
+              >
+              <a href="#" class="dropdown-item" @click="closeMobileMenu">ICT</a>
+              <a href="#" class="dropdown-item" @click="closeMobileMenu"
+                >Agro</a
+              >
+              <a href="#" class="dropdown-item" @click="closeMobileMenu"
+                >Government</a
+              >
+              <a href="#" class="dropdown-item" @click="closeMobileMenu"
+                >NGOs</a
+              >
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" @click="closeMobileMenu">Contact Us</a>
+          </li>
+        </ul>
+
+        <div
+          class="auth-actions d-flex align-items-center flex-wrap justify-content-end py-2"
+        >
+          <template v-if="canLogin">
+            <Link
+              v-if="$page.props.auth.user"
+              :href="route('dashboard')"
+              class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
+              @click="closeMobileMenu"
+            >
+              Dashboard
+            </Link>
+            <template v-else>
               <Link
-                v-if="$page.props.auth.user"
-                :href="route('dashboard')"
+                :href="route('login')"
+                class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
+                @click="closeMobileMenu"
+              >
+                Login/Register
+              </Link>
+              <Link
+                v-if="canRegister"
+                :href="route('register')"
                 class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
                 @click="closeMobileMenu"
               >
-                Dashboard
+                Apply Tender
               </Link>
-              <template v-else>
-                <Link
-                  :href="route('login')"
-                  class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
-                  @click="closeMobileMenu"
-                >
-                  Login/Register
-                </Link>
-                <Link
-                  v-if="canRegister"
-                  :href="route('register')"
-                  class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-                  @click="closeMobileMenu"
-                >
-                  Apply Tender
-                </Link>
-                <Link
-                  v-if="canRegister"
-                  :href="route('register')"
-                  class="btn btn-warning btn-sm ml-2 mb-1 mb-md-0"
-                  @click="closeMobileMenu"
-                >
-                  Post Tender
-                </Link>
-              </template>
+              <Link
+                v-if="canRegister"
+                :href="route('register')"
+                class="btn btn-warning btn-sm ml-2 mb-1 mb-md-0"
+                @click="closeMobileMenu"
+              >
+                Post Tender
+              </Link>
             </template>
-          </div>
+          </template>
         </div>
       </div>
-    </nav>
+    </div>
 
     <main class="pb-5">
       <section class="pt-2 pt-md-3 pb-2">
@@ -361,20 +340,7 @@ const currentYear = new Date().getFullYear();
                     </h3>
                   </div>
                   <div class="card-body pt-2">
-                    <form class="pt-1">
-                      <div class="form-group mb-2">
-                        <label
-                          class="small font-weight-600 mb-1"
-                          style="color: #1a3a22"
-                          >Keyword</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control form-control-sm"
-                          placeholder="e.g. ICT, road works"
-                        />
-                      </div>
-
+                    <form class="pt-1" @submit.prevent="submitSearch">
                       <div class="form-row">
                         <div class="form-group col-6 mb-2">
                           <label
@@ -382,12 +348,18 @@ const currentYear = new Date().getFullYear();
                             style="color: #1a3a22"
                             >Industry</label
                           >
-                          <select class="form-control form-control-sm">
-                            <option>All Industries</option>
-                            <option>Construction</option>
-                            <option>Supply</option>
-                            <option>ICT</option>
-                            <option>Agro</option>
+                          <select
+                            v-model="industryFilter"
+                            class="form-control form-control-sm"
+                          >
+                            <option value="">All Industries</option>
+                            <option
+                              v-for="ind in industries"
+                              :key="ind.id"
+                              :value="ind.id"
+                            >
+                              {{ ind.name }}
+                            </option>
                           </select>
                         </div>
                         <div class="form-group col-6 mb-2">
@@ -396,48 +368,57 @@ const currentYear = new Date().getFullYear();
                             style="color: #1a3a22"
                             >County</label
                           >
-                          <select class="form-control form-control-sm">
-                            <option>All Counties</option>
-                            <option>Nairobi</option>
-                            <option>Mombasa</option>
-                            <option>Kisumu</option>
-                            <option>Nakuru</option>
+                          <select
+                            v-model="countyFilter"
+                            class="form-control form-control-sm"
+                          >
+                            <option value="">All Counties</option>
+                            <option
+                              v-for="c in counties"
+                              :key="c.id"
+                              :value="c.id"
+                            >
+                              {{ c.name }}
+                            </option>
                           </select>
                         </div>
                       </div>
 
                       <div class="form-row">
-                        <div class="form-group col-6 mb-2">
-                          <label
-                            class="small font-weight-600 mb-1"
-                            style="color: #1a3a22"
-                            >Budget Size</label
-                          >
-                          <select class="form-control form-control-sm">
-                            <option>Any Budget</option>
-                            <option>Below KES 1M</option>
-                            <option>KES 1M - 10M</option>
-                            <option>KES 10M - 50M</option>
-                            <option>Above KES 50M</option>
-                          </select>
-                        </div>
-                        <div class="form-group col-6 mb-2">
+                        <div class="form-group col-12 mb-2">
                           <label
                             class="small font-weight-600 mb-1"
                             style="color: #1a3a22"
                             >Deadline</label
                           >
-                          <select class="form-control form-control-sm">
-                            <option>Any Time</option>
-                            <option>Within 7 Days</option>
-                            <option>Within 14 Days</option>
-                            <option>Within 30 Days</option>
+                          <select
+                            v-model="deadlineFilter"
+                            class="form-control form-control-sm"
+                          >
+                            <option value="">Any Time</option>
+                            <option value="7">Within 7 Days</option>
+                            <option value="14">Within 14 Days</option>
+                            <option value="30">Within 30 Days</option>
                           </select>
                         </div>
                       </div>
 
+                      <div class="form-group mb-2">
+                        <label
+                          class="small font-weight-600 mb-1"
+                          style="color: #1a3a22"
+                          >Keyword</label
+                        >
+                        <input
+                          v-model="keyword"
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="e.g. ICT, road works"
+                        />
+                      </div>
+
                       <button
-                        type="button"
+                        type="submit"
                         class="btn btn-success btn-sm btn-block mt-1"
                       >
                         <i class="fas fa-search mr-1"></i> Search
@@ -567,17 +548,22 @@ const currentYear = new Date().getFullYear();
                   class="card-header d-flex justify-content-between align-items-center bg-white"
                 >
                   <h3 class="card-title font-weight-bold">Browse Tenders</h3>
-                  <span class="badge badge-warning">Free Preview Mode</span>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
-                    <span
-                      v-for="category in categories"
-                      :key="category"
+                    <Link
+                      v-for="industry in industries"
+                      :key="industry.id || industry.name"
+                      :href="
+                        route('welcome', {
+                          industry: industry.slug || industry.id,
+                        })
+                      "
                       class="badge badge-light border mr-2 mb-2 p-2 text-muted"
+                      @click="closeMobileMenu"
                     >
-                      {{ category }}
-                    </span>
+                      {{ industry.name }}
+                    </Link>
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-6 mb-2 mb-md-0">
@@ -613,46 +599,114 @@ const currentYear = new Date().getFullYear();
                   </div>
 
                   <div
-                    v-for="tender in sampleTenders"
-                    :key="tender.title"
+                    v-for="tender in visibleTenders"
+                    :key="tender.id || tender.title"
                     class="callout callout-success mb-2"
                   >
                     <div
                       class="d-flex justify-content-between align-items-start flex-wrap"
                     >
-                      <div class="pr-2">
-                        <h6 class="mb-1 font-weight-bold text-dark">
-                          {{ tender.title }}
-                        </h6>
-                        <p class="mb-1 text-muted small">
-                          {{ tender.county }} • {{ tender.deadline }} •
-                          {{ tender.budget }}
-                        </p>
-                        <span class="badge badge-warning mr-1"
-                          >Title visible to all</span
+                      <div class="pr-2 w-100">
+                        <div
+                          class="d-flex justify-content-between align-items-start"
                         >
-                        <span class="badge badge-secondary"
-                          >Details for paid users</span
-                        >
-                        <span
-                          v-if="tender.isSponsored"
-                          class="badge badge-success ml-1"
-                          >Sponsored</span
-                        >
-                      </div>
-                      <div>
-                        <button
-                          class="btn btn-outline-success btn-xs mr-1"
-                          type="button"
-                        >
-                          Save
-                        </button>
-                        <button
-                          class="btn btn-outline-secondary btn-xs"
-                          type="button"
-                        >
-                          Download
-                        </button>
+                          <div>
+                            <h6 class="mb-1 font-weight-bold text-dark">
+                              {{ tender.title }}
+                            </h6>
+                            <p
+                              class="mb-1 text-muted small d-flex flex-wrap align-items-center"
+                            >
+                              <i
+                                class="fas fa-map-marker-alt mr-2 text-success"
+                              ></i>
+                              <span class="mr-3">{{
+                                tender.county && tender.county.name
+                                  ? tender.county.name
+                                  : tender.county_name || ""
+                              }}</span>
+
+                              <span
+                                v-if="tender.published_at || tender.created_at"
+                                class="mr-3 d-flex align-items-center"
+                              >
+                                <i
+                                  class="fas fa-calendar-alt mr-1 text-secondary"
+                                ></i>
+                                <strong class="mr-1">Published:</strong>
+                                <small class="text-muted">{{
+                                  formatDate(
+                                    tender.published_at || tender.created_at
+                                  )
+                                }}</small>
+                              </span>
+
+                              <span
+                                v-if="
+                                  tender.closing_at ||
+                                  tender.closing_date_and_time ||
+                                  tender.expiry_date
+                                "
+                                class="mr-3 d-flex align-items-center"
+                              >
+                                <i class="fas fa-clock mr-1 text-secondary"></i>
+                                <strong class="mr-1">Closing:</strong>
+                                <small class="text-muted">{{
+                                  formatDate(
+                                    tender.closing_at ||
+                                      tender.closing_date_and_time ||
+                                      tender.expiry_date
+                                  )
+                                }}</small>
+                              </span>
+
+                              <span
+                                v-if="tender.budget"
+                                class="d-flex align-items-center"
+                              >
+                                <i
+                                  class="fas fa-money-bill-wave mr-1 text-secondary"
+                                ></i>
+                                <small class="text-muted">{{
+                                  tender.budget
+                                }}</small>
+                              </span>
+                            </p>
+                          </div>
+
+                          <div class="d-flex align-items-start ml-auto">
+                            <Link
+                              :href="
+                                route(
+                                  'tenders.public.show',
+                                  tender.slug || tender.id
+                                )
+                              "
+                              class="btn btn-outline-success btn-sm mr-2 mb-1"
+                              style="text-decoration: none"
+                            >
+                              <i class="fas fa-info-circle mr-1"></i> Details
+                            </Link>
+
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary btn-sm mb-1"
+                              aria-label="favorite"
+                              title="Add to favorites"
+                            >
+                              <i class="fas fa-heart mr-1"></i> Favorites
+                            </button>
+                          </div>
+                        </div>
+
+                        <div class="mt-2">
+                          <span class="badge badge-secondary mr-1">
+                            {{ tender.status ? tender.status.name : "Status" }}
+                          </span>
+                          <span class="badge badge-success ml-1"
+                            >Sponsored</span
+                          >
+                        </div>
                       </div>
                     </div>
                   </div>

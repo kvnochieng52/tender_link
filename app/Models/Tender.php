@@ -23,6 +23,8 @@ class Tender extends Model
         'tender_status_id',
         'description',
         'key_requirements',
+        'tender_link_process',
+        'tender_fee_amount',
         'created_by',
         'updated_by',
     ];
@@ -30,6 +32,7 @@ class Tender extends Model
     protected $casts = [
         'closing_date_and_time' => 'datetime',
         'expiry_date'           => 'datetime',
+        'tender_link_process'   => 'boolean',
     ];
 
     public function institution(): BelongsTo
@@ -50,6 +53,11 @@ class Tender extends Model
     public function files(): HasMany
     {
         return $this->hasMany(TenderFile::class);
+    }
+
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(\App\Models\TenderRequirement::class);
     }
 
     public function status(): BelongsTo

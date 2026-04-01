@@ -258,7 +258,17 @@ const formatDateTime = (val) => {
                   {{ (tenders.current_page - 1) * tenders.per_page + idx + 1 }}
                 </td>
                 <td class="font-weight-semibold small text-nowrap">
-                  {{ tender.tender_no }}
+                  <div class="d-flex align-items-center gap-2">
+                    <span>{{ tender.tender_no }}</span>
+                    <span
+                      v-if="tender.tender_link_process"
+                      class="badge badge-success d-flex align-items-center"
+                      style="gap: 4px"
+                    >
+                      <i class="fas fa-check"></i>
+                      TLprocess
+                    </span>
+                  </div>
                 </td>
                 <td>
                   <div class="font-weight-semibold tender-item-title">
@@ -305,6 +315,17 @@ const formatDateTime = (val) => {
                     >
                       <i class="fas fa-download"></i>
                     </button>
+                    <Link
+                      :href="
+                        route('admin.tenders.applications.index', {
+                          encryptedId: tender.encrypted_id,
+                        })
+                      "
+                      class="btn btn-outline-secondary"
+                      title="View applications"
+                    >
+                      <i class="fas fa-inbox"></i>
+                    </Link>
                     <Link
                       :href="
                         route('tenders.edit', {

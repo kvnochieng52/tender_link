@@ -1,11 +1,20 @@
 <script setup>
 import { computed, ref } from "vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
+import { useToast } from "vue-toastification";
 
 const props = defineProps({
   tender: {
     type: Object,
     required: true,
+  },
+  hasAccess: {
+    type: Boolean,
+    default: false,
+  },
+  plans: {
+    type: Array,
+    default: () => [],
   },
 });
 
@@ -59,6 +68,265 @@ const toggleTenderSubmenu = (event) => {
 const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
   tenderSubmenuOpen.value = false;
+};
+
+// Apply UI state (frontend only)
+const toast = useToast();
+const applyMode = ref(false);
+const applicant = ref({
+  company_name: "",
+  address: "",
+  telephone: "",
+  website: "",
+  county: "",
+  email: "",
+  additional_notes: "",
+});
+const representative = ref({
+  full_name: "",
+  position: "",
+  telephone: "",
+  email: "",
+});
+const requirementFiles = ref({});
+const requirementsList = computed(() => props.tender.requirements || []);
+const countyOptions = computed(() => page.props?.counties || []);
+
+const currentApplyStep = ref(1);
+
+const startApply = () => {
+  applyMode.value = true;
+  currentApplyStep.value = 1;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const cancelApply = () => {
+  applyMode.value = false;
+  currentApplyStep.value = 1;
+};
+
+const goToStep = (n) => {
+  currentApplyStep.value = n;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const nextStep = () => {
+  if (currentApplyStep.value < 2) currentApplyStep.value++;
+};
+
+const prevStep = () => {
+  if (currentApplyStep.value > 1) currentApplyStep.value--;
+};
+
+const onRequirementFileChange = (event, idx, reqId = null) => {
+  const file = event.target.files?.[0] || null;
+  if (!file) return;
+
+  // initialize state
+  requirementFiles.value[idx] = {
+    uploading: true,
+    progress: 0,
+    name: file.name,
+  };
+
+  const xhr = new XMLHttpRequest();
+  const url = route("tenders.upload_file", { slug: props.tender.slug });
+
+  xhr.upload.addEventListener("progress", (e) => {
+    if (e.lengthComputable) {
+      const percent = Math.round((e.loaded / e.total) * 100);
+      requirementFiles.value[idx].progress = percent;
+    }
+  });
+
+  xhr.addEventListener("load", () => {
+    try {
+      const data = JSON.parse(xhr.responseText);
+      if (data.success) {
+        requirementFiles.value[idx] = {
+          uploaded: true,
+          filepath: data.filepath,
+          name: data.file_name,
+        };
+      } else {
+        requirementFiles.value[idx] = { error: true };
+        toast.error(data.message || "Upload failed");
+      }
+    } catch (err) {
+      requirementFiles.value[idx] = { error: true };
+      toast.error("Upload error");
+    }
+  });
+
+  xhr.addEventListener("error", () => {
+    requirementFiles.value[idx] = { error: true };
+    toast.error("Upload failed");
+  });
+
+  const fd = new FormData();
+  fd.append("file", file);
+  if (reqId) fd.append("requirement_id", reqId);
+
+  // include CSRF token in the form as a fallback (some browsers/blockers strip headers)
+  const token =
+    document.querySelector("meta[name=csrf-token]")?.getAttribute("content") ||
+    "";
+  if (token) fd.append("_token", token);
+
+  xhr.open("POST", url);
+  // set standard headers
+  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  if (token) xhr.setRequestHeader("X-CSRF-TOKEN", token);
+  xhr.send(fd);
+};
+
+const triggerFileInput = (idx) => {
+  if (typeof document === "undefined") return;
+  const el = document.getElementById("reqFile_" + idx);
+  if (el && typeof el.click === "function") el.click();
+};
+
+// removed per-requirement email inputs — requirements now show Required/Optional labels
+
+const removeRequirementFile = async (idx) => {
+  const rf = requirementFiles.value[idx];
+  if (rf && rf.uploaded && rf.filepath) {
+    try {
+      const res = await fetch(
+        route("tenders.delete_temp_file", { slug: props.tender.slug }),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN":
+              document
+                .querySelector("meta[name=csrf-token]")
+                ?.getAttribute("content") || "",
+          },
+          body: JSON.stringify({ filepath: rf.filepath }),
+        }
+      );
+      const data = await res.json();
+      if (!data.success) {
+        toast.error("Could not remove file");
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  delete requirementFiles.value[idx];
+};
+
+const submitApplication = async () => {
+  // Basic required fields (business)
+  const missing = [];
+  if (!applicant.value.company_name?.trim())
+    missing.push("Company/Organization name");
+  if (!applicant.value.telephone?.trim()) missing.push("Telephone");
+  if (!applicant.value.email?.trim()) missing.push("Email");
+  if (!applicant.value.address?.trim()) missing.push("Address");
+  if (!applicant.value.county) missing.push("County");
+
+  // Representative required
+  if (!representative.value.full_name?.trim())
+    missing.push("Representative name");
+  if (!representative.value.telephone?.trim())
+    missing.push("Representative telephone");
+  if (!representative.value.email?.trim()) missing.push("Representative email");
+
+  if (missing.length) {
+    toast.error("Please fill required fields: " + missing.join(", "));
+    // ensure user sees the basic details
+    goToStep(1);
+    return;
+  }
+
+  // Ensure all mandatory requirement files uploaded
+  const missingFiles = [];
+  requirementsList.value.forEach((req, idx) => {
+    if (req.mandatory) {
+      const rf = requirementFiles.value[idx];
+      if (!(rf && rf.uploaded)) {
+        missingFiles.push(req.title || `Requirement ${idx + 1}`);
+      }
+    }
+  });
+
+  if (missingFiles.length) {
+    toast.error("Please upload required files: " + missingFiles.join(", "));
+    goToStep(2);
+    return;
+  }
+
+  const form = new FormData();
+  form.append("company_name", applicant.value.company_name || "");
+  form.append("telephone", applicant.value.telephone || "");
+  form.append("website", applicant.value.website || "");
+  form.append("county_id", applicant.value.county || "");
+  form.append("address", applicant.value.address || "");
+  form.append("email", applicant.value.email || "");
+  form.append("representative_name", representative.value.full_name || "");
+  form.append("representative_position", representative.value.position || "");
+  form.append("representative_telephone", representative.value.telephone || "");
+  form.append("representative_email", representative.value.email || "");
+  form.append("additional_notes", applicant.value.additional_notes || "");
+
+  requirementsList.value.forEach((req, idx) => {
+    form.append(`requirement_titles[${idx}]`, req.title || "");
+    const rf = requirementFiles.value[idx];
+    form.append(
+      `requirement_file_paths[${idx}]`,
+      rf && rf.uploaded ? rf.filepath : ""
+    );
+    form.append(`requirement_file_requirement_ids[${idx}]`, req.id || "");
+    form.append(
+      `requirement_file_original_names[${idx}]`,
+      rf && rf.uploaded ? rf.name : ""
+    );
+  });
+
+  try {
+    // append CSRF token as fallback
+    const token =
+      document
+        .querySelector("meta[name=csrf-token]")
+        ?.getAttribute("content") || "";
+    if (token) form.append("_token", token);
+
+    const res = await fetch(
+      route("tenders.apply", { slug: props.tender.slug }),
+      {
+        method: "POST",
+        headers: token ? { "X-CSRF-TOKEN": token } : {},
+        body: form,
+      }
+    );
+
+    if (!res.ok) {
+      let errText = `${res.status} ${res.statusText}`;
+      try {
+        const j = await res.json();
+        errText = j.message || JSON.stringify(j);
+      } catch (err) {
+        try {
+          errText = await res.text();
+        } catch (_) {}
+      }
+      toast.error(`Submission failed: ${errText}`);
+      return;
+    }
+
+    const data = await res.json();
+    if (data.success) {
+      toast.success("Application submitted");
+      applyMode.value = false;
+    } else {
+      toast.error(data.message || "Submission failed");
+    }
+  } catch (e) {
+    toast.error("Submission error: " + (e.message || e));
+  }
 };
 </script>
 
@@ -186,10 +454,9 @@ const closeMobileMenu = () => {
     </nav>
 
     <div class="container py-4">
-      <!-- Hero -->
+      <!-- Hero — always visible -->
       <div class="card tender-hero mb-4">
         <div class="card-body px-4 pt-4 pb-3">
-          <!-- Badges -->
           <div
             class="d-flex flex-wrap align-items-center mb-3"
             style="gap: 0.4rem"
@@ -205,10 +472,8 @@ const closeMobileMenu = () => {
             </span>
           </div>
 
-          <!-- Title — full width -->
           <h1 class="hero-title mb-3">{{ tender.title }}</h1>
 
-          <!-- Single meta row: Tender No | County | Closing Date | Expiry Date -->
           <div class="hero-meta-row">
             <div class="hero-meta-item">
               <span class="hero-meta-label">Tender No.</span>
@@ -240,182 +505,826 @@ const closeMobileMenu = () => {
               }}</span>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="row">
-        <div class="col-lg-8 mb-4 mb-lg-0">
-          <!-- Description -->
-          <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 pb-1">
-              <h5 class="font-weight-bold mb-0">Tender Description</h5>
-            </div>
-            <div class="card-body">
-              <div class="content-html" v-html="tender.description"></div>
-            </div>
-          </div>
-
-          <!-- Requirements -->
-          <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 pb-1">
-              <h5 class="font-weight-bold mb-0">Key Requirements</h5>
-            </div>
-            <div class="card-body">
-              <div
-                v-if="tender.key_requirements"
-                class="content-html"
-                v-html="tender.key_requirements"
-              ></div>
-              <p v-else class="text-muted mb-0">
-                No key requirements specified.
-              </p>
-            </div>
-          </div>
-
-          <!-- Files -->
-          <div class="card border-0 shadow-sm">
-            <div
-              class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center"
+          <div v-if="hasAccess" class="d-flex justify-content-end mt-3">
+            <button
+              v-if="!applyMode && tender.tender_link_process"
+              class="btn btn-success"
+              @click="startApply"
             >
-              <h5 class="font-weight-bold mb-0">Tender Documents</h5>
-              <span class="badge badge-light"
-                >{{ tender.files?.length || 0 }} files</span
-              >
-            </div>
-            <div class="card-body">
-              <div
-                v-if="!tender.files || tender.files.length === 0"
-                class="alert alert-light border mb-0"
-              >
-                No downloadable documents available.
-              </div>
-
-              <div v-else class="list-group list-group-flush">
-                <a
-                  v-for="file in tender.files"
-                  :key="file.id"
-                  :href="fileDownloadUrl(file.filepath)"
-                  :download="file.file_name"
-                  class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div class="d-flex align-items-center">
-                    <i class="fas fa-file-alt text-success mr-2"></i>
-                    <span>{{ file.file_name }}</span>
-                  </div>
-                  <span class="btn btn-sm btn-outline-success">
-                    <i class="fas fa-download mr-1"></i> Download
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4">
-          <!-- Institution -->
-          <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-0 pb-1">
-              <h5 class="font-weight-bold mb-0">Tender Institution</h5>
-            </div>
-            <div class="card-body">
-              <div class="d-flex align-items-start mb-3">
-                <img
-                  v-if="institutionLogoUrl"
-                  :src="institutionLogoUrl"
-                  :alt="tender.institution?.institution_name"
-                  class="institution-logo mr-3"
-                />
-                <div v-else class="institution-logo-placeholder mr-3">
-                  {{
-                    tender.institution?.institution_name
-                      ?.charAt(0)
-                      ?.toUpperCase() || "I"
-                  }}
-                </div>
-
-                <div>
-                  <h6 class="font-weight-bold mb-1">
-                    {{ tender.institution?.institution_name || "—" }}
-                  </h6>
-                  <span class="badge badge-success-light">{{
-                    tender.institution?.institution_type?.name || "—"
-                  }}</span>
-                </div>
-              </div>
-
-              <ul class="list-unstyled mb-0 small text-muted">
-                <li class="mb-2" v-if="tender.institution?.email">
-                  <i class="fas fa-envelope text-success mr-2"></i
-                  >{{ tender.institution.email }}
-                </li>
-                <li class="mb-2" v-if="tender.institution?.telephone">
-                  <i class="fas fa-phone text-success mr-2"></i
-                  >{{ tender.institution.telephone }}
-                </li>
-                <li class="mb-2" v-if="tender.institution?.website">
-                  <i class="fas fa-globe text-success mr-2"></i>
-                  <a
-                    :href="tender.institution.website"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-success"
-                  >
-                    {{ tender.institution.website }}
-                  </a>
-                </li>
-                <li v-if="tender.institution?.address">
-                  <i class="fas fa-map-marker-alt text-success mr-2"></i
-                  >{{ tender.institution.address }}
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Quick summary -->
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white border-0 pb-1">
-              <h5 class="font-weight-bold mb-0">Quick Summary</h5>
-            </div>
-            <div class="card-body small">
-              <div class="d-flex justify-content-between border-bottom py-2">
-                <span class="text-muted">Tender No</span>
-                <span class="font-weight-semibold">{{ tender.tender_no }}</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom py-2">
-                <span class="text-muted">Status</span>
-                <span class="font-weight-semibold">{{
-                  tender.status?.name || "—"
-                }}</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom py-2">
-                <span class="text-muted">Industry</span>
-                <span class="font-weight-semibold">{{
-                  tender.industry?.name || "—"
-                }}</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom py-2">
-                <span class="text-muted">County</span>
-                <span class="font-weight-semibold">{{
-                  tender.county?.name || "—"
-                }}</span>
-              </div>
-              <div class="d-flex justify-content-between pt-2">
-                <span class="text-muted">Documents</span>
-                <span class="font-weight-semibold">{{
-                  tender.files?.length || 0
-                }}</span>
-              </div>
-            </div>
+              <i class="fas fa-paper-plane mr-1"></i> Apply for this Tender
+            </button>
           </div>
         </div>
       </div>
+
+      <!-- ── LOCKED STATE ───────────────────────────────────────────────── -->
+      <template v-if="!hasAccess">
+        <div class="row">
+          <!-- Institution card (always visible on lock screen) -->
+          <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-body">
+                <div class="d-flex align-items-start mb-3">
+                  <img
+                    v-if="institutionLogoUrl"
+                    :src="institutionLogoUrl"
+                    :alt="tender.institution?.institution_name"
+                    class="institution-logo mr-3"
+                  />
+                  <div v-else class="institution-logo-placeholder mr-3">
+                    {{
+                      tender.institution?.institution_name
+                        ?.charAt(0)
+                        ?.toUpperCase() || "I"
+                    }}
+                  </div>
+                  <div>
+                    <h6 class="font-weight-bold mb-1">
+                      {{ tender.institution?.institution_name || "—" }}
+                    </h6>
+                    <span class="badge badge-success-light">{{
+                      tender.institution?.institution_type?.name || "—"
+                    }}</span>
+                    <div v-if="tender.institution?.address" class="small text-muted mt-1">
+                      <i class="fas fa-map-marker-alt text-success mr-1"></i>
+                      {{ tender.institution.address }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment wall -->
+          <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body text-center py-5">
+                <!-- Not logged in: show lock + login prompt -->
+                <template v-if="!user">
+                  <div class="mb-3">
+                    <span
+                      class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light"
+                      style="width: 72px; height: 72px"
+                    >
+                      <i class="fas fa-lock fa-2x text-secondary"></i>
+                    </span>
+                  </div>
+                  <h5 class="font-weight-bold mb-2">Login to continue</h5>
+                  <p class="text-muted mb-4">
+                    Please log in or create an account to access full tender
+                    details.
+                  </p>
+                  <div
+                    class="d-flex justify-content-center"
+                    style="gap: 0.75rem"
+                  >
+                    <Link :href="route('login')" class="btn btn-success px-4">
+                      <i class="fas fa-sign-in-alt mr-1"></i> Login
+                    </Link>
+                    <Link
+                      :href="route('register')"
+                      class="btn btn-outline-success px-4"
+                    >
+                      <i class="fas fa-user-plus mr-1"></i> Register
+                    </Link>
+                  </div>
+                </template>
+
+                <!-- Logged in — tender-specific fee required -->
+                <template v-else-if="tender.tender_link_process">
+                  <div class="mb-3">
+                    <span
+                      class="d-inline-flex align-items-center justify-content-center rounded-circle"
+                      style="width:72px;height:72px;background:rgba(40,167,69,0.1)"
+                    >
+                      <i class="fas fa-file-invoice-dollar fa-2x text-success"></i>
+                    </span>
+                  </div>
+                  <h5 class="font-weight-bold text-uppercase mb-2">Payment Required</h5>
+                  <p class="text-muted mb-1">
+                    To access the full details of this tender, a one-time tender
+                    fee payment is required.
+                  </p>
+                  <div class="my-4">
+                    <span class="d-block text-muted small mb-1">Tender Access Fee</span>
+                    <span class="h2 font-weight-bold text-success">
+                      KES
+                      {{
+                        Number(tender.tender_fee_amount || 0).toLocaleString(
+                          "en-KE",
+                          { minimumFractionDigits: 2 }
+                        )
+                      }}
+                    </span>
+                  </div>
+                  <button class="btn btn-success btn-lg px-5">
+                    <i class="fas fa-credit-card mr-2"></i>Pay &amp; Unlock Tender
+                  </button>
+                  <p class="text-muted small mt-3">
+                    <i class="fas fa-shield-alt mr-1 text-success"></i>
+                    One-time payment · Instant access · Secure checkout
+                  </p>
+                </template>
+
+                <!-- Logged in — subscription plan required -->
+                <template v-else>
+                  <h5 class="font-weight-bold text-uppercase mb-3">Subscription Required</h5>
+                  <p class="text-muted mb-4">
+                    You need an active subscription plan to view tender details.
+                    Choose a plan below.
+                  </p>
+                  <div class="plans-row">
+                    <div
+                      v-for="(plan, idx) in plans"
+                      :key="plan.id"
+                      class="plan-card"
+                      :class="idx === 2 ? 'plan-card--featured' : ''"
+                    >
+                      <div v-if="idx === 2" class="plan-popular-badge">Most Popular</div>
+                      <div class="plan-icon mb-2">
+                        <i class="fas fa-crown" v-if="idx === plans.length - 1"></i>
+                        <i class="fas fa-gem" v-else-if="idx === 2"></i>
+                        <i class="fas fa-tag" v-else></i>
+                      </div>
+                      <div class="plan-name">{{ plan.plan_name }}</div>
+                      <div class="plan-duration">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        {{ plan.period }} day{{ plan.period !== 1 ? 's' : '' }} access
+                      </div>
+                      <div class="plan-price">
+                        <span class="plan-currency">KES</span>
+                        {{ Number(plan.amount).toLocaleString('en-KE', { minimumFractionDigits: 2 }) }}
+                      </div>
+                      <p v-if="plan.description" class="plan-desc">{{ plan.description }}</p>
+                      <button class="plan-btn" :class="idx === 2 ? 'plan-btn--featured' : ''">
+                        <i class="fas fa-check-circle mr-1"></i> Choose Plan
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ── FULL CONTENT (has access) ─────────────────────────────────── -->
+      <template v-else>
+        <div class="row">
+          <template v-if="!applyMode">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+              <!-- Description -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pb-1">
+                  <h5 class="font-weight-bold mb-0">Tender Description</h5>
+                </div>
+                <div class="card-body">
+                  <div class="content-html" v-html="tender.description"></div>
+                </div>
+              </div>
+
+              <!-- Requirements -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pb-1">
+                  <h5 class="font-weight-bold mb-0">Key Requirements</h5>
+                </div>
+                <div class="card-body">
+                  <div
+                    v-if="tender.key_requirements"
+                    class="content-html"
+                    v-html="tender.key_requirements"
+                  ></div>
+                  <p v-else class="text-muted mb-0">
+                    No key requirements specified.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Files -->
+              <div class="card border-0 shadow-sm">
+                <div
+                  class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center"
+                >
+                  <h5 class="font-weight-bold mb-0">Tender Documents</h5>
+                  <span class="badge badge-light"
+                    >{{ tender.files?.length || 0 }} files</span
+                  >
+                </div>
+                <div class="card-body">
+                  <div
+                    v-if="!tender.files || tender.files.length === 0"
+                    class="alert alert-light border mb-0"
+                  >
+                    No downloadable documents available.
+                  </div>
+                  <div v-else class="list-group list-group-flush">
+                    <a
+                      v-for="file in tender.files"
+                      :key="file.id"
+                      :href="fileDownloadUrl(file.filepath)"
+                      :download="file.file_name"
+                      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <div class="d-flex align-items-center">
+                        <i class="fas fa-file-alt text-success mr-2"></i>
+                        <span>{{ file.file_name }}</span>
+                      </div>
+                      <span class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-download mr-1"></i> Download
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 d-flex justify-content-end">
+                <button
+                  v-if="!applyMode && tender.tender_link_process"
+                  class="btn btn-success"
+                  @click="startApply"
+                >
+                  <i class="fas fa-paper-plane mr-1"></i> Apply for this Tender
+                </button>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <!-- Institution -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pb-1">
+                  <h5 class="font-weight-bold mb-0">Tender Institution</h5>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex align-items-start mb-3">
+                    <img
+                      v-if="institutionLogoUrl"
+                      :src="institutionLogoUrl"
+                      :alt="tender.institution?.institution_name"
+                      class="institution-logo mr-3"
+                    />
+                    <div v-else class="institution-logo-placeholder mr-3">
+                      {{
+                        tender.institution?.institution_name
+                          ?.charAt(0)
+                          ?.toUpperCase() || "I"
+                      }}
+                    </div>
+                    <div>
+                      <h6 class="font-weight-bold mb-1">
+                        {{ tender.institution?.institution_name || "—" }}
+                      </h6>
+                      <span class="badge badge-success-light">{{
+                        tender.institution?.institutionType?.name || "—"
+                      }}</span>
+                    </div>
+                  </div>
+                  <ul class="list-unstyled mb-0 small text-muted">
+                    <li class="mb-2" v-if="tender.institution?.email">
+                      <i class="fas fa-envelope text-success mr-2"></i
+                      >{{ tender.institution.email }}
+                    </li>
+                    <li class="mb-2" v-if="tender.institution?.telephone">
+                      <i class="fas fa-phone text-success mr-2"></i
+                      >{{ tender.institution.telephone }}
+                    </li>
+                    <li class="mb-2" v-if="tender.institution?.website">
+                      <i class="fas fa-globe text-success mr-2"></i>
+                      <a
+                        :href="tender.institution.website"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-success"
+                      >
+                        {{ tender.institution.website }}
+                      </a>
+                    </li>
+                    <li v-if="tender.institution?.address">
+                      <i class="fas fa-map-marker-alt text-success mr-2"></i
+                      >{{ tender.institution.address }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Quick summary -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-1">
+                  <h5 class="font-weight-bold mb-0">Quick Summary</h5>
+                </div>
+                <div class="card-body small">
+                  <div
+                    class="d-flex justify-content-between border-bottom py-2"
+                  >
+                    <span class="text-muted">Tender No</span>
+                    <span class="font-weight-semibold">{{
+                      tender.tender_no
+                    }}</span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between border-bottom py-2"
+                  >
+                    <span class="text-muted">Status</span>
+                    <span class="font-weight-semibold">{{
+                      tender.status?.name || "—"
+                    }}</span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between border-bottom py-2"
+                  >
+                    <span class="text-muted">Industry</span>
+                    <span class="font-weight-semibold">{{
+                      tender.industry?.name || "—"
+                    }}</span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between border-bottom py-2"
+                  >
+                    <span class="text-muted">County</span>
+                    <span class="font-weight-semibold">{{
+                      tender.county?.name || "—"
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between pt-2">
+                    <span class="text-muted">Documents</span>
+                    <span class="font-weight-semibold">{{
+                      tender.files?.length || 0
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="col-12">
+              <div class="card border-0 shadow-sm mb-4">
+                <div
+                  class="card-header bg-white border-0 pb-1 d-flex align-items-center justify-content-between"
+                >
+                  <div
+                    class="d-flex align-items-center flex-grow-1"
+                    style="gap: 0.5rem"
+                  >
+                    <button
+                      :class="[
+                        'btn',
+                        currentApplyStep === 1
+                          ? 'btn-success'
+                          : 'btn-outline-secondary',
+                        'btn-sm',
+                      ]"
+                      @click.prevent="goToStep(1)"
+                    >
+                      1. Basic Details
+                    </button>
+                    <button
+                      :class="[
+                        'btn',
+                        currentApplyStep === 2
+                          ? 'btn-success'
+                          : 'btn-outline-secondary',
+                        'btn-sm',
+                      ]"
+                      @click.prevent="goToStep(2)"
+                    >
+                      2. Requirements
+                    </button>
+                  </div>
+                  <button
+                    class="btn btn-outline-success btn-sm ms-3"
+                    @click="cancelApply"
+                  >
+                    Back to Details
+                  </button>
+                </div>
+                <div class="card-body">
+                  <form @submit.prevent="submitApplication">
+                    <div class="row">
+                      <!-- Step 1: Basic Details -->
+                      <template v-if="currentApplyStep === 1">
+                        <div class="col-12 mb-2">
+                          <label class="font-weight-semibold"
+                            >Company / Organization Name
+                            <span class="text-danger">*</span></label
+                          >
+                          <input
+                            v-model="applicant.company_name"
+                            type="text"
+                            class="form-control form-control-sm"
+                          />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                          <label class="font-weight-semibold"
+                            >Telephone <span class="text-danger">*</span></label
+                          >
+                          <input
+                            v-model="applicant.telephone"
+                            type="text"
+                            class="form-control form-control-sm"
+                          />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                          <label class="font-weight-semibold">Website</label>
+                          <input
+                            v-model="applicant.website"
+                            type="url"
+                            class="form-control form-control-sm"
+                          />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                          <label class="font-weight-semibold"
+                            >Email <span class="text-danger">*</span></label
+                          >
+                          <input
+                            v-model="applicant.email"
+                            type="email"
+                            class="form-control form-control-sm"
+                          />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                          <label class="font-weight-semibold"
+                            >County <span class="text-danger">*</span></label
+                          >
+                          <select
+                            v-model="applicant.county"
+                            class="form-control form-control-sm"
+                          >
+                            <option value="">Select county</option>
+                            <option
+                              v-for="c in countyOptions"
+                              :key="c.id || c"
+                              :value="c.id || c"
+                            >
+                              {{ c.name || c }}
+                            </option>
+                          </select>
+                        </div>
+                        <div class="col-12 mb-2">
+                          <label class="font-weight-semibold">Address</label>
+                          <textarea
+                            v-model="applicant.address"
+                            class="form-control form-control-sm"
+                            rows="2"
+                          ></textarea>
+                        </div>
+
+                        <div class="col-12 mb-2">
+                          <h6 class="mb-2">Representative Details</h6>
+                          <div class="row">
+                            <div class="col-md-6 mb-2">
+                              <label class="font-weight-semibold"
+                                >Full Names
+                                <span class="text-danger">*</span></label
+                              >
+                              <input
+                                v-model="representative.full_name"
+                                type="text"
+                                class="form-control form-control-sm"
+                              />
+                            </div>
+                            <div class="col-md-6 mb-2">
+                              <label class="font-weight-semibold"
+                                >Position</label
+                              >
+                              <input
+                                v-model="representative.position"
+                                type="text"
+                                class="form-control form-control-sm"
+                              />
+                            </div>
+                            <div class="col-md-6 mb-2">
+                              <label class="font-weight-semibold"
+                                >Telephone
+                                <span class="text-danger">*</span></label
+                              >
+                              <input
+                                v-model="representative.telephone"
+                                type="text"
+                                class="form-control form-control-sm"
+                              />
+                            </div>
+                            <div class="col-md-6 mb-2">
+                              <label class="font-weight-semibold"
+                                >Email <span class="text-danger">*</span></label
+                              >
+                              <input
+                                v-model="representative.email"
+                                type="email"
+                                class="form-control form-control-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          class="col-12 d-flex justify-content-end mt-2"
+                          style="gap: 0.75rem"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            @click="cancelApply"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-success btn-sm"
+                            @click="nextStep"
+                          >
+                            Next: Requirements
+                          </button>
+                        </div>
+                      </template>
+
+                      <!-- Step 2: Requirements -->
+                      <template v-if="currentApplyStep === 2">
+                        <div class="col-12 mb-2">
+                          <h6 class="mb-2">Tender Requirements</h6>
+                          <div
+                            v-if="!requirementsList.length"
+                            class="text-muted mb-3"
+                          >
+                            No specific requirements listed.
+                          </div>
+                          <div
+                            v-for="(req, idx) in requirementsList"
+                            :key="req.id || idx"
+                            class="border rounded p-2 mb-2"
+                          >
+                            <div
+                              class="d-flex justify-content-between align-items-start mb-1"
+                            >
+                              <div class="me-3" style="flex: 1">
+                                <div class="font-weight-semibold">
+                                  {{ req.title || "Requirement " + (idx + 1) }}
+                                </div>
+                                <small class="text-muted d-block">{{
+                                  req.notes || ""
+                                }}</small>
+                                <div class="mt-2">
+                                  <small
+                                    :class="
+                                      req.mandatory
+                                        ? 'text-danger'
+                                        : 'text-muted'
+                                    "
+                                    >{{
+                                      req.mandatory ? "Required" : "Optional"
+                                    }}</small
+                                  >
+                                </div>
+                              </div>
+                              <div class="text-end ms-2">
+                                <input
+                                  type="file"
+                                  :id="'reqFile_' + idx"
+                                  class="d-none"
+                                  @change="
+                                    (e) =>
+                                      onRequirementFileChange(e, idx, req.id)
+                                  "
+                                />
+                                <button
+                                  type="button"
+                                  class="btn btn-sm choose-file-btn"
+                                  @click.prevent="triggerFileInput(idx)"
+                                >
+                                  <template
+                                    v-if="
+                                      requirementFiles[idx] &&
+                                      requirementFiles[idx].uploading
+                                    "
+                                  >
+                                    <i class="fas fa-spinner fa-spin me-1"></i>
+                                    Uploading
+                                    <small class="ms-2"
+                                      >{{
+                                        requirementFiles[idx].progress || 0
+                                      }}%</small
+                                    >
+                                  </template>
+                                  <template
+                                    v-else-if="
+                                      requirementFiles[idx] &&
+                                      requirementFiles[idx].uploaded
+                                    "
+                                  >
+                                    <i
+                                      class="fas fa-check-circle me-1 text-success"
+                                    ></i>
+                                    Uploaded
+                                  </template>
+                                  <template v-else>
+                                    <i class="fas fa-upload me-1"></i>
+                                    Choose file
+                                  </template>
+                                </button>
+                                <div
+                                  v-if="requirementFiles[idx]"
+                                  class="mt-1 small text-muted d-flex align-items-center"
+                                >
+                                  <span class="me-2">{{
+                                    requirementFiles[idx].name
+                                  }}</span>
+                                  <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger p-0"
+                                    style="line-height: 1; padding: 0 6px"
+                                    @click="removeRequirementFile(idx)"
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                                <div
+                                  v-if="
+                                    requirementFiles[idx] &&
+                                    requirementFiles[idx].uploading
+                                  "
+                                  class="mt-1"
+                                >
+                                  <div class="progress" style="height: 6px">
+                                    <div
+                                      class="progress-bar"
+                                      role="progressbar"
+                                      :style="{
+                                        width:
+                                          (requirementFiles[idx].progress ||
+                                            0) + '%',
+                                      }"
+                                      :aria-valuenow="
+                                        requirementFiles[idx].progress || 0
+                                      "
+                                      aria-valuemin="0"
+                                      aria-valuemax="100"
+                                    ></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="col-12 mb-2">
+                          <label class="font-weight-semibold"
+                            >Additional Notes</label
+                          >
+                          <textarea
+                            v-model="applicant.additional_notes"
+                            class="form-control form-control-sm"
+                            rows="3"
+                          ></textarea>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-between mt-2">
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            @click="prevStep"
+                          >
+                            Back
+                          </button>
+                          <div class="d-flex" style="gap: 0.75rem">
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary btn-sm"
+                              @click="cancelApply"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              class="btn btn-success btn-sm"
+                            >
+                              Submit Application
+                            </button>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+      <!-- ── END FULL CONTENT ──────────────────────────────────────────── -->
     </div>
   </div>
 </template>
 
 <style scoped>
+.plans-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+.plan-card {
+  position: relative;
+  background: #fff;
+  border: 1.5px solid #e8f5e9;
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  flex: 1 1 160px;
+  max-width: 200px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+  cursor: pointer;
+}
+.plan-card:hover {
+  box-shadow: 0 6px 24px rgba(40, 167, 69, 0.14);
+  transform: translateY(-3px);
+  border-color: #28a745;
+}
+.plan-card--featured {
+  border-color: #28a745;
+  background: linear-gradient(160deg, #f0fff4 0%, #fff 100%);
+  box-shadow: 0 4px 18px rgba(40, 167, 69, 0.13);
+}
+.plan-popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #28a745;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.plan-icon {
+  font-size: 1.5rem;
+  color: #28a745;
+}
+.plan-card--featured .plan-icon {
+  color: #155724;
+}
+.plan-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.3rem;
+}
+.plan-duration {
+  font-size: 0.78rem;
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+}
+.plan-price {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #28a745;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+.plan-currency {
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: super;
+  margin-right: 2px;
+  color: #555;
+}
+.plan-desc {
+  font-size: 0.73rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+  flex-grow: 1;
+}
+.plan-btn {
+  width: 100%;
+  padding: 0.45rem 0;
+  border: 1.5px solid #28a745;
+  border-radius: 50px;
+  background: transparent;
+  color: #28a745;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-top: auto;
+}
+.plan-btn:hover,
+.plan-btn--featured {
+  background: #28a745;
+  color: #fff;
+}
+.plan-btn--featured:hover {
+  background: #1e7e34;
+  border-color: #1e7e34;
+}
 .brand-logo-full {
   height: 42px;
   width: auto;
@@ -675,5 +1584,24 @@ const closeMobileMenu = () => {
 
 .font-weight-semibold {
   font-weight: 600;
+}
+
+.choose-file-btn {
+  background: transparent;
+  border: 1px solid #28a745;
+  color: #1f8f53;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.35rem;
+}
+.choose-file-btn i {
+  font-size: 0.85rem;
+}
+.choose-file-btn:hover {
+  background: linear-gradient(90deg, #28a745, #1f8f53);
+  color: #fff;
+  border-color: #1f8f53;
 }
 </style>

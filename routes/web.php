@@ -19,12 +19,31 @@ use Inertia\Inertia;
 |
 */
 
+use App\Models\Tender;
+use App\Models\Industry;
+use App\Models\County;
+
 Route::get('/', function () {
+    $latest = Tender::query()
+        ->with(['county:id,name', 'industry:id,name', 'status:id,name'])
+        ->latest()
+        ->take(6)
+        ->get();
+
+    $industries = Industry::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get();
+    $counties = County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
+        'tenders' => $latest,
+        'industries' => $industries,
+        'counties' => $counties,
     ]);
 })->name('welcome');
+
+// Public tenders search/results (10 per page)
+Route::get('/tenders/search', [TenderController::class, 'publicSearch'])->name('tenders.search');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
@@ -43,6 +62,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Admin applications routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/admin/tenders/{encryptedId}/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('admin.tenders.applications.index');
+    Route::get('/admin/applications/{encryptedAppId}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('admin.applications.show');
+});
+
 Route::get('/tenders/{slug}', [TenderController::class, 'publicShow'])->name('tenders.public.show');
+Route::post('/tenders/{slug}/upload-file', [\App\Http\Controllers\ApplicationController::class, 'uploadTempFile'])->name('tenders.upload_file');
+Route::post('/tenders/{slug}/apply', [\App\Http\Controllers\ApplicationController::class, 'store'])->name('tenders.apply');
+Route::post('/tenders/{slug}/delete-temp-file', [\App\Http\Controllers\ApplicationController::class, 'deleteTempFile'])->name('tenders.delete_temp_file');
 
 require __DIR__ . '/auth.php';

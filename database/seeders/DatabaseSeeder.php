@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             InstitutionTypeSeeder::class,
             CountySeeder::class,
             TenderStatusSeeder::class,
+            \Database\Seeders\CommonRequirementsSeeder::class,
+            \Database\Seeders\PlansTableSeeder::class,
         ]);
     }
 }

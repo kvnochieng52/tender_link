@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -43,4 +44,30 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function userPlans(): HasMany
+    {
+        return $this->hasMany(UserPlan::class);
+    }
+
+    public function tenderPayments(): HasMany
+    {
+        return $this->hasMany(TenderPayment::class);
+    }
+
+    public function hasActivePlan(): bool
+    {
+        return $this->userPlans()
+            ->where('is_active', true)
+            ->where('end_date', '>=', now()->toDateString())
+            ->exists();
+    }
+
+    public function hasPaidForTender(int $tenderId): bool
+    {
+        return $this->tenderPayments()
+            ->where('tender_id', $tenderId)
+            ->where('status', 'paid')
+            ->exists();
+    }
 }

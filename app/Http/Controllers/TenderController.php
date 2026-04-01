@@ -5,16 +5,20 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TenderStoreRequest;
 use App\Http\Requests\TenderUpdateRequest;
 use App\Models\County;
+use App\Models\CommonRequirement;
 use App\Models\Industry;
 use App\Models\Institution;
 use App\Models\InstitutionType;
+use App\Models\Plan;
 use App\Models\Tender;
 use App\Models\TenderFile;
+use App\Models\TenderRequirement;
 use App\Models\TenderStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Throwable;
 use Inertia\Inertia;
@@ -32,12 +36,32 @@ class TenderController extends Controller
                 'county:id,name',
                 'status:id,name',
                 'files:id,tender_id,file_name,filepath',
+                'requirements:id,tender_id,title,notes,mandatory,source,source_id',
             ])
             ->where('slug', $slug)
             ->firstOrFail();
 
+        // Determine if the authenticated user has access to the full tender details
+        $hasAccess = false;
+        $user      = auth()->user();
+
+        if ($user) {
+            if ($tender->tender_link_process) {
+                // Tender-specific fee: always require a payment record
+                $hasAccess = $user->hasPaidForTender($tender->id);
+            } else {
+                // General subscription plan required
+                $hasAccess = $user->hasActivePlan();
+            }
+        }
+
+        $plans = Plan::where('is_active', true)->orderBy('amount')->get();
+
         return Inertia::render('Tenders/PublicShow', [
-            'tender' => $tender,
+            'tender'    => $tender,
+            'hasAccess' => $hasAccess,
+            'plans'     => $plans,
+            'counties'  => County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
         ]);
     }
 
@@ -46,6 +70,69 @@ class TenderController extends Controller
     /* ------------------------------------------------------------------ */
 
     public function index(Request $request): Response
+    {
+        $query = Tender::query()
+            ->with([
+                'institution:id,institution_name,logo',
+                'industry:id,name',
+                'county:id,name',
+                'status:id,name',
+                'files:id,tender_id,file_name,filepath',
+            ])
+            ->select([
+                'id',
+                'title',
+                'slug',
+                'tender_no',
+                'institution_id',
+                'industry_id',
+                'county_id',
+                'tender_status_id',
+                'tender_link_process',
+                'closing_date_and_time',
+                'expiry_date',
+                'created_at',
+            ]);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('tender_no', 'like', "%{$search}%");
+            });
+        }
+
+        if ($statusId = $request->input('status_id')) {
+            $query->where('tender_status_id', $statusId);
+        }
+
+        if ($industryId = $request->input('industry_id')) {
+            $query->where('industry_id', $industryId);
+        }
+
+        if ($countyId = $request->input('county_id')) {
+            $query->where('county_id', $countyId);
+        }
+
+        $tenders = $query->latest()->paginate(10)->withQueryString();
+
+        $tenders->getCollection()->transform(function (Tender $tender) {
+            $tender->encrypted_id = Crypt::encryptString((string) $tender->id);
+            return $tender;
+        });
+
+        return Inertia::render('Tenders/Index', [
+            'tenders'    => $tenders,
+            'statuses'   => TenderStatus::select(['id', 'name'])->where('active', true)->get(),
+            'industries' => Industry::select(['id', 'name'])->where('active', true)->orderBy('name')->get(),
+            'counties'   => County::select(['id', 'name'])->where('active', true)->orderBy('name')->get(),
+            'filters'    => $request->only(['search', 'status_id', 'industry_id', 'county_id']),
+        ]);
+    }
+
+    /**
+     * Public-facing search results page.
+     */
+    public function publicSearch(Request $request): Response
     {
         $query = Tender::query()
             ->with([
@@ -88,16 +175,16 @@ class TenderController extends Controller
             $query->where('county_id', $countyId);
         }
 
-        $tenders = $query->latest()->paginate(15)->withQueryString();
+        $tenders = $query->latest()->paginate(10)->withQueryString();
 
         $tenders->getCollection()->transform(function (Tender $tender) {
-            $tender->encrypted_id = Crypt::encryptString((string) $tender->id);
             return $tender;
         });
 
-        return Inertia::render('Tenders/Index', [
+        return Inertia::render('Tenders/PublicIndex', [
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
             'tenders'    => $tenders,
-            'statuses'   => TenderStatus::select(['id', 'name'])->where('active', true)->get(),
             'industries' => Industry::select(['id', 'name'])->where('active', true)->orderBy('name')->get(),
             'counties'   => County::select(['id', 'name'])->where('active', true)->orderBy('name')->get(),
             'filters'    => $request->only(['search', 'status_id', 'industry_id', 'county_id']),
@@ -142,6 +229,7 @@ class TenderController extends Controller
                 ->orderBy('name')
                 ->get(),
             'statuses' => TenderStatus::where('active', true)->select(['id', 'name'])->get(),
+            'commonRequirements' => CommonRequirement::select(['id', 'title', 'notes', 'mandatory'])->orderBy('title')->get(),
         ]);
     }
 
@@ -211,6 +299,8 @@ class TenderController extends Controller
                 'tender_status_id'      => $activeStatus?->id,
                 'description'           => $request->input('description'),
                 'key_requirements'      => $request->input('key_requirements'),
+                'tender_link_process'   => $request->boolean('tender_link_process', false),
+                'tender_fee_amount'     => $request->input('tender_fee_amount'),
                 'created_by'            => $userId,
                 'updated_by'            => $userId,
             ]);
@@ -223,6 +313,23 @@ class TenderController extends Controller
                         'tender_id'  => $tender->id,
                         'filepath'   => $path,
                         'file_name'  => $uploadedFile->getClientOriginalName(),
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
+                    ]);
+                }
+            }
+
+            // Persist tender requirements if provided
+            if ($request->filled('requirements')) {
+                $requirements = $request->input('requirements');
+                foreach ($requirements as $req) {
+                    TenderRequirement::create([
+                        'tender_id'  => $tender->id,
+                        'title'      => $req['title'] ?? null,
+                        'notes'      => $req['notes'] ?? null,
+                        'mandatory'  => isset($req['mandatory']) ? (bool)$req['mandatory'] : false,
+                        'source'     => $req['source'] ?? null,
+                        'source_id'  => $req['source_id'] ?? null,
                         'created_by' => $userId,
                         'updated_by' => $userId,
                     ]);
@@ -242,7 +349,7 @@ class TenderController extends Controller
     public function edit(string $encryptedId): Response
     {
         $id     = Crypt::decryptString($encryptedId);
-        $tender = Tender::with(['files', 'institution.institutionType'])->findOrFail($id);
+        $tender = Tender::with(['files', 'requirements', 'institution.institutionType'])->findOrFail($id);
 
         return Inertia::render('Tenders/Edit', [
             'tender'           => $tender,
@@ -256,6 +363,7 @@ class TenderController extends Controller
             'industries'       => Industry::where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
             'counties'         => County::where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
             'statuses'         => TenderStatus::where('active', true)->select(['id', 'name'])->get(),
+            'commonRequirements' => CommonRequirement::select(['id', 'title', 'notes', 'mandatory'])->orderBy('title')->get(),
         ]);
     }
 
@@ -325,8 +433,29 @@ class TenderController extends Controller
                 'tender_status_id'      => $request->input('tender_status_id') ?? $tender->tender_status_id,
                 'description'           => $request->input('description'),
                 'key_requirements'      => $request->input('key_requirements'),
+                'tender_link_process'   => $request->boolean('tender_link_process', false),
+                'tender_fee_amount'     => $request->input('tender_fee_amount'),
                 'updated_by'            => $userId,
             ]);
+
+            // Sync tender requirements
+            if ($request->filled('requirements')) {
+                // Remove existing entries then re-insert
+                TenderRequirement::where('tender_id', $tender->id)->delete();
+                $requirements = $request->input('requirements');
+                foreach ($requirements as $req) {
+                    TenderRequirement::create([
+                        'tender_id'  => $tender->id,
+                        'title'      => $req['title'] ?? null,
+                        'notes'      => $req['notes'] ?? null,
+                        'mandatory'  => isset($req['mandatory']) ? (bool)$req['mandatory'] : false,
+                        'source'     => $req['source'] ?? null,
+                        'source_id'  => $req['source_id'] ?? null,
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
+                    ]);
+                }
+            }
 
             // Remove files
             if ($request->filled('remove_file_ids')) {

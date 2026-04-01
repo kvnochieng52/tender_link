@@ -30,6 +30,12 @@ class TenderStoreRequest extends FormRequest
             'expiry_date' => ['required', 'date'],
             'description' => ['required', 'string'],
             'key_requirements' => ['nullable', 'string'],
+            'tender_link_process' => ['nullable', 'boolean'],
+            'tender_fee_amount' => ['nullable', 'numeric', 'min:0'],
+            'requirements' => ['nullable', 'array'],
+            'requirements.*.title' => ['required_with:requirements', 'string', 'max:255'],
+            'requirements.*.notes' => ['nullable', 'string'],
+            'requirements.*.mandatory' => ['nullable', 'boolean'],
 
             'create_new_institution' => ['nullable', 'boolean'],
             'edit_institution' => ['nullable', 'boolean'],

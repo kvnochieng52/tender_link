@@ -51,62 +51,11 @@ const showCustomRequirementForm = ref(false);
 const editingRequirementTarget = ref(null);
 const editingInlineIndex = ref(null);
 
-const commonRequirementLibrary = [
-  {
-    id: "certificate_incorporation",
-    title: "Valid Certificate of Incorporation / Registration",
-    notes: "Include change of particulars where applicable.",
-    mandatory: true,
-  },
-  {
-    id: "tax_compliance",
-    title: "Valid Tax Compliance Certificate",
-    notes: "Certificate must be valid at submission date.",
-    mandatory: true,
-  },
-  {
-    id: "cr12",
-    title: "CR12 from Registrar of Companies",
-    notes: "Issued within the last six (6) months.",
-    mandatory: true,
-  },
-  {
-    id: "form_of_tender",
-    title: "Signed & Stamped Form of Tender",
-    notes: "Use company letterhead.",
-    mandatory: true,
-  },
-  {
-    id: "bid_security",
-    title: "Bid Security / Guarantee",
-    notes: "Set amount and validity period in days.",
-    mandatory: true,
-  },
-  {
-    id: "business_permit",
-    title: "Valid Business Permit",
-    notes: "Issued by county government for current year.",
-    mandatory: true,
-  },
-  {
-    id: "audited_accounts",
-    title: "Certified Audited Accounts",
-    notes: "Attach required years and CPA/ICPAK details.",
-    mandatory: true,
-  },
-  {
-    id: "confidential_questionnaire",
-    title: "Signed Confidential Business Questionnaire",
-    notes: "Indicate physical, postal, telephone and email contacts.",
-    mandatory: true,
-  },
-  {
-    id: "independent_determination",
-    title: "Certificate of Independent Tender Determination",
-    notes: "Signed and stamped in company letterhead.",
-    mandatory: true,
-  },
-];
+const commonRequirementLibrary = ref(
+  page.props.commonRequirements && page.props.commonRequirements.length
+    ? page.props.commonRequirements.map((r) => ({ ...r }))
+    : []
+);
 
 // Local reactive copy so we can patch in-place without a page reload
 const localInstitutions = ref(props.institutions.map((i) => ({ ...i })));
@@ -115,12 +64,13 @@ const localInstitutions = ref(props.institutions.map((i) => ({ ...i })));
 const commonRequirementSearch = ref("");
 const showAutocomplete = ref(false);
 const filteredCommonRequirements = computed(() => {
-  if (!commonRequirementSearch.value.trim()) return commonRequirementLibrary;
+  if (!commonRequirementSearch.value.trim())
+    return commonRequirementLibrary.value;
   const search = commonRequirementSearch.value.trim().toLowerCase();
-  return commonRequirementLibrary.filter(
+  return commonRequirementLibrary.value.filter(
     (item) =>
       item.title.toLowerCase().includes(search) ||
-      item.notes.toLowerCase().includes(search)
+      (item.notes || "").toLowerCase().includes(search)
   );
 });
 
@@ -145,6 +95,9 @@ const form = useForm({
   description: "",
   key_requirements: "",
   files: [],
+  requirements: [],
+  tender_link_process: false,
+  tender_fee_amount: null,
 });
 
 const closingDateConfig = {
@@ -208,7 +161,7 @@ const isSubmitDisabled = computed(() => {
 });
 
 const selectedLibraryRequirements = computed(() =>
-  commonRequirementLibrary
+  commonRequirementLibrary.value
     .filter((item) => selectedLibraryRequirementIds.value.includes(item.id))
     .map((item) => ({
       id: item.id,
@@ -630,6 +583,20 @@ const submit = () => {
   }
 
   form.clearErrors("files", "files.*");
+
+  // Only attach requirements if the requirements page is enabled
+  if (form.tender_link_process) {
+    form.requirements = allRequirementItems.value.map((r) => ({
+      title: r.title,
+      notes: r.notes || null,
+      mandatory: !!r.mandatory,
+      source: r.source || null,
+      source_id: r.id || null,
+    }));
+  } else {
+    // If requirements page is disabled, submit with empty requirements
+    form.requirements = [];
+  }
 
   form.post(route("tenders.store"), {
     forceFormData: true,
@@ -1446,6 +1413,72 @@ const submit = () => {
           </div>
         </div>
 
+        <div class="card border-0 shadow-sm mb-4 tender-link-process-card">
+          <div class="card-header bg-white border-0 pb-1">
+            <h5 class="font-weight-bold mb-0">Tender Linking Process</h5>
+          </div>
+          <div class="card-body">
+            <div class="form-check mb-3">
+              <input
+                v-model="form.tender_link_process"
+                type="checkbox"
+                class="form-check-input"
+                id="tenderLinkProcess"
+              />
+              <label class="form-check-label" for="tenderLinkProcess">
+                <span class="font-weight-semibold"
+                  >Enable Requirements Page</span
+                >
+                <small class="d-block text-muted mt-1">
+                  When checked, the requirements page will be displayed for
+                  applicants. You can also charge a tender fee.
+                </small>
+              </label>
+              <small
+                v-if="form.errors.tender_link_process"
+                class="text-danger"
+                >{{ form.errors.tender_link_process }}</small
+              >
+            </div>
+
+            <div
+              v-if="form.tender_link_process"
+              class="alert alert-info border-0 mb-3"
+            >
+              <i class="fas fa-info-circle mr-2"></i>
+              The requirements page is now enabled. You can optionally set a
+              tender fee below.
+            </div>
+
+            <div v-if="form.tender_link_process" class="form-group">
+              <label class="font-weight-semibold" for="tenderFeeAmount">
+                Tender Fee Amount
+                <span class="optional-label">(optional)</span>
+              </label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">KES</span>
+                </div>
+                <input
+                  v-model.number="form.tender_fee_amount"
+                  type="number"
+                  class="form-control"
+                  id="tenderFeeAmount"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
+              <small class="text-muted d-block mt-1">
+                Leave blank for no fee (defaults to null)
+              </small>
+              <small v-if="form.errors.tender_fee_amount" class="text-danger">{{
+                form.errors.tender_fee_amount
+              }}</small>
+            </div>
+          </div>
+        </div>
+
         <div class="card border-0 shadow-sm mb-4 tender-files-card">
           <div class="card-header bg-white border-0 pb-1">
             <h5 class="font-weight-bold mb-0">
@@ -1519,6 +1552,7 @@ const submit = () => {
           class="d-flex flex-wrap justify-content-end mt-4 mb-4 submit-action-row"
         >
           <button
+            v-if="form.tender_link_process"
             type="button"
             class="btn btn-success px-4"
             :disabled="form.processing"
@@ -1527,6 +1561,19 @@ const submit = () => {
             <span
               ><i class="fas fa-arrow-right mr-1"></i>Continue to
               Requirements</span
+            >
+          </button>
+          <button
+            v-else
+            type="submit"
+            class="btn btn-success px-4"
+            :disabled="form.processing || isSubmitDisabled"
+          >
+            <span v-if="form.processing"
+              ><i class="fas fa-spinner fa-spin mr-1"></i>Submitting...</span
+            >
+            <span v-else
+              ><i class="fas fa-check-circle mr-1"></i>Submit Tender</span
             >
           </button>
         </div>

@@ -6,3 +6,6 @@
 
 /* Import our custom dashboard styles */
 @import './dashboard.css';
+
+/* Shared landing page styles (header/footer/navigation) */
+@import './landing.css';
