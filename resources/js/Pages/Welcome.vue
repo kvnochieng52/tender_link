@@ -611,9 +611,18 @@ const submitSearch = () => {
                           class="d-flex justify-content-between align-items-start"
                         >
                           <div>
-                            <h6 class="mb-1 font-weight-bold text-dark">
+                            <Link
+                              :href="
+                                route(
+                                  'tenders.public.show',
+                                  tender.slug || tender.id
+                                )
+                              "
+                              class="mb-1 font-weight-bold text-dark d-block"
+                              style="text-decoration: none"
+                            >
                               {{ tender.title }}
-                            </h6>
+                            </Link>
                             <p
                               class="mb-1 text-muted small d-flex flex-wrap align-items-center"
                             >
@@ -712,9 +721,12 @@ const submitSearch = () => {
                   </div>
 
                   <div class="text-center mt-3">
-                    <button type="button" class="btn btn-success px-4">
+                    <Link
+                      :href="route('tenders.search')"
+                      class="btn btn-success px-4"
+                    >
                       <i class="fas fa-list mr-1"></i> Browse More Tenders
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>

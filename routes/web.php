@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\TenderController;
+use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\MpesaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -67,6 +69,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/tenders/{encryptedId}/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('admin.tenders.applications.index');
     Route::get('/admin/applications/{encryptedAppId}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('admin.applications.show');
 });
+
+// M-Pesa
+Route::post('/mpesa/stk-push', [MpesaController::class, 'stkPush'])->middleware('auth')->name('mpesa.stk_push');
+Route::post('/mpesa/callback', [MpesaController::class, 'callback'])->name('mpesa.callback')->withoutMiddleware(['web']);
+
+// Google OAuth
+Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('/tenders/{slug}', [TenderController::class, 'publicShow'])->name('tenders.public.show');
 Route::post('/tenders/{slug}/upload-file', [\App\Http\Controllers\ApplicationController::class, 'uploadTempFile'])->name('tenders.upload_file');

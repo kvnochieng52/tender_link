@@ -124,12 +124,12 @@ const submit = () => {
               <span v-else>Login</span>
             </button>
 
-            <button
-              type="button"
+            <a
+              :href="route('auth.google')"
               class="btn btn-outline-secondary btn-block mt-2 google-btn"
             >
-              <i class="fab fa-google text-danger mr-2"></i>Login with Gmail
-            </button>
+              <i class="fab fa-google text-danger mr-2"></i>Login with Google
+            </a>
           </form>
 
           <div class="d-flex flex-wrap mt-4 auth-actions">

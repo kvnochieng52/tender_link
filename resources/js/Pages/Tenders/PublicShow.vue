@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import { useToast } from "vue-toastification";
+import axios from "axios";
 
 const props = defineProps({
   tender: {
@@ -69,6 +70,73 @@ const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
   tenderSubmenuOpen.value = false;
 };
+
+// ── Payment modal state ─────────────────────────────────────────────────
+const payModalOpen = ref(false);
+const payModalContext = ref({ type: null, planId: null, amount: 0, label: "" });
+const payMethod = ref("mpesa"); // future: 'card', 'bank', etc.
+const payPhone = ref(user.value?.telephone || "");
+const payLoading = ref(false);
+const payError = ref("");
+const paySuccess = ref(false);
+const selectedPlanId = ref(null);
+
+const openPayModal = (type, planId = null) => {
+  payError.value = "";
+  paySuccess.value = false;
+  payMethod.value = "mpesa";
+  selectedPlanId.value = planId;
+  if (type === "tender") {
+    payModalContext.value = {
+      type: "tender",
+      planId: null,
+      amount: props.tender.tender_fee_amount || 0,
+      label: `Tender Access Fee – ${props.tender.tender_number || ""}`,
+    };
+  } else {
+    const plan = props.plans.find((p) => p.id === planId);
+    payModalContext.value = {
+      type: "plan",
+      planId,
+      amount: plan?.amount || 0,
+      label: plan
+        ? `${plan.plan_name} (${plan.period} days)`
+        : "Subscription Plan",
+    };
+  }
+  payModalOpen.value = true;
+};
+
+const closePayModal = () => {
+  if (payLoading.value) return;
+  payModalOpen.value = false;
+};
+
+const submitPayment = async () => {
+  payError.value = "";
+  if (payMethod.value === "mpesa" && !payPhone.value) {
+    payError.value = "Please enter your M-Pesa phone number.";
+    return;
+  }
+  payLoading.value = true;
+  try {
+    const ctx = payModalContext.value;
+    await axios.post(route("mpesa.stk_push"), {
+      phone: payPhone.value,
+      payment_type: ctx.type,
+      plan_id: ctx.type === "plan" ? ctx.planId : null,
+      tender_id: ctx.type === "tender" ? props.tender.id : null,
+    });
+    paySuccess.value = true;
+  } catch (err) {
+    payError.value =
+      err?.response?.data?.message ||
+      "Failed to initiate payment. Please try again.";
+  } finally {
+    payLoading.value = false;
+  }
+};
+// ────────────────────────────────────────────────────────────────────────
 
 // Apply UI state (frontend only)
 const toast = useToast();
@@ -583,7 +651,7 @@ const submitApplication = async () => {
                     style="gap: 0.75rem; max-width: 260px; margin: 0 auto"
                   >
                     <a
-                      href="/auth/google"
+                      :href="route('auth.google')"
                       class="btn btn-outline-secondary btn-block px-4"
                     >
                       <i class="fab fa-google text-danger mr-1"></i> Login with
@@ -635,7 +703,10 @@ const submitApplication = async () => {
                       }}
                     </span>
                   </div>
-                  <button class="btn btn-success btn-lg px-5">
+                  <button
+                    class="btn btn-success btn-lg px-5"
+                    @click="openPayModal('tender')"
+                  >
                     <i class="fas fa-credit-card mr-2"></i>Pay &amp; Unlock
                     Tender
                   </button>
@@ -654,6 +725,7 @@ const submitApplication = async () => {
                     You need an active subscription plan to view tender details.
                     Choose a plan below.
                   </p>
+
                   <div class="plans-row">
                     <div
                       v-for="(plan, idx) in plans"
@@ -675,9 +747,7 @@ const submitApplication = async () => {
                       <div class="plan-name">{{ plan.plan_name }}</div>
                       <div class="plan-duration">
                         <i class="fas fa-calendar-alt mr-1"></i>
-                        {{ plan.period }} day{{
-                          plan.period !== 1 ? "s" : ""
-                        }}
+                        {{ plan.period }} day{{ plan.period !== 1 ? "s" : "" }}
                         access
                       </div>
                       <div class="plan-price">
@@ -694,6 +764,7 @@ const submitApplication = async () => {
                       <button
                         class="plan-btn"
                         :class="idx === 2 ? 'plan-btn--featured' : ''"
+                        @click="openPayModal('plan', plan.id)"
                       >
                         <i class="fas fa-check-circle mr-1"></i> Choose Plan
                       </button>
@@ -1251,6 +1322,177 @@ const submitApplication = async () => {
       <!-- ── END FULL CONTENT ──────────────────────────────────────────── -->
     </div>
   </div>
+
+  <!-- ── PAYMENT MODAL ────────────────────────────────────────────────── -->
+  <teleport to="body">
+    <transition name="pay-modal">
+      <div
+        v-if="payModalOpen"
+        class="pay-modal-backdrop"
+        @click.self="closePayModal"
+      >
+        <div class="pay-modal-card" role="dialog" aria-modal="true">
+          <!-- Header -->
+          <div class="pay-modal-header">
+            <div class="pay-modal-title">
+              <i class="fas fa-lock mr-2 text-success"></i>
+              Complete Payment
+            </div>
+            <button
+              class="pay-modal-close"
+              :disabled="payLoading"
+              @click="closePayModal"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Order summary -->
+          <div class="pay-modal-summary">
+            <div class="pay-summary-label">{{ payModalContext.label }}</div>
+            <div class="pay-summary-amount">
+              <span class="pay-summary-currency">KES</span>
+              {{
+                Number(payModalContext.amount).toLocaleString("en-KE", {
+                  minimumFractionDigits: 2,
+                })
+              }}
+            </div>
+          </div>
+
+          <!-- Success state -->
+          <div v-if="paySuccess" class="pay-modal-success">
+            <div class="pay-success-icon">
+              <i class="fas fa-check-circle text-success fa-3x"></i>
+            </div>
+            <h6 class="font-weight-bold mt-3 mb-2">STK Push Sent!</h6>
+            <p class="text-muted small mb-3">
+              A payment prompt has been sent to <strong>{{ payPhone }}</strong
+              >. Enter your M-Pesa PIN on your phone to complete the payment.
+              This page will update once your payment is confirmed.
+            </p>
+            <button
+              class="btn btn-outline-success btn-sm"
+              @click="closePayModal"
+            >
+              Close
+            </button>
+          </div>
+
+          <template v-else>
+            <!-- Payment method selector -->
+            <div class="pay-method-section">
+              <p class="pay-section-label">Select Payment Method</p>
+              <div class="pay-method-options">
+                <!-- M-Pesa (default & active) -->
+                <button
+                  class="pay-method-btn"
+                  :class="{ 'pay-method-btn--active': payMethod === 'mpesa' }"
+                  @click="payMethod = 'mpesa'"
+                >
+                  <img
+                    src="/images/mpesa-logo.png"
+                    alt="M-Pesa"
+                    class="pay-method-logo"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'"
+                  />
+                  <span style="display: none" class="pay-method-fallback">
+                    <i class="fas fa-mobile-alt mr-1"></i> M-Pesa
+                  </span>
+                  <span class="pay-method-name">M-Pesa</span>
+                  <span v-if="payMethod === 'mpesa'" class="pay-method-check">
+                    <i class="fas fa-check-circle text-success"></i>
+                  </span>
+                </button>
+
+                <!-- Placeholder for future methods -->
+                <button
+                  class="pay-method-btn pay-method-btn--disabled"
+                  disabled
+                  title="Coming soon"
+                >
+                  <i class="fas fa-credit-card fa-lg text-muted"></i>
+                  <span class="pay-method-name text-muted">Card</span>
+                  <span class="pay-method-soon">Soon</span>
+                </button>
+                <button
+                  class="pay-method-btn pay-method-btn--disabled"
+                  disabled
+                  title="Coming soon"
+                >
+                  <i class="fas fa-university fa-lg text-muted"></i>
+                  <span class="pay-method-name text-muted">Bank</span>
+                  <span class="pay-method-soon">Soon</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- M-Pesa form -->
+            <div v-if="payMethod === 'mpesa'" class="pay-form-section">
+              <p class="pay-section-label">M-Pesa Details</p>
+              <div class="form-group mb-1">
+                <label class="small font-weight-bold mb-1">Phone Number</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="fas fa-mobile-alt text-success"></i>
+                    </span>
+                  </div>
+                  <input
+                    v-model="payPhone"
+                    type="tel"
+                    class="form-control"
+                    placeholder="e.g. 0712 345 678"
+                    :disabled="payLoading"
+                    @keyup.enter="submitPayment"
+                  />
+                </div>
+                <small class="text-muted"
+                  >You will receive an STK push on this number.</small
+                >
+              </div>
+              <div v-if="payError" class="alert alert-danger py-2 mt-2 small">
+                <i class="fas fa-exclamation-circle mr-1"></i>{{ payError }}
+              </div>
+            </div>
+
+            <!-- Footer actions -->
+            <div class="pay-modal-footer">
+              <button
+                class="btn btn-light px-4"
+                :disabled="payLoading"
+                @click="closePayModal"
+              >
+                Cancel
+              </button>
+              <button
+                class="btn btn-success px-4"
+                :disabled="payLoading"
+                @click="submitPayment"
+              >
+                <span v-if="payLoading">
+                  <i class="fas fa-spinner fa-spin mr-2"></i>Sending…
+                </span>
+                <span v-else>
+                  <i class="fas fa-paper-plane mr-2"></i>Send Payment Request
+                </span>
+              </button>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="pay-modal-trust">
+              <i class="fas fa-shield-alt text-success mr-1"></i>
+              Secure &amp; Encrypted
+              <span class="mx-2">·</span>
+              <i class="fas fa-undo text-success mr-1"></i>
+              Verified by Safaricom
+            </div>
+          </template>
+        </div>
+      </div>
+    </transition>
+  </teleport>
+  <!-- ── END PAYMENT MODAL ─────────────────────────────────────────────── -->
 </template>
 
 <style scoped>
@@ -1640,5 +1882,182 @@ const submitApplication = async () => {
   background: linear-gradient(90deg, #28a745, #1f8f53);
   color: #fff;
   border-color: #1f8f53;
+}
+
+/* ── Payment Modal ───────────────────────────────────────────────────── */
+.pay-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.pay-modal-card {
+  background: #fff;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+.pay-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.85rem;
+  border-bottom: 1px solid #e9ecef;
+}
+.pay-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.pay-modal-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.pay-modal-close:hover {
+  background: #f1f1f1;
+  color: #333;
+}
+.pay-modal-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: #f8fff9;
+  border-bottom: 1px solid #e9ecef;
+}
+.pay-summary-label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+}
+.pay-summary-amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #28a745;
+}
+.pay-summary-currency {
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: super;
+  margin-right: 2px;
+  color: #555;
+}
+.pay-method-section,
+.pay-form-section {
+  padding: 1rem 1.25rem 0;
+}
+.pay-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6c757d;
+  margin-bottom: 0.6rem;
+}
+.pay-method-options {
+  display: flex;
+  gap: 0.65rem;
+}
+.pay-method-btn {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0.7rem 0.5rem;
+  border: 1.5px solid #dee2e6;
+  border-radius: 0.6rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pay-method-btn:hover:not(:disabled) {
+  border-color: #28a745;
+}
+.pay-method-btn--active {
+  border-color: #28a745 !important;
+  background: #f0fff4;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.15);
+}
+.pay-method-btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pay-method-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+.pay-method-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #333;
+}
+.pay-method-check {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.7rem;
+}
+.pay-method-soon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.55rem;
+  background: #dee2e6;
+  color: #6c757d;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.pay-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem 0.75rem;
+}
+.pay-modal-trust {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #adb5bd;
+  padding: 0 1.25rem 1rem;
+}
+.pay-modal-success {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+/* Modal transition */
+.pay-modal-enter-active,
+.pay-modal-leave-active {
+  transition: opacity 0.2s;
+}
+.pay-modal-enter-from,
+.pay-modal-leave-to {
+  opacity: 0;
+}
+.pay-modal-enter-active .pay-modal-card,
+.pay-modal-leave-active .pay-modal-card {
+  transition: transform 0.2s;
+}
+.pay-modal-enter-from .pay-modal-card,
+.pay-modal-leave-to .pay-modal-card {
+  transform: translateY(16px) scale(0.97);
 }
 </style>
