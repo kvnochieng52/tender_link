@@ -51,10 +51,10 @@ const logout = () => {
 
         <div class="top-nav-links d-none d-md-flex align-items-center">
           <Link :href="route('welcome')" class="nav-link px-2">Home</Link>
-          <a href="#" class="nav-link px-2">About Us</a>
-          <a href="#" class="nav-link px-2">Services</a>
-          <a href="#" class="nav-link px-2">Browse Tenders</a>
-          <a href="#" class="nav-link px-2">Contact Us</a>
+          <Link :href="route('about')"    class="nav-link px-2">About Us</Link>
+          <Link :href="route('services')" class="nav-link px-2">Services</Link>
+          <Link :href="route('tenders.search')" class="nav-link px-2">Browse Tenders</Link>
+          <Link :href="route('contact')"  class="nav-link px-2">Contact Us</Link>
         </div>
 
         <div class="d-flex align-items-center flex-wrap py-2">

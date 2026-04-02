@@ -211,10 +211,10 @@ const submitSearch = () => {
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="closeMobileMenu">About Us</a>
+            <Link :href="route('about')" class="nav-link" @click="closeMobileMenu">About Us</Link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="closeMobileMenu">Services</a>
+            <Link :href="route('services')" class="nav-link" @click="closeMobileMenu">Services</Link>
           </li>
           <li
             :class="[
@@ -246,7 +246,7 @@ const submitSearch = () => {
             </div>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" @click="closeMobileMenu">Contact Us</a>
+            <Link :href="route('contact')" class="nav-link" @click="closeMobileMenu">Contact Us</Link>
           </li>
         </ul>
 
@@ -801,7 +801,7 @@ const submitSearch = () => {
 
           <div class="footer-links d-flex align-items-center flex-wrap">
             <a href="#" class="footer-link mr-3">Terms and Conditions</a>
-            <a href="#" class="footer-link">Contact Us</a>
+            <Link :href="route('contact')" class="footer-link">Contact Us</Link>
           </div>
         </div>
 

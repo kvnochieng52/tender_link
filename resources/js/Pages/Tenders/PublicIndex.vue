@@ -76,10 +76,10 @@ const closeMobileMenu = () => {
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu">About Us</a>
+              <Link :href="route('about')" class="nav-link" @click="closeMobileMenu">About Us</Link>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu">Services</a>
+              <Link :href="route('services')" class="nav-link" @click="closeMobileMenu">Services</Link>
             </li>
             <li
               :class="[
@@ -113,9 +113,7 @@ const closeMobileMenu = () => {
               </div>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" @click="closeMobileMenu"
-                >Contact Us</a
-              >
+              <Link :href="route('contact')" class="nav-link" @click="closeMobileMenu">Contact Us</Link>
             </li>
           </ul>
 

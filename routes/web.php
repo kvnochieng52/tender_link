@@ -44,6 +44,30 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
+// Static public pages
+Route::get('/about-us', function () {
+    return Inertia::render('AboutUs', [
+        'canLogin'    => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('about');
+
+Route::get('/services', function () {
+    return Inertia::render('Services', [
+        'canLogin'    => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('services');
+
+Route::get('/contact-us', function () {
+    return Inertia::render('ContactUs', [
+        'canLogin'    => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('contact');
+
+Route::post('/contact-us', [\App\Http\Controllers\ContactController::class, 'send'])->name('contact.send');
+
 // Public tenders search/results (10 per page)
 Route::get('/tenders/search', [TenderController::class, 'publicSearch'])->name('tenders.search');
 
