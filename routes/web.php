@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/home/dashboard', [DashboardController::class, 'index'])->name('home.dashboard');
+    Route::get('/my-applications', [\App\Http\Controllers\ApplicationController::class, 'myApplications'])->name('my.applications');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -66,8 +67,20 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/institutions', [InstitutionController::class, 'index'])->name('institutions.index');
     Route::post('/institutions', [InstitutionController::class, 'store'])->name('institutions.store');
     Route::post('/institutions/{institution}', [InstitutionController::class, 'update'])->name('institutions.update');
+    Route::get('/admin/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'all'])->name('admin.applications.all');
     Route::get('/admin/tenders/{encryptedId}/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('admin.tenders.applications.index');
+    Route::get('/admin/tenders/{encryptedId}/evaluate', [\App\Http\Controllers\Admin\ApplicationController::class, 'evaluate'])->name('admin.tenders.evaluate');
+    Route::patch('/admin/tenders/{encryptedId}/process-status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateTenderProcessStatus'])->name('admin.tenders.process-status');
     Route::get('/admin/applications/{encryptedAppId}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('admin.applications.show');
+    Route::patch('/admin/applications/{encryptedAppId}/status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateApplicationStatus'])->name('admin.applications.update-status');
+    Route::patch('/admin/applications/{encryptedAppId}/rating', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateApplicationRating'])->name('admin.applications.update-rating');
+    Route::post('/admin/applications/{encryptedAppId}/notes', [\App\Http\Controllers\Admin\ApplicationController::class, 'addNote'])->name('admin.applications.add-note');
+    Route::get('/admin/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('admin.transactions.index');
+    Route::get('/admin/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('admin.users.index');
+    Route::post('/admin/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('admin.users.store');
+    Route::put('/admin/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.users.update');
+    Route::patch('/admin/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('admin.users.update-role');
+    Route::patch('/admin/users/{user}/toggle-verified', [\App\Http\Controllers\Admin\UserController::class, 'toggleVerified'])->name('admin.users.toggle-verified');
 });
 
 // M-Pesa

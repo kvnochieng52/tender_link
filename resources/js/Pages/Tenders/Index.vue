@@ -285,6 +285,15 @@ const formatDateTime = (val) => {
                     :class="statusBadgeClass(tender.status?.name)"
                     >{{ tender.status?.name ?? "—" }}</span
                   >
+                  <span
+                    v-if="tender.application_process_status"
+                    class="badge ml-1"
+                    :style="{
+                      backgroundColor: tender.application_process_status.color,
+                      color: '#fff',
+                    }"
+                    >{{ tender.application_process_status.name }}</span
+                  >
                 </td>
                 <td class="small">
                   <div class="text-nowrap">
@@ -325,6 +334,17 @@ const formatDateTime = (val) => {
                       title="View applications"
                     >
                       <i class="fas fa-inbox"></i>
+                    </Link>
+                    <Link
+                      :href="
+                        route('admin.tenders.evaluate', {
+                          encryptedId: tender.encrypted_id,
+                        })
+                      "
+                      class="btn btn-outline-warning"
+                      title="Evaluate applications"
+                    >
+                      <i class="fas fa-clipboard-check"></i>
                     </Link>
                     <Link
                       :href="

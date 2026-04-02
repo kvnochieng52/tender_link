@@ -109,9 +109,16 @@ const logout = () => {
           </Link>
 
           <!-- My Applications: visible to all -->
-          <a href="#" class="sidebar-link" @click="closeSidebar">
+          <Link
+            :href="route('my.applications')"
+            :class="[
+              'sidebar-link',
+              { active: route().current('my.applications') },
+            ]"
+            @click="closeSidebar"
+          >
             <i class="fas fa-file-alt mr-2"></i> My Applications
-          </a>
+          </Link>
 
           <!-- Admin-only section -->
           <template v-if="isAdmin">
@@ -147,24 +154,36 @@ const logout = () => {
             >
               <i class="fas fa-building mr-2"></i> Institutions
             </Link>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
+            <Link
+              :href="route('admin.applications.all')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('admin.applications.all') },
+              ]"
+              @click="closeSidebar"
+            >
               <i class="fas fa-list-check mr-2"></i> All Applications
-            </a>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
-              <i class="fas fa-clipboard-check mr-2"></i> Evaluation
-            </a>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
-              <i class="fas fa-award mr-2"></i> Award &amp; Notification
-            </a>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
+            </Link>
+            <Link
+              :href="route('admin.transactions.index')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('admin.transactions.index') },
+              ]"
+              @click="closeSidebar"
+            >
+              <i class="fas fa-exchange-alt mr-2"></i> Transactions
+            </Link>
+            <Link
+              :href="route('admin.users.index')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('admin.users.*') },
+              ]"
+              @click="closeSidebar"
+            >
               <i class="fas fa-users mr-2"></i> User Management
-            </a>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
-              <i class="fas fa-chart-line mr-2"></i> Reports
-            </a>
-            <a href="#" class="sidebar-link" @click="closeSidebar">
-              <i class="fas fa-cog mr-2"></i> Settings
-            </a>
+            </Link>
           </template>
         </nav>
       </aside>

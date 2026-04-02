@@ -1,13 +1,18 @@
 <script setup>
+import { computed } from "vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 
-defineProps({
-  canResetPassword: {
-    type: Boolean,
-  },
-  status: {
-    type: String,
-  },
+const props = defineProps({
+  canResetPassword: { type: Boolean },
+  status: { type: String },
+  redirectTo: { type: String, default: "" },
+});
+
+const googleUrl = computed(() => {
+  const base = route("auth.google");
+  return props.redirectTo
+    ? `${base}?redirect=${encodeURIComponent(props.redirectTo)}`
+    : base;
 });
 
 const form = useForm({
@@ -47,6 +52,22 @@ const submit = () => {
 
           <div v-if="status" class="alert alert-success mb-3">
             {{ status }}
+          </div>
+
+          <!-- Google — primary option -->
+          <a :href="googleUrl" class="btn btn-white btn-block google-btn mb-3">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              width="18"
+              height="18"
+              class="mr-2"
+              alt=""
+            />
+            Continue with Google
+          </a>
+
+          <div class="divider-text text-center text-muted small mb-3">
+            <span>or sign in with email</span>
           </div>
 
           <form @submit.prevent="submit">
@@ -123,13 +144,6 @@ const submit = () => {
               >
               <span v-else>Login</span>
             </button>
-
-            <a
-              :href="route('auth.google')"
-              class="btn btn-outline-secondary btn-block mt-2 google-btn"
-            >
-              <i class="fab fa-google text-danger mr-2"></i>Login with Google
-            </a>
           </form>
 
           <div class="d-flex flex-wrap mt-4 auth-actions">
@@ -195,7 +209,38 @@ const submit = () => {
 }
 
 .google-btn {
-  border-color: #d8d8d8;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  color: #444;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+  border-color: #bbb;
+  color: #222;
+}
+
+.divider-text {
+  position: relative;
+}
+.divider-text::before,
+.divider-text::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: #dee2e6;
+}
+.divider-text::before {
+  left: 0;
+}
+.divider-text::after {
+  right: 0;
 }
 
 .auth-actions {

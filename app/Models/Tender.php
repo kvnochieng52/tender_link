@@ -21,6 +21,7 @@ class Tender extends Model
         'closing_date_and_time',
         'expiry_date',
         'tender_status_id',
+        'application_process_status_id',
         'description',
         'key_requirements',
         'tender_link_process',
@@ -63,6 +64,16 @@ class Tender extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(TenderStatus::class, 'tender_status_id');
+    }
+
+    public function applicationProcessStatus(): BelongsTo
+    {
+        return $this->belongsTo(ApplicationProcessStatus::class);
+    }
+
+    public function applications(): HasMany
+    {
+        return $this->hasMany(Application::class);
     }
 
     public function creator(): BelongsTo

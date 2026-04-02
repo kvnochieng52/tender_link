@@ -278,14 +278,6 @@ const submitSearch = () => {
               >
                 Apply Tender
               </Link>
-              <Link
-                v-if="canRegister"
-                :href="route('register')"
-                class="btn btn-warning btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-              >
-                Post Tender
-              </Link>
             </template>
           </template>
         </div>

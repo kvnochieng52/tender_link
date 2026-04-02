@@ -17,6 +17,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  currentUrl: {
+    type: String,
+    default: "",
+  },
 });
 
 const page = usePage();
@@ -562,25 +566,28 @@ const submitApplication = async () => {
             </Link>
             <template v-else>
               <Link
-                :href="route('login')"
+                :href="
+                  route('login') +
+                  (props.currentUrl
+                    ? '?redirect=' + encodeURIComponent(props.currentUrl)
+                    : '')
+                "
                 class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
                 @click="closeMobileMenu"
               >
                 Login/Register
               </Link>
               <Link
-                :href="route('register')"
+                :href="
+                  route('register') +
+                  (props.currentUrl
+                    ? '?redirect=' + encodeURIComponent(props.currentUrl)
+                    : '')
+                "
                 class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
                 @click="closeMobileMenu"
               >
                 Apply Tender
-              </Link>
-              <Link
-                :href="route('register')"
-                class="btn btn-warning btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-              >
-                Post Tender
               </Link>
             </template>
           </div>
@@ -718,17 +725,42 @@ const submitApplication = async () => {
                     style="gap: 0.75rem; max-width: 260px; margin: 0 auto"
                   >
                     <a
-                      :href="route('auth.google')"
-                      class="btn btn-outline-secondary btn-block px-4"
+                      :href="
+                        route('auth.google') +
+                        (props.currentUrl
+                          ? '?redirect=' + encodeURIComponent(props.currentUrl)
+                          : '')
+                      "
+                      class="btn btn-block px-4"
+                      style="
+                        border: 1px solid #d8d8d8;
+                        background: #fff;
+                        color: #444;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 0.4rem;
+                      "
                     >
-                      <i class="fab fa-google text-danger mr-1"></i> Login with
-                      Google
+                      <img
+                        src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                        width="16"
+                        height="16"
+                        alt=""
+                      />
+                      Continue with Google
                     </a>
                     <Link
-                      :href="route('login')"
+                      :href="
+                        route('login') +
+                        (props.currentUrl
+                          ? '?redirect=' + encodeURIComponent(props.currentUrl)
+                          : '')
+                      "
                       class="btn btn-success btn-block px-4"
                     >
-                      <i class="fas fa-sign-in-alt mr-1"></i> Login
+                      <i class="fas fa-sign-in-alt mr-1"></i> Login with Email
                     </Link>
                   </div>
                 </template>

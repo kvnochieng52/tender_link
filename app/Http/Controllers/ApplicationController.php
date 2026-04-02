@@ -115,4 +115,26 @@ class ApplicationController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Application submitted']);
     }
+
+    public function myApplications(Request $request)
+    {
+        $query = Application::query()
+            ->where('user_id', Auth::id())
+            ->with(['tender:id,title,tender_no,slug,closing_date_and_time', 'files']);
+
+        if ($q = $request->input('q')) {
+            $query->where(function ($qr) use ($q) {
+                $qr->where('company_name', 'like', "%{$q}%")
+                    ->orWhereHas('tender', fn($t) => $t->where('title', 'like', "%{$q}%")
+                        ->orWhere('tender_no', 'like', "%{$q}%"));
+            });
+        }
+
+        $apps = $query->latest()->paginate(20)->withQueryString();
+
+        return Inertia::render('Applications/MyApplications', [
+            'applications' => $apps,
+            'filters'      => $request->only('q'),
+        ]);
+    }
 }

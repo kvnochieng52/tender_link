@@ -144,13 +144,6 @@ const closeMobileMenu = () => {
                   @click="closeMobileMenu"
                   >Apply Tender</Link
                 >
-                <Link
-                  v-if="canRegister"
-                  :href="route('register')"
-                  class="btn btn-warning btn-sm ml-2 mb-1 mb-md-0"
-                  @click="closeMobileMenu"
-                  >Post Tender</Link
-                >
               </template>
             </template>
           </div>
@@ -165,9 +158,19 @@ const closeMobileMenu = () => {
             <div class="col-12 mb-3">
               <div class="card">
                 <div class="card-body">
-                  <form method="get" :action="route('tenders.search')" class="form-inline">
-                    <div class="d-flex flex-wrap align-items-center" style="gap:12px;">
-                      <div class="mb-2" style="flex:2 1 220px; min-width:220px;">
+                  <form
+                    method="get"
+                    :action="route('tenders.search')"
+                    class="form-inline"
+                  >
+                    <div
+                      class="d-flex flex-wrap align-items-center"
+                      style="gap: 12px"
+                    >
+                      <div
+                        class="mb-2"
+                        style="flex: 2 1 220px; min-width: 220px"
+                      >
                         <input
                           type="text"
                           name="search"
@@ -177,22 +180,50 @@ const closeMobileMenu = () => {
                         />
                       </div>
 
-                      <div class="mb-2" style="flex:1 1 160px; min-width:150px;">
-                        <select name="industry_id" v-model="industry" class="form-control form-control-sm">
+                      <div
+                        class="mb-2"
+                        style="flex: 1 1 160px; min-width: 150px"
+                      >
+                        <select
+                          name="industry_id"
+                          v-model="industry"
+                          class="form-control form-control-sm"
+                        >
                           <option value="">All Industries</option>
-                          <option v-for="ind in industries" :key="ind.id" :value="ind.id">{{ ind.name }}</option>
+                          <option
+                            v-for="ind in industries"
+                            :key="ind.id"
+                            :value="ind.id"
+                          >
+                            {{ ind.name }}
+                          </option>
                         </select>
                       </div>
 
-                      <div class="mb-2" style="flex:1 1 160px; min-width:150px;">
-                        <select name="county_id" v-model="county" class="form-control form-control-sm">
+                      <div
+                        class="mb-2"
+                        style="flex: 1 1 160px; min-width: 150px"
+                      >
+                        <select
+                          name="county_id"
+                          v-model="county"
+                          class="form-control form-control-sm"
+                        >
                           <option value="">All Counties</option>
-                          <option v-for="c in counties" :key="c.id" :value="c.id">{{ c.name }}</option>
+                          <option
+                            v-for="c in counties"
+                            :key="c.id"
+                            :value="c.id"
+                          >
+                            {{ c.name }}
+                          </option>
                         </select>
                       </div>
 
-                      <div class="mb-2" style="flex:0 0 110px;">
-                        <button class="btn btn-success btn-sm w-100">Search</button>
+                      <div class="mb-2" style="flex: 0 0 110px">
+                        <button class="btn btn-success btn-sm w-100">
+                          Search
+                        </button>
                       </div>
                     </div>
                   </form>

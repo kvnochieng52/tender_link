@@ -25,7 +25,19 @@ class Application extends Model
         'representative_telephone',
         'representative_email',
         'additional_notes',
+        'application_status_id',
+        'rating',
+        'evaluation_notes',
     ];
+
+    protected $casts = [
+        'rating' => 'decimal:2',
+    ];
+
+    public function applicationStatus(): BelongsTo
+    {
+        return $this->belongsTo(ApplicationStatus::class);
+    }
 
     public function tender(): BelongsTo
     {
@@ -35,5 +47,10 @@ class Application extends Model
     public function files(): HasMany
     {
         return $this->hasMany(ApplicationFile::class);
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(ApplicationNote::class)->latest();
     }
 }

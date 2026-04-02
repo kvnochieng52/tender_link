@@ -58,10 +58,11 @@ class TenderController extends Controller
         $plans = Plan::where('is_active', true)->orderBy('amount')->get();
 
         return Inertia::render('Tenders/PublicShow', [
-            'tender'    => $tender,
-            'hasAccess' => $hasAccess,
-            'plans'     => $plans,
-            'counties'  => County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
+            'tender'     => $tender,
+            'hasAccess'  => $hasAccess,
+            'plans'      => $plans,
+            'counties'   => County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
+            'currentUrl' => request()->url(),
         ]);
     }
 
@@ -77,6 +78,7 @@ class TenderController extends Controller
                 'industry:id,name',
                 'county:id,name',
                 'status:id,name',
+                'applicationProcessStatus:id,name,color',
                 'files:id,tender_id,file_name,filepath',
             ])
             ->select([
@@ -88,6 +90,7 @@ class TenderController extends Controller
                 'industry_id',
                 'county_id',
                 'tender_status_id',
+                'application_process_status_id',
                 'tender_link_process',
                 'closing_date_and_time',
                 'expiry_date',

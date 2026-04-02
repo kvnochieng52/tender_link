@@ -1,5 +1,17 @@
 <script setup>
+import { computed } from "vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
+
+const props = defineProps({
+  redirectTo: { type: String, default: "" },
+});
+
+const googleUrl = computed(() => {
+  const base = route("auth.google");
+  return props.redirectTo
+    ? `${base}?redirect=${encodeURIComponent(props.redirectTo)}`
+    : base;
+});
 
 const form = useForm({
   name: "",
@@ -36,6 +48,22 @@ const submit = () => {
           <p class="text-muted text-center mb-4">
             Register to start discovering tenders
           </p>
+
+          <!-- Google — primary option -->
+          <a :href="googleUrl" class="btn btn-white btn-block google-btn mb-3">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              width="18"
+              height="18"
+              class="mr-2"
+              alt=""
+            />
+            Continue with Google
+          </a>
+
+          <div class="divider-text text-center text-muted small mb-3">
+            <span>or register with email</span>
+          </div>
 
           <form @submit.prevent="submit">
             <div class="form-group mb-3">
@@ -185,5 +213,40 @@ const submit = () => {
 
 .auth-actions {
   justify-content: center;
+}
+
+.google-btn {
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  color: #444;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-btn:hover {
+  background: #f8f9fa;
+  border-color: #bbb;
+  color: #222;
+}
+
+.divider-text {
+  position: relative;
+}
+.divider-text::before,
+.divider-text::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: #dee2e6;
+}
+.divider-text::before {
+  left: 0;
+}
+.divider-text::after {
+  right: 0;
 }
 </style>

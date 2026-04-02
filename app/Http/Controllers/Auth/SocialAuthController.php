@@ -14,6 +14,10 @@ class SocialAuthController extends Controller
      */
     public function redirectToGoogle()
     {
+        if ($redirect = request()->query('redirect')) {
+            session()->put('url.intended', $redirect);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
