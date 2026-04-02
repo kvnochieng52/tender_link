@@ -1,6 +1,5 @@
 <script setup>
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
-import DeleteUserForm from './Partials/DeleteUserForm.vue';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
 import { Head } from '@inertiajs/vue3';
@@ -41,12 +40,12 @@ defineProps({
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-user mr-2"></i>
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 font-weight-bold">
+                                    <i class="fas fa-user-circle mr-2 text-success"></i>
                                     Profile Information
-                                </h3>
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <UpdateProfileInformationForm
@@ -56,27 +55,15 @@ defineProps({
                             </div>
                         </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-lock mr-2"></i>
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-bottom">
+                                <h5 class="mb-0 font-weight-bold">
+                                    <i class="fas fa-lock mr-2 text-success"></i>
                                     Update Password
-                                </h3>
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <UpdatePasswordForm />
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-trash mr-2"></i>
-                                    Delete Account
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <DeleteUserForm />
                             </div>
                         </div>
                     </div>

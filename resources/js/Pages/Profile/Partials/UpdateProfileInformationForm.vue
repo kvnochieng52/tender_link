@@ -1,102 +1,90 @@
 <script setup>
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Link, useForm, usePage } from '@inertiajs/vue3';
-
-defineProps({
-    mustVerifyEmail: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
-});
+import { useForm, usePage } from '@inertiajs/vue3';
 
 const user = usePage().props.auth.user;
 
 const form = useForm({
-    name: user.name,
-    email: user.email,
+    name:      user.name      ?? '',
+    telephone: user.telephone ?? '',
 });
+
+const submit = () => {
+    form.patch(route('profile.update'));
+};
 </script>
 
 <template>
-    <section>
-        <header>
-            <h2 class="text-lg font-medium text-gray-900">Profile Information</h2>
+    <form @submit.prevent="submit" style="max-width: 520px">
+        <p class="text-muted small mb-4">
+            Update your display name and phone number. Your email address cannot be changed here.
+        </p>
 
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
-            </p>
-        </header>
+        <!-- Email (read-only display) -->
+        <div class="form-group mb-3">
+            <label class="small font-weight-bold mb-1">Email Address</label>
+            <input
+                type="email"
+                class="form-control form-control-sm bg-light"
+                :value="user.email"
+                readonly
+                disabled
+            />
+            <small class="form-text text-muted">Email cannot be changed.</small>
+        </div>
 
-        <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
-            <div>
-                <InputLabel for="name" value="Name" />
+        <!-- Name -->
+        <div class="form-group mb-3">
+            <label for="profile-name" class="small font-weight-bold mb-1">
+                Full Name <span class="text-danger">*</span>
+            </label>
+            <input
+                id="profile-name"
+                v-model="form.name"
+                type="text"
+                class="form-control form-control-sm"
+                :class="{ 'is-invalid': form.errors.name }"
+                placeholder="Your full name"
+                required
+                autofocus
+                autocomplete="name"
+            />
+            <div v-if="form.errors.name" class="invalid-feedback">{{ form.errors.name }}</div>
+        </div>
 
-                <TextInput
-                    id="name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
+        <!-- Telephone -->
+        <div class="form-group mb-4">
+            <label for="profile-telephone" class="small font-weight-bold mb-1">Phone Number</label>
+            <input
+                id="profile-telephone"
+                v-model="form.telephone"
+                type="tel"
+                class="form-control form-control-sm"
+                :class="{ 'is-invalid': form.errors.telephone }"
+                placeholder="e.g. 0712 345 678"
+                autocomplete="tel"
+            />
+            <div v-if="form.errors.telephone" class="invalid-feedback">{{ form.errors.telephone }}</div>
+        </div>
 
-                <InputError class="mt-2" :message="form.errors.name" />
-            </div>
-
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="text-sm mt-2 text-gray-800">
-                    Your email address is unverified.
-                    <Link
-                        :href="route('verification.send')"
-                        method="post"
-                        as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Click here to re-send the verification email.
-                    </Link>
-                </p>
-
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 font-medium text-sm text-green-600"
-                >
-                    A new verification link has been sent to your email address.
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
-
-                <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
-                >
-                    <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">Saved.</p>
-                </Transition>
-            </div>
-        </form>
-    </section>
+        <div class="d-flex align-items-center" style="gap: 1rem">
+            <button
+                type="submit"
+                class="btn btn-success btn-sm px-4"
+                :disabled="form.processing"
+            >
+                <i class="fas fa-save mr-1"></i>
+                {{ form.processing ? 'Saving…' : 'Save Changes' }}
+            </button>
+            <transition name="fade">
+                <span v-if="form.recentlySuccessful" class="small text-success">
+                    <i class="fas fa-check mr-1"></i> Saved.
+                </span>
+            </transition>
+        </div>
+    </form>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity .4s; }
+.fade-enter-from, .fade-leave-to       { opacity: 0; }
+</style>
