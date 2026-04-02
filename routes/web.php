@@ -73,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // M-Pesa
 Route::post('/mpesa/stk-push', [MpesaController::class, 'stkPush'])->middleware('auth')->name('mpesa.stk_push');
 Route::post('/mpesa/callback', [MpesaController::class, 'callback'])->name('mpesa.callback')->withoutMiddleware(['web']);
+Route::get('/mpesa/poll/{checkoutRequestId}', [MpesaController::class, 'pollStatus'])->middleware('auth')->name('mpesa.poll');
 
 // Google OAuth
 Route::get('/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');

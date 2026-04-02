@@ -78,12 +78,76 @@ const payMethod = ref("mpesa"); // future: 'card', 'bank', etc.
 const payPhone = ref(user.value?.telephone || "");
 const payLoading = ref(false);
 const payError = ref("");
-const paySuccess = ref(false);
 const selectedPlanId = ref(null);
+
+// Polling state
+const pollCheckoutId = ref(null);
+const pollState = ref(null); // null | 'waiting' | 'paid' | 'failed' | 'timeout'
+const pollInterval = ref(null);
+const pollMessage = ref("");
+const pollSeconds = ref(0);
+let pollTimer = null;
+
+const stopPolling = () => {
+  if (pollInterval.value) {
+    clearInterval(pollInterval.value);
+    pollInterval.value = null;
+  }
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+};
+
+const startPolling = (checkoutRequestId) => {
+  pollCheckoutId.value = checkoutRequestId;
+  pollState.value = "waiting";
+  pollSeconds.value = 0;
+  let attempts = 0;
+
+  // Tick seconds counter
+  pollTimer = setInterval(() => {
+    pollSeconds.value++;
+  }, 1000);
+
+  pollInterval.value = setInterval(async () => {
+    attempts++;
+    if (attempts > 30) {
+      // 30 × 4 s = 120 s timeout
+      stopPolling();
+      pollState.value = "timeout";
+      payError.value =
+        "Payment confirmation timed out. If you completed the payment, please contact support.";
+      return;
+    }
+    try {
+      const { data } = await axios.get(
+        route("mpesa.poll", pollCheckoutId.value)
+      );
+      pollMessage.value = data.message || "";
+      if (data.status === "Paid") {
+        stopPolling();
+        pollState.value = "paid";
+        setTimeout(() => window.location.reload(), 1800);
+      } else if (data.status === "Failed" || data.status === "Cancelled") {
+        stopPolling();
+        pollState.value = "failed";
+        payError.value =
+          data.message || "Payment failed or was cancelled. Please try again.";
+      }
+    } catch (_) {
+      // network hiccup — just retry next tick
+    }
+  }, 4000);
+};
 
 const openPayModal = (type, planId = null) => {
   payError.value = "";
-  paySuccess.value = false;
+  pollState.value = null;
+  pollCheckoutId.value = null;
+  pollMessage.value = "";
+  pollSeconds.value = 0;
+  stopPolling();
   payMethod.value = "mpesa";
   selectedPlanId.value = planId;
   if (type === "tender") {
@@ -109,6 +173,9 @@ const openPayModal = (type, planId = null) => {
 
 const closePayModal = () => {
   if (payLoading.value) return;
+  if (pollState.value === "waiting") return; // prevent accidental close while polling
+  stopPolling();
+  pollState.value = null;
   payModalOpen.value = false;
 };
 
@@ -121,13 +188,13 @@ const submitPayment = async () => {
   payLoading.value = true;
   try {
     const ctx = payModalContext.value;
-    await axios.post(route("mpesa.stk_push"), {
+    const { data } = await axios.post(route("mpesa.stk_push"), {
       phone: payPhone.value,
       payment_type: ctx.type,
       plan_id: ctx.type === "plan" ? ctx.planId : null,
       tender_id: ctx.type === "tender" ? props.tender.id : null,
     });
-    paySuccess.value = true;
+    startPolling(data.checkout_request_id);
   } catch (err) {
     payError.value =
       err?.response?.data?.message ||
@@ -1360,22 +1427,64 @@ const submitApplication = async () => {
             </div>
           </div>
 
-          <!-- Success state -->
-          <div v-if="paySuccess" class="pay-modal-success">
+          <!-- Waiting / polling state -->
+          <div v-if="pollState === 'waiting'" class="pay-modal-polling">
+            <div class="pay-polling-spinner">
+              <div class="pay-polling-ring"></div>
+              <div class="pay-polling-inner">
+                <img
+                  src="/images/mpesa-logo.png"
+                  alt="M-Pesa"
+                  class="pay-polling-logo"
+                  onerror="this.style.display='none'"
+                />
+              </div>
+            </div>
+            <h6 class="font-weight-bold mt-4 mb-1">Waiting for Payment</h6>
+            <p class="text-muted small mb-1">
+              A prompt was sent to <strong>{{ payPhone }}</strong>.<br />
+              Enter your M-Pesa PIN to confirm.
+            </p>
+            <p class="pay-poll-timer small text-secondary mb-3">
+              <i class="fas fa-clock mr-1"></i>{{ pollSeconds }}s elapsed
+            </p>
+            <div class="pay-poll-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.75rem">
+              Do NOT close this window. Page will refresh automatically on success.
+            </p>
+          </div>
+
+          <!-- Success / paid state -->
+          <div v-else-if="pollState === 'paid'" class="pay-modal-success">
             <div class="pay-success-icon">
               <i class="fas fa-check-circle text-success fa-3x"></i>
             </div>
-            <h6 class="font-weight-bold mt-3 mb-2">STK Push Sent!</h6>
+            <h6 class="font-weight-bold mt-3 mb-2">Payment Confirmed!</h6>
             <p class="text-muted small mb-3">
-              A payment prompt has been sent to <strong>{{ payPhone }}</strong
-              >. Enter your M-Pesa PIN on your phone to complete the payment.
-              This page will update once your payment is confirmed.
+              Your payment was successful. Refreshing page…
             </p>
+            <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+          </div>
+
+          <!-- Failed / timeout state -->
+          <div v-else-if="pollState === 'failed' || pollState === 'timeout'" class="pay-modal-failed">
+            <div class="pay-failed-icon">
+              <i class="fas fa-times-circle text-danger fa-3x"></i>
+            </div>
+            <h6 class="font-weight-bold mt-3 mb-2">
+              {{ pollState === 'timeout' ? 'Request Timed Out' : 'Payment Failed' }}
+            </h6>
+            <p class="text-muted small mb-3">{{ payError }}</p>
             <button
-              class="btn btn-outline-success btn-sm"
-              @click="closePayModal"
+              class="btn btn-outline-primary btn-sm"
+              @click="() => { pollState = null; payError = ''; }"
             >
-              Close
+              <i class="fas fa-redo mr-1"></i> Try Again
+            </button>
+            <button class="btn btn-link btn-sm text-muted" @click="closePayModal">
+              Cancel
             </button>
           </div>
 
@@ -2041,6 +2150,78 @@ const submitApplication = async () => {
 .pay-modal-success {
   text-align: center;
   padding: 2rem 1.5rem;
+}
+
+/* Polling / waiting state */
+.pay-modal-polling {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+.pay-polling-spinner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+}
+.pay-polling-ring {
+  position: absolute;
+  inset: 0;
+  border: 4px solid #e8f5e9;
+  border-top-color: #28a745;
+  border-radius: 50%;
+  animation: pay-spin 1s linear infinite;
+}
+.pay-polling-inner {
+  position: absolute;
+  inset: 12px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pay-polling-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+@keyframes pay-spin {
+  to { transform: rotate(360deg); }
+}
+.pay-poll-timer {
+  font-variant-numeric: tabular-nums;
+}
+.pay-poll-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.pay-poll-dots span {
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pay-dot-bounce 1.2s infinite ease-in-out both;
+}
+.pay-poll-dots span:nth-child(1) { animation-delay: -0.32s; }
+.pay-poll-dots span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes pay-dot-bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40%            { transform: scale(1); }
+}
+
+/* Failed state */
+.pay-modal-failed {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+.pay-failed-icon {
+  animation: pay-shake 0.4s ease;
+}
+@keyframes pay-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-6px); }
+  75%       { transform: translateX(6px); }
 }
 
 /* Modal transition */

@@ -14,6 +14,7 @@ class UserPlan extends Model
         'end_date',
         'description',
         'is_active',
+        'transaction_id',
         'created_by',
         'updated_by',
     ];

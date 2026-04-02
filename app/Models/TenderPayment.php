@@ -14,6 +14,7 @@ class TenderPayment extends Model
         'payment_ref',
         'status',
         'paid_at',
+        'transaction_id',
     ];
 
     protected $casts = [

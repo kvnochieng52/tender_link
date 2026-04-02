@@ -9,6 +9,7 @@ use App\Models\TransactionStatus;
 use App\Models\UserPlan;
 use App\Models\TenderPayment;
 use App\Services\MpesaService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -190,12 +191,13 @@ class MpesaController extends Controller
             ->update(['is_active' => false]);
 
         UserPlan::create([
-            'user_id'    => $transaction->user_id,
-            'plan_id'    => $transaction->plan_id,
-            'start_date' => $startDate,
-            'end_date'   => $endDate,
-            'is_active'  => true,
-            'created_by' => $transaction->user_id,
+            'user_id'        => $transaction->user_id,
+            'plan_id'        => $transaction->plan_id,
+            'start_date'     => $startDate,
+            'end_date'       => $endDate,
+            'is_active'      => true,
+            'transaction_id' => $transaction->id,
+            'created_by'     => $transaction->user_id,
         ]);
 
         Log::info('User plan activated', ['user_id' => $transaction->user_id, 'plan_id' => $transaction->plan_id]);
@@ -206,10 +208,11 @@ class MpesaController extends Controller
         TenderPayment::updateOrCreate(
             ['user_id' => $transaction->user_id, 'tender_id' => $transaction->tender_id],
             [
-                'amount_paid' => $transaction->amount,
-                'payment_ref' => $meta['MpesaReceiptNumber'] ?? $transaction->trans_ref,
-                'status'      => 'paid',
-                'paid_at'     => now(),
+                'amount_paid'    => $transaction->amount,
+                'payment_ref'    => $meta['MpesaReceiptNumber'] ?? $transaction->trans_ref,
+                'status'         => 'paid',
+                'paid_at'        => now(),
+                'transaction_id' => $transaction->id,
             ]
         );
 
@@ -219,5 +222,26 @@ class MpesaController extends Controller
     private function mpesaResponse()
     {
         return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Success']);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  POLL TRANSACTION STATUS                                             */
+    /* ------------------------------------------------------------------ */
+
+    public function pollStatus(string $checkoutRequestId): JsonResponse
+    {
+        $transaction = Transaction::where('checkout_request_id', $checkoutRequestId)
+            ->where('user_id', Auth::id())
+            ->with('transactionStatus')
+            ->first();
+
+        if (!$transaction) {
+            return response()->json(['status' => 'Pending', 'message' => 'Waiting for payment...']);
+        }
+
+        return response()->json([
+            'status'  => $transaction->transactionStatus?->trans_status_name ?? 'Pending',
+            'message' => $transaction->trans_message ?? '',
+        ]);
     }
 }
