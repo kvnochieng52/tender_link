@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             TenderStatusSeeder::class,
             \Database\Seeders\CommonRequirementsSeeder::class,
             \Database\Seeders\PlansTableSeeder::class,
+            \Database\Seeders\RolesAndPermissionsSeeder::class,
         ]);
     }
 }

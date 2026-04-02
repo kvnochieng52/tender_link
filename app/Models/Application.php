@@ -13,6 +13,7 @@ class Application extends Model
 
     protected $fillable = [
         'tender_id',
+        'user_id',
         'company_name',
         'telephone',
         'website',

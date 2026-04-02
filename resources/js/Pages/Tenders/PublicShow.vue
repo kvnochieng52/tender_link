@@ -1442,7 +1442,8 @@ const submitApplication = async () => {
             </div>
             <h6 class="font-weight-bold mt-4 mb-1">Waiting for Payment</h6>
             <p class="text-muted small mb-1">
-              A prompt was sent to <strong>{{ payPhone }}</strong>.<br />
+              A prompt was sent to <strong>{{ payPhone }}</strong
+              >.<br />
               Enter your M-Pesa PIN to confirm.
             </p>
             <p class="pay-poll-timer small text-secondary mb-3">
@@ -1451,8 +1452,12 @@ const submitApplication = async () => {
             <div class="pay-poll-dots">
               <span></span><span></span><span></span>
             </div>
-            <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.75rem">
-              Do NOT close this window. Page will refresh automatically on success.
+            <p
+              class="text-muted"
+              style="font-size: 0.75rem; margin-top: 0.75rem"
+            >
+              Do NOT close this window. Page will refresh automatically on
+              success.
             </p>
           </div>
 
@@ -1465,25 +1470,41 @@ const submitApplication = async () => {
             <p class="text-muted small mb-3">
               Your payment was successful. Refreshing page…
             </p>
-            <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+            <div
+              class="spinner-border spinner-border-sm text-success"
+              role="status"
+            ></div>
           </div>
 
           <!-- Failed / timeout state -->
-          <div v-else-if="pollState === 'failed' || pollState === 'timeout'" class="pay-modal-failed">
+          <div
+            v-else-if="pollState === 'failed' || pollState === 'timeout'"
+            class="pay-modal-failed"
+          >
             <div class="pay-failed-icon">
               <i class="fas fa-times-circle text-danger fa-3x"></i>
             </div>
             <h6 class="font-weight-bold mt-3 mb-2">
-              {{ pollState === 'timeout' ? 'Request Timed Out' : 'Payment Failed' }}
+              {{
+                pollState === "timeout" ? "Request Timed Out" : "Payment Failed"
+              }}
             </h6>
             <p class="text-muted small mb-3">{{ payError }}</p>
             <button
               class="btn btn-outline-primary btn-sm"
-              @click="() => { pollState = null; payError = ''; }"
+              @click="
+                () => {
+                  pollState = null;
+                  payError = '';
+                }
+              "
             >
               <i class="fas fa-redo mr-1"></i> Try Again
             </button>
-            <button class="btn btn-link btn-sm text-muted" @click="closePayModal">
+            <button
+              class="btn btn-link btn-sm text-muted"
+              @click="closePayModal"
+            >
               Cancel
             </button>
           </div>
@@ -2186,7 +2207,9 @@ const submitApplication = async () => {
   object-fit: contain;
 }
 @keyframes pay-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .pay-poll-timer {
   font-variant-numeric: tabular-nums;
@@ -2203,11 +2226,21 @@ const submitApplication = async () => {
   border-radius: 50%;
   animation: pay-dot-bounce 1.2s infinite ease-in-out both;
 }
-.pay-poll-dots span:nth-child(1) { animation-delay: -0.32s; }
-.pay-poll-dots span:nth-child(2) { animation-delay: -0.16s; }
+.pay-poll-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.pay-poll-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
 @keyframes pay-dot-bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40%            { transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 
 /* Failed state */
@@ -2219,9 +2252,16 @@ const submitApplication = async () => {
   animation: pay-shake 0.4s ease;
 }
 @keyframes pay-shake {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(-6px); }
-  75%       { transform: translateX(6px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
 }
 
 /* Modal transition */

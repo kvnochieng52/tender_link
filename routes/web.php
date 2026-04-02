@@ -27,7 +27,7 @@ use App\Models\County;
 
 Route::get('/', function () {
     $latest = Tender::query()
-        ->with(['county:id,name', 'industry:id,name', 'status:id,name'])
+        ->with(['county:id,name', 'industry:id,name', 'status:id,name', 'institution:id,institution_name,logo'])
         ->latest()
         ->take(6)
         ->get();
@@ -51,6 +51,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/home/dashboard', [DashboardController::class, 'index'])->name('home.dashboard');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Admin-only routes
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/tenders', [TenderController::class, 'index'])->name('tenders.index');
     Route::get('/tenders/create', [TenderController::class, 'create'])->name('tenders.create');
     Route::post('/tenders', [TenderController::class, 'store'])->name('tenders.store');
@@ -59,13 +66,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/institutions', [InstitutionController::class, 'index'])->name('institutions.index');
     Route::post('/institutions', [InstitutionController::class, 'store'])->name('institutions.store');
     Route::post('/institutions/{institution}', [InstitutionController::class, 'update'])->name('institutions.update');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// Admin applications routes
-Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/tenders/{encryptedId}/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('admin.tenders.applications.index');
     Route::get('/admin/applications/{encryptedAppId}', [\App\Http\Controllers\Admin\ApplicationController::class, 'show'])->name('admin.applications.show');
 });

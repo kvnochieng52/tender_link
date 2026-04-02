@@ -603,14 +603,26 @@ const submitSearch = () => {
                     :key="tender.id || tender.title"
                     class="callout callout-success mb-2"
                   >
-                    <div
-                      class="d-flex justify-content-between align-items-start flex-wrap"
-                    >
-                      <div class="pr-2 w-100">
+                    <div class="d-flex align-items-start">
+                      <!-- Company logo -->
+                      <div class="flex-shrink-0 mr-3">
+                        <img
+                          v-if="tender.institution && tender.institution.logo"
+                          :src="`/storage/${tender.institution.logo}`"
+                          :alt="tender.institution.institution_name"
+                          class="tender-list-logo"
+                        />
+                        <div v-else class="tender-list-logo-placeholder">
+                          <i class="fas fa-building text-muted"></i>
+                        </div>
+                      </div>
+
+                      <!-- Main content -->
+                      <div class="flex-grow-1 min-width-0">
                         <div
                           class="d-flex justify-content-between align-items-start"
                         >
-                          <div>
+                          <div class="min-width-0 pr-2">
                             <Link
                               :href="
                                 route(
@@ -618,16 +630,26 @@ const submitSearch = () => {
                                   tender.slug || tender.id
                                 )
                               "
-                              class="mb-1 font-weight-bold text-dark d-block"
-                              style="text-decoration: none"
+                              class="mb-0 font-weight-bold text-dark d-block"
+                              style="text-decoration: none; line-height: 1.3"
                             >
                               {{ tender.title }}
                             </Link>
+                            <div
+                              v-if="
+                                tender.institution &&
+                                tender.institution.institution_name
+                              "
+                              class="text-muted small mb-1"
+                            >
+                              <i class="fas fa-building mr-1 text-success"></i>
+                              {{ tender.institution.institution_name }}
+                            </div>
                             <p
                               class="mb-1 text-muted small d-flex flex-wrap align-items-center"
                             >
                               <i
-                                class="fas fa-map-marker-alt mr-2 text-success"
+                                class="fas fa-map-marker-alt mr-1 text-success"
                               ></i>
                               <span class="mr-3">{{
                                 tender.county && tender.county.name
@@ -683,7 +705,9 @@ const submitSearch = () => {
                             </p>
                           </div>
 
-                          <div class="d-flex align-items-start ml-auto">
+                          <div
+                            class="d-flex align-items-start ml-auto flex-shrink-0"
+                          >
                             <Link
                               :href="
                                 route(
@@ -800,6 +824,30 @@ const submitSearch = () => {
 </template>
 
 <style scoped>
+.tender-list-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  background: #fff;
+  padding: 2px;
+}
+.tender-list-logo-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  border: 1px dashed #ced4da;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.min-width-0 {
+  min-width: 0;
+}
+
 .landing-page {
   overflow-x: hidden;
 }

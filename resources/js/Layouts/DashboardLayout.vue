@@ -6,6 +6,7 @@ import LoadingBar from "@/Components/LoadingBar.vue";
 const sidebarOpen = ref(false);
 
 const user = computed(() => usePage().props.auth.user);
+const isAdmin = computed(() => usePage().props.auth.isAdmin);
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
@@ -90,6 +91,7 @@ const logout = () => {
         </div>
 
         <nav class="sidebar-nav mt-3">
+          <!-- Dashboard: visible to all -->
           <Link
             :href="route('dashboard')"
             :class="[
@@ -105,54 +107,65 @@ const logout = () => {
           >
             <i class="fas fa-tachometer-alt mr-2"></i> Dashboard Overview
           </Link>
-          <Link
-            :href="route('tenders.index')"
-            :class="[
-              'sidebar-link',
-              { active: route().current('tenders.index') },
-            ]"
-            @click="closeSidebar"
-          >
-            <i class="fas fa-list mr-2"></i> Tender List
-          </Link>
-          <Link
-            :href="route('tenders.create')"
-            :class="[
-              'sidebar-link',
-              { active: route().current('tenders.create') },
-            ]"
-            @click="closeSidebar"
-          >
-            <i class="fas fa-bullhorn mr-2"></i> New Tender
-          </Link>
-          <Link
-            :href="route('institutions.index')"
-            :class="[
-              'sidebar-link',
-              { active: route().current('institutions.*') },
-            ]"
-            @click="closeSidebar"
-          >
-            <i class="fas fa-building mr-2"></i> Institutions
-          </Link>
+
+          <!-- My Applications: visible to all -->
           <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-list-check mr-2"></i> Applications
+            <i class="fas fa-file-alt mr-2"></i> My Applications
           </a>
-          <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-clipboard-check mr-2"></i> Evaluation
-          </a>
-          <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-award mr-2"></i> Award & Notification
-          </a>
-          <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-users mr-2"></i> User Management
-          </a>
-          <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-chart-line mr-2"></i> Reports
-          </a>
-          <a href="#" class="sidebar-link" @click="closeSidebar">
-            <i class="fas fa-cog mr-2"></i> Settings
-          </a>
+
+          <!-- Admin-only section -->
+          <template v-if="isAdmin">
+            <div class="sidebar-section-label mt-3 mb-1">Admin</div>
+
+            <Link
+              :href="route('tenders.index')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('tenders.index') },
+              ]"
+              @click="closeSidebar"
+            >
+              <i class="fas fa-list mr-2"></i> Tender List
+            </Link>
+            <Link
+              :href="route('tenders.create')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('tenders.create') },
+              ]"
+              @click="closeSidebar"
+            >
+              <i class="fas fa-bullhorn mr-2"></i> New Tender
+            </Link>
+            <Link
+              :href="route('institutions.index')"
+              :class="[
+                'sidebar-link',
+                { active: route().current('institutions.*') },
+              ]"
+              @click="closeSidebar"
+            >
+              <i class="fas fa-building mr-2"></i> Institutions
+            </Link>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-list-check mr-2"></i> All Applications
+            </a>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-clipboard-check mr-2"></i> Evaluation
+            </a>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-award mr-2"></i> Award &amp; Notification
+            </a>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-users mr-2"></i> User Management
+            </a>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-chart-line mr-2"></i> Reports
+            </a>
+            <a href="#" class="sidebar-link" @click="closeSidebar">
+              <i class="fas fa-cog mr-2"></i> Settings
+            </a>
+          </template>
         </nav>
       </aside>
 
@@ -207,6 +220,15 @@ const logout = () => {
 .sidebar-header {
   padding: 0.5rem 0.35rem;
   border-bottom: 1px solid #e5ece7;
+}
+
+.sidebar-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fa897;
+  padding: 0 0.8rem;
 }
 
 .sidebar-link {

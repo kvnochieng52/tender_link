@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\ApplicationFile;
 use App\Models\Tender;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -74,6 +75,7 @@ class ApplicationController extends Controller
 
         $application = Application::create([
             'tender_id' => $tender->id,
+            'user_id'   => Auth::id(),
             'company_name' => $validated['company_name'],
             'telephone' => $validated['telephone'] ?? null,
             'website' => $validated['website'] ?? null,
