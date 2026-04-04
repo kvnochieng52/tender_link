@@ -105,6 +105,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/admin/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.users.update');
     Route::patch('/admin/users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('admin.users.update-role');
     Route::patch('/admin/users/{user}/toggle-verified', [\App\Http\Controllers\Admin\UserController::class, 'toggleVerified'])->name('admin.users.toggle-verified');
+    Route::patch('/admin/users/{user}/toggle-active', [\App\Http\Controllers\Admin\UserController::class, 'toggleActive'])->name('admin.users.toggle-active');
 });
 
 // M-Pesa

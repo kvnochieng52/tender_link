@@ -99,4 +99,11 @@ class UserController extends Controller
 
         return back();
     }
+
+    public function toggleActive(User $user)
+    {
+        $user->update(['is_active' => ! $user->is_active]);
+
+        return back();
+    }
 }

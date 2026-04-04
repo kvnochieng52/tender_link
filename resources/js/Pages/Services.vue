@@ -1,27 +1,12 @@
 <script setup>
 import { ref } from "vue";
 import { Head, Link } from "@inertiajs/vue3";
+import PublicNavbar from "@/Components/PublicNavbar.vue";
 
 const props = defineProps({
   canLogin: { type: Boolean },
   canRegister: { type: Boolean },
 });
-
-const mobileMenuOpen = ref(false);
-const tenderSubmenuOpen = ref(false);
-
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value;
-  if (!mobileMenuOpen.value) tenderSubmenuOpen.value = false;
-};
-const toggleTenderSubmenu = (e) => {
-  e.preventDefault();
-  tenderSubmenuOpen.value = !tenderSubmenuOpen.value;
-};
-const closeMobileMenu = () => {
-  mobileMenuOpen.value = false;
-  tenderSubmenuOpen.value = false;
-};
 
 const currentYear = new Date().getFullYear();
 
@@ -193,144 +178,11 @@ const plans = [
 
   <div class="landing-page bg-light">
     <!-- ── Navbar ──────────────────────────────────────────── -->
-    <div
-      class="container d-flex align-items-center justify-content-between flex-wrap"
-    >
-      <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
-        <img
-          src="/images/tender-link-logo.svg"
-          alt="Tender Plug"
-          class="brand-logo-full"
-        />
-      </Link>
-
-      <button
-        class="navbar-toggler mobile-nav-toggler"
-        type="button"
-        aria-label="Toggle navigation"
-        :aria-expanded="mobileMenuOpen"
-        @click="toggleMobileMenu"
-      >
-        <i class="fas fa-bars"></i>
-      </button>
-
-      <div :class="['nav-mobile-collapse', mobileMenuOpen ? 'is-open' : '']">
-        <ul
-          class="navbar-nav nav-main-menu flex-row flex-wrap justify-content-center my-2 my-lg-0 mx-lg-auto"
-        >
-          <li class="nav-item">
-            <Link
-              :href="route('welcome')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Home</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('about')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >About Us</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('services')"
-              class="nav-link active"
-              @click="closeMobileMenu"
-              >Services</Link
-            >
-          </li>
-          <li
-            :class="[
-              'nav-item',
-              'nav-item-dropdown',
-              tenderSubmenuOpen ? 'is-open' : '',
-            ]"
-          >
-            <a class="nav-link" href="#" @click="toggleTenderSubmenu">
-              Browse Tenders <i class="fas fa-angle-down ml-1"></i>
-            </a>
-            <div class="dropdown-menu-custom">
-              <Link
-                :href="route('tenders.search', { industry: 'construction' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Construction</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'supply' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Supply</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'ict' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >ICT</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'agro' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Agro</Link
-              >
-              <Link
-                :href="route('tenders.search')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Government</Link
-              >
-              <Link
-                :href="route('tenders.search')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >NGOs</Link
-              >
-            </div>
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('contact')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Contact Us</Link
-            >
-          </li>
-        </ul>
-
-        <div
-          class="auth-actions d-flex align-items-center flex-wrap justify-content-end py-2"
-        >
-          <template v-if="canLogin">
-            <Link
-              v-if="$page.props.auth.user"
-              :href="route('dashboard')"
-              class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-              @click="closeMobileMenu"
-            >
-              Dashboard
-            </Link>
-            <template v-else>
-              <Link
-                :href="route('login')"
-                class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-                >Login/Register</Link
-              >
-              <Link
-                :href="route('register')"
-                class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-                >Apply Tender</Link
-              >
-            </template>
-          </template>
-        </div>
-      </div>
-    </div>
+    <PublicNavbar
+      :canLogin="canLogin"
+      :canRegister="canRegister"
+      active-page="services"
+    />
     <!-- ── /Navbar ─────────────────────────────────────────── -->
 
     <main class="pb-5">
@@ -496,58 +348,6 @@ const plans = [
                   style="text-decoration: none"
                 >
                   <i class="fas fa-envelope mr-1"></i> Enquire Now
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Pricing -->
-      <section class="py-5">
-        <div class="container">
-          <div class="section-header text-center mb-5">
-            <span class="badge badge-success-soft mb-2"
-              ><i class="fas fa-tags mr-1"></i>Pricing</span
-            >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
-              Simple, Transparent Plans
-            </h2>
-            <p class="text-muted mx-auto" style="max-width: 480px">
-              No hidden fees. Upgrade or downgrade any time.
-            </p>
-          </div>
-          <div class="row justify-content-center">
-            <div
-              v-for="plan in plans"
-              :key="plan.name"
-              class="col-sm-10 col-md-6 col-lg-4 mb-4"
-            >
-              <div
-                :class="[
-                  'plan-card h-100',
-                  plan.highlighted ? 'plan-card--highlighted' : '',
-                ]"
-              >
-                <div class="plan-badge">{{ plan.badge }}</div>
-                <h4 class="plan-name">{{ plan.name }}</h4>
-                <div class="plan-price">
-                  {{ plan.price
-                  }}<span class="plan-period">{{ plan.period }}</span>
-                </div>
-                <ul class="plan-feature-list">
-                  <li v-for="f in plan.features" :key="f">
-                    <i class="fas fa-check mr-2 text-success"></i>{{ f }}
-                  </li>
-                </ul>
-                <Link
-                  :href="route('register')"
-                  :class="[
-                    'btn btn-block btn-sm px-4 mt-auto',
-                    plan.highlighted ? 'btn-success' : 'btn-outline-success',
-                  ]"
-                >
-                  Get Started
                 </Link>
               </div>
             </div>

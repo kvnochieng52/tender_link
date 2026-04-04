@@ -1,6 +1,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch, toRefs } from "vue";
 import { Head, Link } from "@inertiajs/vue3";
+import PublicNavbar from "@/Components/PublicNavbar.vue";
 
 const props = defineProps({
   canLogin: { type: Boolean },
@@ -115,42 +116,6 @@ onBeforeUnmount(() => {
   }
 });
 
-const mobileMenuOpen = ref(false);
-const tenderSubmenuOpen = ref(false);
-const dropdownTimerId = ref(null);
-
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value;
-  if (!mobileMenuOpen.value) {
-    tenderSubmenuOpen.value = false;
-  }
-};
-
-const toggleTenderSubmenu = (event) => {
-  event.preventDefault();
-  tenderSubmenuOpen.value = !tenderSubmenuOpen.value;
-};
-
-// Hover helpers — 120 ms grace period so mouse can travel to submenu without it closing
-const openDropdown = () => {
-  if (dropdownTimerId.value) clearTimeout(dropdownTimerId.value);
-  tenderSubmenuOpen.value = true;
-};
-const closeDropdown = () => {
-  dropdownTimerId.value = setTimeout(() => {
-    tenderSubmenuOpen.value = false;
-  }, 120);
-};
-
-const closeMobileMenu = () => {
-  mobileMenuOpen.value = false;
-  tenderSubmenuOpen.value = false;
-};
-
-// Build a search URL filtered by category name
-const categoryUrl = (name) =>
-  `${route("tenders.search")}?search=${encodeURIComponent(name)}`;
-
 const currentYear = new Date().getFullYear();
 
 const formatDate = (d) => {
@@ -192,153 +157,11 @@ const submitSearch = () => {
   <Head title="Tender Portal" />
 
   <div class="landing-page bg-light">
-    <div
-      class="container d-flex align-items-center justify-content-between flex-wrap"
-    >
-      <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
-        <img
-          src="/images/tender-link-logo.svg"
-          alt="Tender Plug"
-          class="brand-logo-full"
-        />
-      </Link>
-
-      <button
-        class="navbar-toggler mobile-nav-toggler"
-        type="button"
-        aria-label="Toggle navigation"
-        :aria-expanded="mobileMenuOpen"
-        @click="toggleMobileMenu"
-      >
-        <i class="fas fa-bars"></i>
-      </button>
-
-      <div :class="['nav-mobile-collapse', mobileMenuOpen ? 'is-open' : '']">
-        <ul
-          class="navbar-nav nav-main-menu flex-row flex-wrap justify-content-center my-2 my-lg-0 mx-lg-auto"
-        >
-          <li class="nav-item">
-            <Link
-              :href="route('welcome')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Home</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('about')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >About Us</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('services')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Services</Link
-            >
-          </li>
-          <li
-            :class="[
-              'nav-item',
-              'nav-item-dropdown',
-              tenderSubmenuOpen ? 'is-open' : '',
-            ]"
-            @mouseenter="openDropdown"
-            @mouseleave="closeDropdown"
-          >
-            <a class="nav-link" href="#" @click="toggleTenderSubmenu">
-              Browse Tenders <i class="fas fa-angle-down ml-1"></i>
-            </a>
-            <div
-              class="dropdown-menu-custom"
-              @mouseenter="openDropdown"
-              @mouseleave="closeDropdown"
-            >
-              <Link
-                :href="categoryUrl('Construction')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Construction</Link
-              >
-              <Link
-                :href="categoryUrl('Supply')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Supply</Link
-              >
-              <Link
-                :href="categoryUrl('ICT')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >ICT</Link
-              >
-              <Link
-                :href="categoryUrl('Agro')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Agro</Link
-              >
-              <Link
-                :href="categoryUrl('Government')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Government</Link
-              >
-              <Link
-                :href="categoryUrl('NGO')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >NGOs</Link
-              >
-            </div>
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('contact')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Contact Us</Link
-            >
-          </li>
-        </ul>
-
-        <div
-          class="auth-actions d-flex align-items-center flex-wrap justify-content-end py-2"
-        >
-          <template v-if="canLogin">
-            <Link
-              v-if="$page.props.auth.user"
-              :href="route('dashboard')"
-              class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-              @click="closeMobileMenu"
-            >
-              Dashboard
-            </Link>
-            <template v-else>
-              <Link
-                :href="route('login')"
-                class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-              >
-                Login/Register
-              </Link>
-              <Link
-                v-if="canRegister"
-                :href="route('register')"
-                class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-              >
-                Apply Tender
-              </Link>
-            </template>
-          </template>
-        </div>
-      </div>
-    </div>
+    <PublicNavbar
+      :canLogin="canLogin"
+      :canRegister="canRegister"
+      active-page="home"
+    />
 
     <main class="pb-5">
       <section class="pt-2 pt-md-3 pb-2">

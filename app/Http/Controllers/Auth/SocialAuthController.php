@@ -48,6 +48,13 @@ class SocialAuthController extends Controller
                 'avatar'            => $googleUser->getAvatar(),
                 'password'          => null,
                 'email_verified_at' => now(),
+                'is_active'         => 1,
+            ]);
+        }
+
+        if (! $user->is_active) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Account not active. Contact admin.',
             ]);
         }
 

@@ -1,28 +1,13 @@
 <script setup>
 import { ref } from "vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
+import PublicNavbar from "@/Components/PublicNavbar.vue";
 
 const props = defineProps({
   canLogin: { type: Boolean },
   canRegister: { type: Boolean },
   flash: { type: Object, default: () => ({}) },
 });
-
-const mobileMenuOpen = ref(false);
-const tenderSubmenuOpen = ref(false);
-
-const toggleMobileMenu = () => {
-  mobileMenuOpen.value = !mobileMenuOpen.value;
-  if (!mobileMenuOpen.value) tenderSubmenuOpen.value = false;
-};
-const toggleTenderSubmenu = (e) => {
-  e.preventDefault();
-  tenderSubmenuOpen.value = !tenderSubmenuOpen.value;
-};
-const closeMobileMenu = () => {
-  mobileMenuOpen.value = false;
-  tenderSubmenuOpen.value = false;
-};
 
 const currentYear = new Date().getFullYear();
 
@@ -94,144 +79,11 @@ const toggleFaq = (i) => {
 
   <div class="landing-page bg-light">
     <!-- ── Navbar ──────────────────────────────────────────── -->
-    <div
-      class="container d-flex align-items-center justify-content-between flex-wrap"
-    >
-      <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
-        <img
-          src="/images/tender-link-logo.svg"
-          alt="Tender Plug"
-          class="brand-logo-full"
-        />
-      </Link>
-
-      <button
-        class="navbar-toggler mobile-nav-toggler"
-        type="button"
-        aria-label="Toggle navigation"
-        :aria-expanded="mobileMenuOpen"
-        @click="toggleMobileMenu"
-      >
-        <i class="fas fa-bars"></i>
-      </button>
-
-      <div :class="['nav-mobile-collapse', mobileMenuOpen ? 'is-open' : '']">
-        <ul
-          class="navbar-nav nav-main-menu flex-row flex-wrap justify-content-center my-2 my-lg-0 mx-lg-auto"
-        >
-          <li class="nav-item">
-            <Link
-              :href="route('welcome')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Home</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('about')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >About Us</Link
-            >
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('services')"
-              class="nav-link"
-              @click="closeMobileMenu"
-              >Services</Link
-            >
-          </li>
-          <li
-            :class="[
-              'nav-item',
-              'nav-item-dropdown',
-              tenderSubmenuOpen ? 'is-open' : '',
-            ]"
-          >
-            <a class="nav-link" href="#" @click="toggleTenderSubmenu">
-              Browse Tenders <i class="fas fa-angle-down ml-1"></i>
-            </a>
-            <div class="dropdown-menu-custom">
-              <Link
-                :href="route('tenders.search', { industry: 'construction' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Construction</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'supply' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Supply</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'ict' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >ICT</Link
-              >
-              <Link
-                :href="route('tenders.search', { industry: 'agro' })"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Agro</Link
-              >
-              <Link
-                :href="route('tenders.search')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >Government</Link
-              >
-              <Link
-                :href="route('tenders.search')"
-                class="dropdown-item"
-                @click="closeMobileMenu"
-                >NGOs</Link
-              >
-            </div>
-          </li>
-          <li class="nav-item">
-            <Link
-              :href="route('contact')"
-              class="nav-link active"
-              @click="closeMobileMenu"
-              >Contact Us</Link
-            >
-          </li>
-        </ul>
-
-        <div
-          class="auth-actions d-flex align-items-center flex-wrap justify-content-end py-2"
-        >
-          <template v-if="canLogin">
-            <Link
-              v-if="$page.props.auth.user"
-              :href="route('dashboard')"
-              class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-              @click="closeMobileMenu"
-            >
-              Dashboard
-            </Link>
-            <template v-else>
-              <Link
-                :href="route('login')"
-                class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-                >Login/Register</Link
-              >
-              <Link
-                :href="route('register')"
-                class="btn btn-success btn-sm ml-2 mb-1 mb-md-0"
-                @click="closeMobileMenu"
-                >Apply Tender</Link
-              >
-            </template>
-          </template>
-        </div>
-      </div>
-    </div>
+    <PublicNavbar
+      :canLogin="canLogin"
+      :canRegister="canRegister"
+      active-page="contact"
+    />
     <!-- ── /Navbar ─────────────────────────────────────────── -->
 
     <main class="pb-5">

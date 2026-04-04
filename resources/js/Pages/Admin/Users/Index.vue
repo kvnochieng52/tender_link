@@ -57,6 +57,14 @@ function toggleVerified(user) {
   );
 }
 
+function toggleActive(user) {
+  router.patch(
+    route("admin.users.toggle-active", { user: user.id }),
+    {},
+    { preserveScroll: true }
+  );
+}
+
 const formatDate = (v) =>
   v
     ? new Date(v).toLocaleString("en-KE", {
@@ -179,6 +187,7 @@ function submitEdit() {
                 <th>Phone</th>
                 <th>Role</th>
                 <th class="text-center">Verified</th>
+                <th class="text-center">Active</th>
                 <th class="text-center">Applications</th>
                 <th class="text-center">Transactions</th>
                 <th>Joined</th>
@@ -275,6 +284,18 @@ function submitEdit() {
                   <span v-else class="badge badge-warning">Unverified</span>
                 </td>
 
+                <!-- Active -->
+                <td class="text-center">
+                  <span
+                    :class="[
+                      'badge',
+                      user.is_active ? 'badge-success' : 'badge-danger',
+                    ]"
+                  >
+                    {{ user.is_active ? "Active" : "Inactive" }}
+                  </span>
+                </td>
+
                 <td class="text-center">
                   <span class="badge badge-info">
                     {{ user.applications_count ?? 0 }}
@@ -326,6 +347,25 @@ function submitEdit() {
                         user.email_verified_at
                           ? 'fa-user-times'
                           : 'fa-user-check',
+                      ]"
+                    ></i>
+                  </button>
+                  <button
+                    :class="[
+                      'btn btn-sm',
+                      user.is_active
+                        ? 'btn-outline-danger'
+                        : 'btn-outline-success',
+                    ]"
+                    :title="
+                      user.is_active ? 'Deactivate account' : 'Activate account'
+                    "
+                    @click="toggleActive(user)"
+                  >
+                    <i
+                      :class="[
+                        'fas',
+                        user.is_active ? 'fa-ban' : 'fa-check-circle',
                       ]"
                     ></i>
                   </button>
