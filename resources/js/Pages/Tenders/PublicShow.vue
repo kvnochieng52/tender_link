@@ -510,10 +510,20 @@ const submitApplication = async () => {
               >
             </li>
             <li class="nav-item">
-              <Link :href="route('about')" class="nav-link" @click="closeMobileMenu">About Us</Link>
+              <Link
+                :href="route('about')"
+                class="nav-link"
+                @click="closeMobileMenu"
+                >About Us</Link
+              >
             </li>
             <li class="nav-item">
-              <Link :href="route('services')" class="nav-link" @click="closeMobileMenu">Services</Link>
+              <Link
+                :href="route('services')"
+                class="nav-link"
+                @click="closeMobileMenu"
+                >Services</Link
+              >
             </li>
             <li
               :class="[
@@ -547,7 +557,12 @@ const submitApplication = async () => {
               </div>
             </li>
             <li class="nav-item">
-              <Link :href="route('contact')" class="nav-link" @click="closeMobileMenu">Contact Us</Link>
+              <Link
+                :href="route('contact')"
+                class="nav-link"
+                @click="closeMobileMenu"
+                >Contact Us</Link
+              >
             </li>
           </ul>
 
