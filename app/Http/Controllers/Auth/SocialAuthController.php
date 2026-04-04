@@ -18,7 +18,7 @@ class SocialAuthController extends Controller
             session()->put('url.intended', $redirect);
         }
 
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();
     }
 
     /**

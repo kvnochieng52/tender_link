@@ -49,10 +49,10 @@ const contactDetails = [
   {
     icon: "fas fa-map-marker-alt",
     label: "Address",
-    value: "Westlands Business Park, Nairobi, Kenya",
+    value: "Madonna House Annex, Westlands, Nairobi",
   },
-  { icon: "fas fa-phone-alt", label: "Phone", value: "+254 700 000 000" },
-  { icon: "fas fa-envelope", label: "Email", value: "hello@tenderlink.co.ke" },
+  { icon: "fas fa-phone-alt", label: "Phone", value: "0108517504" },
+  { icon: "fas fa-envelope", label: "Email", value: "info@tenderplug.com" },
   {
     icon: "fas fa-clock",
     label: "Hours",
@@ -429,14 +429,12 @@ const toggleFaq = (i) => {
           <div
             class="map-placeholder d-flex align-items-center justify-content-center"
           >
-            <div class="text-center text-muted">
+              <div class="text-center text-muted">
               <i
                 class="fas fa-map-marker-alt fa-3x mb-3"
                 style="color: #28a745"
               ></i>
-              <p class="mb-0 font-weight-bold">
-                Westlands Business Park, Nairobi, Kenya
-              </p>
+              <p class="mb-0 font-weight-bold">Madonna House Annex, Westlands, Nairobi</p>
               <small>Map embed coming soon</small>
             </div>
           </div>
