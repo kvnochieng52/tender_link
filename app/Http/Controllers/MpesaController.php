@@ -239,9 +239,52 @@ class MpesaController extends Controller
             return response()->json(['status' => 'Pending', 'message' => 'Waiting for payment...']);
         }
 
-        return response()->json([
-            'status'  => $transaction->transactionStatus?->trans_status_name ?? 'Pending',
-            'message' => $transaction->trans_message ?? '',
-        ]);
+        $currentStatus = $transaction->transactionStatus?->trans_status_name ?? 'Pending';
+
+        // If already resolved, return immediately
+        if (in_array($currentStatus, ['Paid', 'Failed', 'Cancelled'])) {
+            return response()->json([
+                'status'  => $currentStatus,
+                'message' => $transaction->trans_message ?? '',
+            ]);
+        }
+
+        // Actively query Safaricom so we don't rely solely on the callback
+        $queryResult = $this->mpesa->stkQuery($checkoutRequestId);
+        $resultCode  = $queryResult['result_code'];
+        $resultDesc  = $queryResult['result_desc'];
+
+        if ($resultCode === 0) {
+            // Payment confirmed by Safaricom — mark Paid (callback may arrive later with receipt)
+            $paidStatus = TransactionStatus::where('trans_status_name', 'Paid')->first();
+            $transaction->update([
+                'trans_status_id' => $paidStatus?->id,
+                'trans_message'   => 'Payment completed successfully via M-Pesa',
+                'updated_by'      => $transaction->user_id,
+            ]);
+
+            if ($transaction->payment_type === 'plan' && $transaction->plan_id) {
+                $this->activatePlan($transaction);
+            } elseif ($transaction->payment_type === 'tender' && $transaction->tender_id) {
+                $this->activateTenderAccess($transaction, []);
+            }
+
+            return response()->json(['status' => 'Paid', 'message' => 'Payment confirmed']);
+        }
+
+        if ($resultCode !== null && $resultCode !== 0) {
+            // Non-zero means failed or cancelled (e.g. 1032 = cancelled, 1 = insufficient funds)
+            $failedStatus = TransactionStatus::where('trans_status_name', 'Failed')->first();
+            $transaction->update([
+                'trans_status_id' => $failedStatus?->id,
+                'trans_message'   => $resultDesc,
+                'updated_by'      => $transaction->user_id,
+            ]);
+
+            return response()->json(['status' => 'Failed', 'message' => $resultDesc]);
+        }
+
+        // Query inconclusive (null result_code) — still waiting for Safaricom
+        return response()->json(['status' => 'Pending', 'message' => 'Waiting for M-Pesa confirmation...']);
     }
 }

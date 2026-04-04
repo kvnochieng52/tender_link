@@ -116,6 +116,48 @@ class MpesaService
     }
 
     /**
+     * Query the status of an STK Push transaction from Safaricom.
+     *
+     * Returns an array: ['result_code' => int, 'result_desc' => string]
+     * result_code 0  = success/paid
+     * result_code 1032 = cancelled by user
+     * result_code 1 = insufficient funds / other failure
+     * null result_code means we could not determine status yet.
+     */
+    public function stkQuery(string $checkoutRequestId): array
+    {
+        $token = $this->getAccessToken();
+        if (!$token) {
+            return ['result_code' => null, 'result_desc' => 'Could not obtain access token'];
+        }
+
+        $timestamp = now()->format('YmdHis');
+        $password  = base64_encode($this->shortCode . $this->passkey . $timestamp);
+
+        try {
+            $response = Http::withToken($token)
+                ->post("{$this->baseUrl()}/mpesa/stkpushquery/v1/query", [
+                    'BusinessShortCode' => $this->shortCode,
+                    'Password'          => $password,
+                    'Timestamp'         => $timestamp,
+                    'CheckoutRequestID' => $checkoutRequestId,
+                ]);
+
+            Log::info('M-Pesa STK Query response', ['response' => $response->json()]);
+
+            $resultCode = $response->json('ResultCode');
+
+            return [
+                'result_code' => $resultCode !== null ? (int) $resultCode : null,
+                'result_desc' => $response->json('ResultDesc') ?? $response->json('errorMessage') ?? 'Unknown',
+            ];
+        } catch (\Exception $e) {
+            Log::error('M-Pesa STK Query exception', ['error' => $e->getMessage()]);
+            return ['result_code' => null, 'result_desc' => 'Connection error'];
+        }
+    }
+
+    /**
      * Normalise a Kenyan phone number to 254XXXXXXXXX format.
      */
     public static function normalisePhone(string $phone): string
