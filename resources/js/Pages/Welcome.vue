@@ -183,7 +183,7 @@ const submitSearch = () => {
       <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="brand-logo-full"
         />
       </Link>
@@ -810,7 +810,7 @@ const submitSearch = () => {
         >
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="footer-logo mb-3 mb-md-0"
           />
 
@@ -822,7 +822,7 @@ const submitSearch = () => {
 
         <div class="footer-bottom text-center text-md-left mt-3 pt-3">
           <small class="text-muted"
-            >© {{ currentYear }} Tender Link. All rights reserved.</small
+            >© {{ currentYear }} Tender Plug. All rights reserved.</small
           >
         </div>
       </div>

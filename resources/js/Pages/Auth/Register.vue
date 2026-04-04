@@ -35,7 +35,7 @@ const submit = () => {
       <div class="text-center mb-4">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="auth-logo"
         />
       </div>

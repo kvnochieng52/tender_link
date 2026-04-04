@@ -27,7 +27,7 @@ const verificationLinkSent = computed(
       <div class="text-center mb-4">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="auth-logo"
         />
       </div>
@@ -38,7 +38,7 @@ const verificationLinkSent = computed(
             Verify Your Email
           </h1>
           <p class="text-muted text-center mb-4">
-            Confirm your email address to activate your Tender Link account.
+            Confirm your email address to activate your Tender Plug account.
           </p>
 
           <div class="alert alert-light border alert-info-text mb-3">

@@ -101,7 +101,7 @@ const addOnServices = [
   {
     icon: "fas fa-code",
     title: "API Integrations",
-    text: "Connect Tender Link to your ERP, accounting system, or government procurement portal via our RESTful API.",
+    text: "Connect Tender Plug to your ERP, accounting system, or government procurement portal via our RESTful API.",
   },
 ];
 
@@ -151,7 +151,7 @@ const plans = [
 </script>
 
 <template>
-  <Head title="Our Services – Tender Link" />
+  <Head title="Our Services – Tender Plug" />
 
   <div class="landing-page bg-light">
     <!-- ── Navbar ──────────────────────────────────────────── -->
@@ -161,7 +161,7 @@ const plans = [
       <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="brand-logo-full"
         />
       </Link>
@@ -327,7 +327,7 @@ const plans = [
             </h2>
             <p class="text-muted mx-auto" style="max-width: 560px">
               From the moment you post or discover a tender to the final award —
-              Tender Link covers every step.
+              Tender Plug covers every step.
             </p>
           </div>
           <div class="row">
@@ -483,7 +483,7 @@ const plans = [
         >
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="footer-logo mb-3 mb-md-0"
           />
           <div class="footer-links d-flex align-items-center flex-wrap">
@@ -493,7 +493,7 @@ const plans = [
         </div>
         <div class="footer-bottom text-center text-md-left mt-3 pt-3">
           <small class="text-muted"
-            >© {{ currentYear }} Tender Link. All rights reserved.</small
+            >© {{ currentYear }} Tender Plug. All rights reserved.</small
           >
         </div>
       </div>

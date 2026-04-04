@@ -39,7 +39,7 @@ class MpesaController extends Controller
         if ($request->payment_type === 'plan') {
             $plan   = Plan::findOrFail($request->plan_id);
             $amount = (float) $plan->amount;
-            $desc   = "Tender Link – {$plan->plan_name} plan";
+            $desc   = "Tender Plug – {$plan->plan_name} plan";
             $ref    = 'PLAN-' . $plan->id . '-U' . $user->id;
         } else {
             $tender = Tender::findOrFail($request->tender_id);

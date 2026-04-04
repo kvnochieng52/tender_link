@@ -43,7 +43,7 @@ const logout = () => {
           <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
             <img
               src="/images/tender-link-logo.svg"
-              alt="Tender Link"
+              alt="Tender Plug"
               class="brand-logo-full"
             />
           </Link>
@@ -51,10 +51,12 @@ const logout = () => {
 
         <div class="top-nav-links d-none d-md-flex align-items-center">
           <Link :href="route('welcome')" class="nav-link px-2">Home</Link>
-          <Link :href="route('about')"    class="nav-link px-2">About Us</Link>
+          <Link :href="route('about')" class="nav-link px-2">About Us</Link>
           <Link :href="route('services')" class="nav-link px-2">Services</Link>
-          <Link :href="route('tenders.search')" class="nav-link px-2">Browse Tenders</Link>
-          <Link :href="route('contact')"  class="nav-link px-2">Contact Us</Link>
+          <Link :href="route('tenders.search')" class="nav-link px-2"
+            >Browse Tenders</Link
+          >
+          <Link :href="route('contact')" class="nav-link px-2">Contact Us</Link>
         </div>
 
         <div class="d-flex align-items-center flex-wrap py-2">
@@ -196,7 +198,7 @@ const logout = () => {
     <footer class="dashboard-footer border-top">
       <div class="container d-flex justify-content-between flex-wrap py-2">
         <small class="text-muted"
-          >© {{ new Date().getFullYear() }} Tender Link</small
+          >© {{ new Date().getFullYear() }} Tender Plug</small
         >
         <small class="text-muted">Smart Tender Discovery Platform</small>
       </div>

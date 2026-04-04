@@ -48,7 +48,7 @@ const closeMobileMenu = () => {
         <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="brand-logo-full"
           />
         </Link>
@@ -351,7 +351,7 @@ const closeMobileMenu = () => {
         >
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="footer-logo mb-3 mb-md-0"
           />
 
@@ -363,7 +363,7 @@ const closeMobileMenu = () => {
 
         <div class="footer-bottom text-center text-md-left mt-3 pt-3">
           <small class="text-muted"
-            >© {{ new Date().getFullYear() }} Tender Link. All rights
+            >© {{ new Date().getFullYear() }} Tender Plug. All rights
             reserved.</small
           >
         </div>

@@ -36,7 +36,7 @@ const submit = () => {
       <div class="text-center mb-4">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="auth-logo"
         />
       </div>
@@ -47,7 +47,7 @@ const submit = () => {
             Welcome Back
           </h1>
           <p class="text-muted text-center mb-4">
-            Login to continue to Tender Link
+            Login to continue to Tender Plug
           </p>
 
           <div v-if="status" class="alert alert-success mb-3">

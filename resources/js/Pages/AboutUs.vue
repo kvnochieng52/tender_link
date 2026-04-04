@@ -98,7 +98,7 @@ const values = [
 </script>
 
 <template>
-  <Head title="About Us – Tender Link" />
+  <Head title="About Us – Tender Plug" />
 
   <div class="landing-page bg-light">
     <!-- ── Navbar ──────────────────────────────────────────── -->
@@ -108,7 +108,7 @@ const values = [
       <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
         <img
           src="/images/tender-link-logo.svg"
-          alt="Tender Link"
+          alt="Tender Plug"
           class="brand-logo-full"
         />
       </Link>
@@ -247,7 +247,7 @@ const values = [
       <section class="about-hero">
         <div class="about-hero-overlay">
           <div class="container text-center">
-            <h1 class="about-hero-title">About Tender Link</h1>
+            <h1 class="about-hero-title">About Tender Plug</h1>
             <p class="about-hero-sub">
               Kenya's most trusted procurement portal — connecting institutions
               with verified suppliers.
@@ -281,7 +281,7 @@ const values = [
                 Empowering Kenya's Procurement Ecosystem
               </h2>
               <p class="text-muted">
-                Tender Link is a technology-driven procurement portal that
+                Tender Plug is a technology-driven procurement portal that
                 bridges the gap between government entities, NGOs, private
                 institutions, and qualified suppliers across Kenya. We simplify
                 tender discovery, submission, and evaluation — for everyone from
@@ -368,7 +368,7 @@ const values = [
               ><i class="fas fa-users mr-1"></i>Our Team</span
             >
             <h2 class="font-weight-bold" style="color: #1a3a22">
-              Meet the People Behind Tender Link
+              Meet the People Behind Tender Plug
             </h2>
             <p class="text-muted mx-auto" style="max-width: 520px">
               A passionate group of professionals committed to transforming
@@ -405,7 +405,7 @@ const values = [
             Ready to find your next opportunity?
           </h2>
           <p class="text-white-50 mb-4">
-            Join thousands of suppliers and institutions already on Tender Link.
+            Join thousands of suppliers and institutions already on Tender Plug.
           </p>
           <div
             class="d-flex justify-content-center flex-wrap"
@@ -437,7 +437,7 @@ const values = [
         >
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="footer-logo mb-3 mb-md-0"
           />
           <div class="footer-links d-flex align-items-center flex-wrap">
@@ -447,7 +447,7 @@ const values = [
         </div>
         <div class="footer-bottom text-center text-md-left mt-3 pt-3">
           <small class="text-muted"
-            >© {{ currentYear }} Tender Link. All rights reserved.</small
+            >© {{ currentYear }} Tender Plug. All rights reserved.</small
           >
         </div>
       </div>

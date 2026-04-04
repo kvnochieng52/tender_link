@@ -482,7 +482,7 @@ const submitApplication = async () => {
         <Link :href="route('welcome')" class="navbar-brand mr-0 py-2">
           <img
             src="/images/tender-link-logo.svg"
-            alt="Tender Link"
+            alt="Tender Plug"
             class="brand-logo-full"
           />
         </Link>
