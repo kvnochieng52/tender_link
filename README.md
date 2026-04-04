@@ -7,6 +7,10 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Tender Plug
+
+Tender Plug — Smart Tender Discovery Platform. This repository contains the Tender Plug web application built on Laravel. The platform connects institutions with verified suppliers and provides tools for tender discovery, submission, evaluation, and award.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

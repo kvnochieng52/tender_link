@@ -1,4 +1,6 @@
 {
+    "name": "tender-plug",
+    "description": "Tender Plug — Smart Tender Discovery Platform",
     "private": true,
     "type": "module",
     "scripts": {
