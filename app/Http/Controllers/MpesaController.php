@@ -254,6 +254,15 @@ class MpesaController extends Controller
         $resultCode  = $queryResult['result_code'];
         $resultDesc  = $queryResult['result_desc'];
 
+        // Safaricom result codes that definitively mean failure/cancellation.
+        // Code 1 = "The transaction is being processed" — NOT a failure, keep polling.
+        // Code 1032 = Request cancelled by user
+        // Code 1037 = DS timeout (user didn't respond)
+        // Code 2001 = Wrong PIN entered
+        // Code 17 = System busy, retry
+        $definiteFailureCodes = [1032, 1037, 2001, 1025, 9999];
+        $stillProcessingCodes = [1, 17, null]; // null = query inconclusive
+
         if ($resultCode === 0) {
             // Payment confirmed by Safaricom — mark Paid (callback may arrive later with receipt)
             $paidStatus = TransactionStatus::where('trans_status_name', 'Paid')->first();
@@ -272,8 +281,8 @@ class MpesaController extends Controller
             return response()->json(['status' => 'Paid', 'message' => 'Payment confirmed']);
         }
 
-        if ($resultCode !== null && $resultCode !== 0) {
-            // Non-zero means failed or cancelled (e.g. 1032 = cancelled, 1 = insufficient funds)
+        if ($resultCode !== null && in_array($resultCode, $definiteFailureCodes)) {
+            // Definitively failed or cancelled — safe to mark as failed
             $failedStatus = TransactionStatus::where('trans_status_name', 'Failed')->first();
             $transaction->update([
                 'trans_status_id' => $failedStatus?->id,
@@ -284,7 +293,7 @@ class MpesaController extends Controller
             return response()->json(['status' => 'Failed', 'message' => $resultDesc]);
         }
 
-        // Query inconclusive (null result_code) — still waiting for Safaricom
+        // Result code 1, 17, null, or any unrecognised code — still processing, keep polling
         return response()->json(['status' => 'Pending', 'message' => 'Waiting for M-Pesa confirmation...']);
     }
 }

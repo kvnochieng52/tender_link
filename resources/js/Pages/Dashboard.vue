@@ -79,8 +79,13 @@ const pollInterval = ref(null);
 const pollMessage = ref("");
 const pollSeconds = ref(0);
 let pollTimer = null;
+let pollInitTimeout = null;
 
 const stopPolling = () => {
+  if (pollInitTimeout) {
+    clearTimeout(pollInitTimeout);
+    pollInitTimeout = null;
+  }
   if (pollInterval.value) {
     clearInterval(pollInterval.value);
     pollInterval.value = null;
@@ -96,12 +101,16 @@ const startPolling = (checkoutRequestId) => {
   pollState.value = "waiting";
   pollSeconds.value = 0;
   let attempts = 0;
+
   pollTimer = setInterval(() => {
     pollSeconds.value++;
   }, 1000);
-  pollInterval.value = setInterval(async () => {
+
+  // Wait 10s before the first query — Safaricom needs time to process the PIN
+  const doPoll = async () => {
     attempts++;
-    if (attempts > 30) {
+    // Allow up to 60 attempts × 5s = 300s (5 minutes)
+    if (attempts > 60) {
       stopPolling();
       pollState.value = "timeout";
       payError.value =
@@ -124,9 +133,15 @@ const startPolling = (checkoutRequestId) => {
           data.message || "Payment failed or was cancelled. Please try again.";
       }
     } catch (_) {
-      /* retry */
+      /* network hiccup — retry next tick */
     }
-  }, 4000);
+  };
+
+  // First poll after 10s, then every 5s
+  pollInitTimeout = setTimeout(() => {
+    doPoll();
+    pollInterval.value = setInterval(doPoll, 5000);
+  }, 10000);
 };
 
 const openPayModal = (planId) => {
