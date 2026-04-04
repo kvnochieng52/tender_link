@@ -79,12 +79,12 @@ const heroSlides = [
       "Track national and county projects with deadline-focused insights.",
     image: "/images/photo1.jpg",
   },
-  {
-    title: "ICT, Supply & Agro Business Leads",
-    subtitle:
-      "Filter opportunities by industry, county, and budget size quickly.",
-    image: "/images/photo3.jpg",
-  },
+  // {
+  //   title: "ICT, Supply & Agro Business Leads",
+  //   subtitle:
+  //     "Filter opportunities by industry, county, and budget size quickly.",
+  //   image: "/images/photo3.jpg",
+  // },
 ];
 
 const heroSlideIndex = ref(0);
