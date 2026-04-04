@@ -105,6 +105,48 @@ const addOnServices = [
   },
 ];
 
+const extraServices = [
+  {
+    icon: "fas fa-gavel",
+    badge: "Bid Support",
+    badgeColor: "#1a7a40",
+    title: "Compliance & Bid Support",
+    text: "End-to-end support to help your business win tenders — from company profile preparation to full bid submission.",
+    features: [
+      "Company profile preparation",
+      "Tender document preparation",
+      "Prequalification support",
+      "Compliance checks",
+    ],
+    pricing: [
+      { label: "Company profile", price: "KES 15,000" },
+      { label: "Full tender bid", price: "KES 10K – 50K+" },
+    ],
+  },
+  {
+    icon: "fas fa-handshake",
+    badge: "Marketplace",
+    badgeColor: "#1a5fa0",
+    title: "B2B Marketplace",
+    text: "Connect with verified businesses across Kenya. Our marketplace gives you direct access to a curated database of business partners.",
+    features: [
+      "Suppliers",
+      "Contractors",
+      "Service providers",
+    ],
+    pricing: [],
+  },
+  {
+    icon: "fas fa-file-invoice-dollar",
+    badge: "Funding",
+    badgeColor: "#7a4a1a",
+    title: "Business Plan & Funding Proposals",
+    text: "We develop professionally crafted business plans and funding proposals designed to attract investors, grants, and financial institutions.",
+    features: [],
+    pricing: [],
+  },
+];
+
 const plans = [
   {
     name: "Basic",
@@ -386,6 +428,78 @@ const plans = [
                   <h6 class="font-weight-bold mb-1">{{ addon.title }}</h6>
                   <p class="text-muted small mb-0">{{ addon.text }}</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Professional Services -->
+      <section class="py-5 bg-white">
+        <div class="container">
+          <div class="section-header text-center mb-5">
+            <span class="badge badge-success-soft mb-2"
+              ><i class="fas fa-briefcase mr-1"></i>Professional Services</span
+            >
+            <h2 class="font-weight-bold" style="color: #1a3a22">
+              Beyond the Platform
+            </h2>
+            <p class="text-muted mx-auto" style="max-width: 560px">
+              Hands-on services to help your business win tenders, connect with
+              partners, and secure funding.
+            </p>
+          </div>
+          <div class="row">
+            <div
+              v-for="svc in extraServices"
+              :key="svc.title"
+              class="col-md-4 mb-4"
+            >
+              <div class="extra-svc-card h-100">
+                <div class="extra-svc-icon-wrap mb-3">
+                  <i :class="svc.icon"></i>
+                </div>
+                <span
+                  class="extra-svc-badge mb-2 d-inline-block"
+                  :style="{ background: svc.badgeColor }"
+                  >{{ svc.badge }}</span
+                >
+                <h5 class="font-weight-bold mb-2" style="color: #1a3a22">
+                  {{ svc.title }}
+                </h5>
+                <p class="text-muted small mb-3">{{ svc.text }}</p>
+
+                <template v-if="svc.features.length">
+                  <p class="small font-weight-bold mb-1" style="color: #1a3a22">
+                    What we offer:
+                  </p>
+                  <ul class="extra-svc-list mb-3">
+                    <li v-for="f in svc.features" :key="f">
+                      <i class="fas fa-check-circle text-success mr-1"></i>{{ f }}
+                    </li>
+                  </ul>
+                </template>
+
+                <template v-if="svc.pricing.length">
+                  <p class="small font-weight-bold mb-1" style="color: #1a3a22">
+                    Pricing:
+                  </p>
+                  <ul class="extra-svc-list">
+                    <li v-for="p in svc.pricing" :key="p.label">
+                      <i class="fas fa-tag text-success mr-1"></i>
+                      <span class="font-weight-semibold">{{ p.label }}:</span>
+                      {{ p.price }}
+                    </li>
+                  </ul>
+                </template>
+
+                <Link
+                  :href="route('contact')"
+                  class="btn btn-outline-success btn-sm mt-3"
+                  style="text-decoration: none"
+                >
+                  <i class="fas fa-envelope mr-1"></i> Enquire Now
+                </Link>
               </div>
             </div>
           </div>
@@ -710,6 +824,54 @@ const plans = [
   font-weight: 600;
   padding: 0.35em 0.75em;
   border-radius: 99px;
+}
+
+/* Professional / extra services cards */
+.extra-svc-card {
+  background: #fff;
+  border: 1px solid #d6ead9;
+  border-radius: 14px;
+  padding: 1.6rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.extra-svc-card:hover {
+  box-shadow: 0 6px 24px rgba(40, 167, 69, 0.13);
+  transform: translateY(-3px);
+}
+.extra-svc-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e8f8ee, #d0f0d8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #28a745;
+}
+.extra-svc-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  padding: 0.2em 0.65em;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+.extra-svc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.extra-svc-list li {
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-bottom: 0.35rem;
+}
+.font-weight-semibold {
+  font-weight: 600;
 }
 
 @media (max-width: 767px) {

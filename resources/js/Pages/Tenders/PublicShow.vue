@@ -740,7 +740,7 @@ const submitApplication = async () => {
                       <i class="fas fa-lock fa-2x text-secondary"></i>
                     </span>
                   </div>
-                  <h5 class="font-weight-bold mb-2">Login to continue</h5>
+                  <h5 class="font-weight-bold mb-2">Login to view Full Tender Details</h5>
                   <p class="text-muted mb-4">
                     Please log in or create an account to access full tender
                     details.
