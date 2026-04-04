@@ -69,24 +69,21 @@ const coreFeatures = [
 
 const heroSlides = [
   {
+    title: "Government & NGO Procurement",
+    subtitle: "Discover verified public and donor-funded tenders in one place.",
+    image: "/images/photo2.jpg",
+  },
+  {
     title: "Construction & Infrastructure Opportunities",
     subtitle:
       "Track national and county projects with deadline-focused insights.",
-    image:
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1400&q=80",
-  },
-  {
-    title: "Government & NGO Procurement",
-    subtitle: "Discover verified public and donor-funded tenders in one place.",
-    image:
-      "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1400&q=80",
+    image: "/images/photo1.jpg",
   },
   {
     title: "ICT, Supply & Agro Business Leads",
     subtitle:
       "Filter opportunities by industry, county, and budget size quickly.",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=80",
+    image: "/images/photo3.jpg",
   },
 ];
 
@@ -832,6 +829,7 @@ const submitSearch = () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 25%;
   display: block;
 }
 

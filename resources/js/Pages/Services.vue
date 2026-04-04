@@ -15,6 +15,7 @@ const mainServices = [
     step: "01",
     icon: "fas fa-search",
     title: "Tender Discovery & Alerts",
+    routeName: "services.procurement",
     text: "Access a continuously updated database of government, NGO, and private-sector tenders. Set keyword and category alerts to never miss a relevant opportunity.",
     features: [
       "Real-time tender feed",
@@ -26,6 +27,7 @@ const mainServices = [
     step: "02",
     icon: "fas fa-file-upload",
     title: "Online Application & Document Upload",
+    routeName: "services.procurement",
     text: "Submit applications directly on the platform. Upload all required documents, track submission status, and receive instant confirmation.",
     features: [
       "Multi-file document upload",
@@ -37,6 +39,7 @@ const mainServices = [
     step: "03",
     icon: "fas fa-clipboard-check",
     title: "Evaluation & Scoring",
+    routeName: "services.procurement",
     text: "Our structured evaluation workflow helps institutions score, rank, and shortlist applicants with full audit trails and transparent criteria.",
     features: [
       "Configurable scoring rubrics",
@@ -48,6 +51,7 @@ const mainServices = [
     step: "04",
     icon: "fas fa-award",
     title: "Award & Notification",
+    routeName: null,
     text: "Automate award letters and notify all applicants of outcomes, ensuring a professional, compliant conclusion to every tender cycle.",
     features: [
       "Auto-generated award letters",
@@ -92,6 +96,8 @@ const addOnServices = [
 
 const extraServices = [
   {
+    id: "bid-support",
+    routeName: "services.bid-support",
     icon: "fas fa-gavel",
     badge: "Bid Support",
     badgeColor: "#1a7a40",
@@ -109,6 +115,8 @@ const extraServices = [
     ],
   },
   {
+    id: "marketplace",
+    routeName: "services.marketplace",
     icon: "fas fa-handshake",
     badge: "Marketplace",
     badgeColor: "#1a5fa0",
@@ -118,6 +126,8 @@ const extraServices = [
     pricing: [],
   },
   {
+    id: "funding",
+    routeName: "services.funding",
     icon: "fas fa-file-invoice-dollar",
     badge: "Funding",
     badgeColor: "#7a4a1a",
@@ -206,7 +216,7 @@ const plans = [
       </section>
 
       <!-- Core services -->
-      <section class="py-5">
+      <section id="tender-discovery" class="py-5">
         <div class="container">
           <div class="section-header text-center mb-5">
             <span class="badge badge-success-soft mb-2"
@@ -238,6 +248,14 @@ const plans = [
                     <i class="fas fa-check-circle text-success mr-1"></i>{{ f }}
                   </li>
                 </ul>
+                <Link
+                  v-if="svc.routeName"
+                  :href="route('services.procurement')"
+                  class="btn btn-outline-success btn-sm mt-3"
+                  style="text-decoration: none"
+                >
+                  <i class="fas fa-arrow-right mr-1"></i>Learn More
+                </Link>
               </div>
             </div>
           </div>
@@ -246,6 +264,7 @@ const plans = [
 
       <!-- Add-on services -->
       <section
+        id="online-application"
         class="py-5"
         style="background: linear-gradient(160deg, #f0faf4 0%, #e8f8ee 100%)"
       >
@@ -283,7 +302,7 @@ const plans = [
       </section>
 
       <!-- Professional Services -->
-      <section class="py-5 bg-white">
+      <section id="bid-support" class="py-5 bg-white">
         <div class="container">
           <div class="section-header text-center mb-5">
             <span class="badge badge-success-soft mb-2"
@@ -301,6 +320,7 @@ const plans = [
             <div
               v-for="svc in extraServices"
               :key="svc.title"
+              :id="svc.id"
               class="col-md-4 mb-4"
             >
               <div class="extra-svc-card h-100">
@@ -342,13 +362,22 @@ const plans = [
                   </ul>
                 </template>
 
-                <Link
-                  :href="route('contact')"
-                  class="btn btn-outline-success btn-sm mt-3"
-                  style="text-decoration: none"
-                >
-                  <i class="fas fa-envelope mr-1"></i> Enquire Now
-                </Link>
+                <div class="d-flex flex-wrap mt-3" style="gap: 0.5rem">
+                  <Link
+                    :href="route(svc.routeName)"
+                    class="btn btn-success btn-sm"
+                    style="text-decoration: none"
+                  >
+                    <i class="fas fa-arrow-right mr-1"></i>Learn More
+                  </Link>
+                  <Link
+                    :href="route('contact')"
+                    class="btn btn-outline-success btn-sm"
+                    style="text-decoration: none"
+                  >
+                    <i class="fas fa-envelope mr-1"></i>Enquire
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

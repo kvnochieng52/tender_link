@@ -59,6 +59,26 @@ Route::get('/services', function () {
     ]);
 })->name('services');
 
+Route::get('/services/procurement', fn() => Inertia::render('Services/ProcurementServices', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+]))->name('services.procurement');
+
+Route::get('/services/bid-support', fn() => Inertia::render('Services/BidSupport', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+]))->name('services.bid-support');
+
+Route::get('/services/marketplace', fn() => Inertia::render('Services/Marketplace', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+]))->name('services.marketplace');
+
+Route::get('/services/funding', fn() => Inertia::render('Services/Funding', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+]))->name('services.funding');
+
 Route::get('/contact-us', function () {
     return Inertia::render('ContactUs', [
         'canLogin'    => Route::has('login'),

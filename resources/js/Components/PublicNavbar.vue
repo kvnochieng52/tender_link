@@ -11,16 +11,26 @@ const props = defineProps({
 
 const mobileMenuOpen = ref(false);
 const tenderSubmenuOpen = ref(false);
+const servicesSubmenuOpen = ref(false);
 const dropdownTimerId = ref(null);
+const servicesTimerId = ref(null);
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
-  if (!mobileMenuOpen.value) tenderSubmenuOpen.value = false;
+  if (!mobileMenuOpen.value) {
+    tenderSubmenuOpen.value = false;
+    servicesSubmenuOpen.value = false;
+  }
 };
 
 const toggleTenderSubmenu = (e) => {
   e.preventDefault();
   tenderSubmenuOpen.value = !tenderSubmenuOpen.value;
+};
+
+const toggleServicesSubmenu = (e) => {
+  e.preventDefault();
+  servicesSubmenuOpen.value = !servicesSubmenuOpen.value;
 };
 
 const openDropdown = () => {
@@ -34,9 +44,21 @@ const closeDropdown = () => {
   }, 120);
 };
 
+const openServicesDropdown = () => {
+  if (servicesTimerId.value) clearTimeout(servicesTimerId.value);
+  servicesSubmenuOpen.value = true;
+};
+
+const closeServicesDropdown = () => {
+  servicesTimerId.value = setTimeout(() => {
+    servicesSubmenuOpen.value = false;
+  }, 120);
+};
+
 const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
   tenderSubmenuOpen.value = false;
+  servicesSubmenuOpen.value = false;
 };
 
 const categoryUrl = (name) =>
@@ -86,13 +108,60 @@ const categoryUrl = (name) =>
             >About Us</Link
           >
         </li>
-        <li class="nav-item">
-          <Link
-            :href="route('services')"
-            :class="['nav-link', activePage === 'services' ? 'active' : '']"
-            @click="closeMobileMenu"
-            >Services</Link
+        <li
+          :class="[
+            'nav-item',
+            'nav-item-dropdown',
+            servicesSubmenuOpen ? 'is-open' : '',
+            activePage === 'services' ? 'active' : '',
+          ]"
+          @mouseenter="openServicesDropdown"
+          @mouseleave="closeServicesDropdown"
+        >
+          <a class="nav-link" href="#" @click="toggleServicesSubmenu">
+            Services <i class="fas fa-angle-down ml-1"></i>
+          </a>
+          <div
+            class="dropdown-menu-custom"
+            @mouseenter="openServicesDropdown"
+            @mouseleave="closeServicesDropdown"
           >
+            <Link
+              :href="route('services.procurement')"
+              class="dropdown-item"
+              @click="closeMobileMenu"
+              ><i class="fas fa-cogs mr-2 text-success"></i>End-to-End
+              Procurement</Link
+            >
+            <Link
+              :href="route('services.bid-support')"
+              class="dropdown-item"
+              @click="closeMobileMenu"
+              ><i class="fas fa-gavel mr-2 text-success"></i>Compliance &amp;
+              Bid Support</Link
+            >
+            <Link
+              :href="route('services.marketplace')"
+              class="dropdown-item"
+              @click="closeMobileMenu"
+              ><i class="fas fa-handshake mr-2 text-success"></i>B2B
+              Marketplace</Link
+            >
+            <Link
+              :href="route('services.funding')"
+              class="dropdown-item"
+              @click="closeMobileMenu"
+              ><i class="fas fa-file-invoice-dollar mr-2 text-success"></i
+              >Business Plan &amp; Funding</Link
+            >
+            <div class="dropdown-divider"></div>
+            <Link
+              :href="route('services')"
+              class="dropdown-item font-weight-bold"
+              @click="closeMobileMenu"
+              ><i class="fas fa-th-list mr-2"></i>All Services</Link
+            >
+          </div>
         </li>
         <li
           :class="[
@@ -277,6 +346,11 @@ const categoryUrl = (name) =>
 .dropdown-item:hover {
   background-color: rgba(40, 167, 69, 0.08);
   color: #1f8f53;
+}
+.dropdown-divider {
+  height: 1px;
+  background-color: #e9ecef;
+  margin: 0.35rem 0;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
