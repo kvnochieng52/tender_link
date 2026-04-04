@@ -117,10 +117,10 @@ onBeforeUnmount(() => {
 
 const mobileMenuOpen = ref(false);
 const tenderSubmenuOpen = ref(false);
+const dropdownTimerId = ref(null);
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
-
   if (!mobileMenuOpen.value) {
     tenderSubmenuOpen.value = false;
   }
@@ -131,10 +131,25 @@ const toggleTenderSubmenu = (event) => {
   tenderSubmenuOpen.value = !tenderSubmenuOpen.value;
 };
 
+// Hover helpers — 120 ms grace period so mouse can travel to submenu without it closing
+const openDropdown = () => {
+  if (dropdownTimerId.value) clearTimeout(dropdownTimerId.value);
+  tenderSubmenuOpen.value = true;
+};
+const closeDropdown = () => {
+  dropdownTimerId.value = setTimeout(() => {
+    tenderSubmenuOpen.value = false;
+  }, 120);
+};
+
 const closeMobileMenu = () => {
   mobileMenuOpen.value = false;
   tenderSubmenuOpen.value = false;
 };
+
+// Build a search URL filtered by category name
+const categoryUrl = (name) =>
+  `${route("tenders.search")}?search=${encodeURIComponent(name)}`;
 
 const currentYear = new Date().getFullYear();
 
@@ -232,26 +247,52 @@ const submitSearch = () => {
               'nav-item-dropdown',
               tenderSubmenuOpen ? 'is-open' : '',
             ]"
+            @mouseenter="openDropdown"
+            @mouseleave="closeDropdown"
           >
             <a class="nav-link" href="#" @click="toggleTenderSubmenu">
               Browse Tenders <i class="fas fa-angle-down ml-1"></i>
             </a>
-            <div class="dropdown-menu-custom">
-              <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                >Construction</a
+            <div
+              class="dropdown-menu-custom"
+              @mouseenter="openDropdown"
+              @mouseleave="closeDropdown"
+            >
+              <Link
+                :href="categoryUrl('Construction')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >Construction</Link
               >
-              <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                >Supply</a
+              <Link
+                :href="categoryUrl('Supply')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >Supply</Link
               >
-              <a href="#" class="dropdown-item" @click="closeMobileMenu">ICT</a>
-              <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                >Agro</a
+              <Link
+                :href="categoryUrl('ICT')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >ICT</Link
               >
-              <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                >Government</a
+              <Link
+                :href="categoryUrl('Agro')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >Agro</Link
               >
-              <a href="#" class="dropdown-item" @click="closeMobileMenu"
-                >NGOs</a
+              <Link
+                :href="categoryUrl('Government')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >Government</Link
+              >
+              <Link
+                :href="categoryUrl('NGO')"
+                class="dropdown-item"
+                @click="closeMobileMenu"
+                >NGOs</Link
               >
             </div>
           </li>
@@ -576,14 +617,25 @@ const submitSearch = () => {
                     <div class="col-md-6 mb-2 mb-md-0">
                       <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
-                          <span class="input-group-text"
-                            ><i class="fas fa-search text-success"></i
-                          ></span>
+                          <button
+                            type="button"
+                            class="input-group-text btn-reset"
+                            style="
+                              cursor: pointer;
+                              background: none;
+                              border-right: 0;
+                            "
+                            @click="submitSearch"
+                            aria-label="Search tenders"
+                          >
+                            <i class="fas fa-search text-success"></i>
+                          </button>
                         </div>
                         <input
+                          v-model="keyword"
                           class="form-control"
                           placeholder="Search tenders"
-                          disabled
+                          @keyup.enter="submitSearch"
                         />
                       </div>
                     </div>
@@ -610,8 +662,8 @@ const submitSearch = () => {
                     :key="tender.id || tender.title"
                     class="callout callout-success mb-2"
                   >
-                    <!-- Row 1: logo + all text content -->
-                    <div class="d-flex align-items-start">
+                    <!-- Flex row: logo | content | buttons (desktop: top-right; mobile: wraps below) -->
+                    <div class="d-flex align-items-start tender-card-wrap">
                       <!-- Company logo -->
                       <div class="flex-shrink-0 mr-3">
                         <img
@@ -711,7 +763,7 @@ const submitSearch = () => {
                         </p>
 
                         <!-- Badges -->
-                        <div class="mb-2">
+                        <div class="mb-0">
                           <span class="badge badge-secondary mr-1">
                             {{ tender.status ? tender.status.name : "Status" }}
                           </span>
@@ -719,30 +771,30 @@ const submitSearch = () => {
                             >Sponsored</span
                           >
                         </div>
+                      </div>
 
-                        <!-- Action buttons — always below the content -->
-                        <div class="tender-item-actions">
-                          <Link
-                            :href="
-                              route(
-                                'tenders.public.show',
-                                tender.slug || tender.id
-                              )
-                            "
-                            class="btn btn-outline-success btn-sm mr-2"
-                            style="text-decoration: none"
-                          >
-                            <i class="fas fa-info-circle mr-1"></i> Details
-                          </Link>
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary btn-sm"
-                            aria-label="favorite"
-                            title="Add to favorites"
-                          >
-                            <i class="fas fa-heart mr-1"></i> Favorites
-                          </button>
-                        </div>
+                      <!-- Action buttons — top-right on desktop, wraps below on mobile -->
+                      <div class="tender-item-actions flex-shrink-0">
+                        <Link
+                          :href="
+                            route(
+                              'tenders.public.show',
+                              tender.slug || tender.id
+                            )
+                          "
+                          class="btn btn-outline-success btn-sm"
+                          style="text-decoration: none"
+                        >
+                          <i class="fas fa-info-circle mr-1"></i> Details
+                        </Link>
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary btn-sm"
+                          aria-label="favorite"
+                          title="Add to favorites"
+                        >
+                          <i class="fas fa-heart mr-1"></i> Favorites
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -858,11 +910,35 @@ const submitSearch = () => {
   white-space: normal;
   line-height: 1.4;
 }
+
+/* Desktop: buttons are a 3rd flex child, aligned to the top-right of the card */
+.tender-card-wrap {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
 .tender-item-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 0.4rem;
-  margin-top: 0.4rem;
+  margin-left: 0.75rem;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Mobile: buttons wrap below the logo+content row */
+@media (max-width: 575.98px) {
+  .tender-card-wrap {
+    flex-wrap: wrap;
+  }
+  .tender-item-actions {
+    /* full width, indented to align with content (past the 52px logo + 1rem mr-3) */
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 0;
+    padding-left: calc(52px + 1rem);
+    margin-top: 0.5rem;
+  }
 }
 
 /* Browse Tenders card title — responsive, no AdminLTE float conflict */
@@ -1029,22 +1105,22 @@ const submitSearch = () => {
 
 .dropdown-menu-custom {
   position: absolute;
-  top: calc(100% + 0.35rem);
+  /* flush against the trigger — no gap so mouse hover doesn't break */
+  top: 100%;
   left: 0;
   z-index: 1100;
   min-width: 190px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0.5rem;
-  box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.12);
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
   display: none;
   padding: 0.35rem 0;
+  /* invisible top padding as a hover bridge so mouse can reach the menu */
+  margin-top: 0;
 }
 
-.nav-item-dropdown:hover .dropdown-menu-custom {
-  display: block;
-}
-
+/* Hover & open both handled via JS — CSS :hover is removed to avoid race condition */
 .nav-item-dropdown.is-open .dropdown-menu-custom {
   display: block;
 }

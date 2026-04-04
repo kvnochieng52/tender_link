@@ -429,12 +429,14 @@ const toggleFaq = (i) => {
           <div
             class="map-placeholder d-flex align-items-center justify-content-center"
           >
-              <div class="text-center text-muted">
+            <div class="text-center text-muted">
               <i
                 class="fas fa-map-marker-alt fa-3x mb-3"
                 style="color: #28a745"
               ></i>
-              <p class="mb-0 font-weight-bold">Madonna House Annex, Westlands, Nairobi</p>
+              <p class="mb-0 font-weight-bold">
+                Madonna House Annex, Westlands, Nairobi
+              </p>
               <small>Map embed coming soon</small>
             </div>
           </div>

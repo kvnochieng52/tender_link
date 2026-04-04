@@ -129,11 +129,7 @@ const extraServices = [
     badgeColor: "#1a5fa0",
     title: "B2B Marketplace",
     text: "Connect with verified businesses across Kenya. Our marketplace gives you direct access to a curated database of business partners.",
-    features: [
-      "Suppliers",
-      "Contractors",
-      "Service providers",
-    ],
+    features: ["Suppliers", "Contractors", "Service providers"],
     pricing: [],
   },
   {
@@ -475,7 +471,8 @@ const plans = [
                   </p>
                   <ul class="extra-svc-list mb-3">
                     <li v-for="f in svc.features" :key="f">
-                      <i class="fas fa-check-circle text-success mr-1"></i>{{ f }}
+                      <i class="fas fa-check-circle text-success mr-1"></i
+                      >{{ f }}
                     </li>
                   </ul>
                 </template>
