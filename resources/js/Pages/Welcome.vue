@@ -552,9 +552,9 @@ const submitSearch = () => {
             <div class="col-12 mb-4">
               <div class="card card-outline card-success h-100 shadow-sm">
                 <div
-                  class="card-header d-flex justify-content-between align-items-center bg-white"
+                  class="card-header d-flex align-items-center bg-white"
                 >
-                  <h3 class="card-title font-weight-bold">Browse Tenders</h3>
+                  <h3 class="browse-tenders-title font-weight-bold mb-0">Browse Tenders</h3>
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
@@ -853,6 +853,23 @@ const submitSearch = () => {
 }
 .min-width-0 {
   min-width: 0;
+}
+
+/* Browse Tenders card title — responsive, no AdminLTE float conflict */
+.browse-tenders-title {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  color: #1a3a22;
+  float: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+@media (max-width: 575.98px) {
+  .browse-tenders-title {
+    font-size: 1rem;
+  }
 }
 
 .landing-page {
