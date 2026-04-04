@@ -610,6 +610,7 @@ const submitSearch = () => {
                     :key="tender.id || tender.title"
                     class="callout callout-success mb-2"
                   >
+                    <!-- Row 1: logo + all text content -->
                     <div class="d-flex align-items-start">
                       <!-- Company logo -->
                       <div class="flex-shrink-0 mr-3">
@@ -624,128 +625,89 @@ const submitSearch = () => {
                         </div>
                       </div>
 
-                      <!-- Main content -->
+                      <!-- Main content: title + meta, always full-width beside logo -->
                       <div class="flex-grow-1 min-width-0">
-                        <div
-                          class="d-flex justify-content-between align-items-start"
+                        <Link
+                          :href="route('tenders.public.show', tender.slug || tender.id)"
+                          class="mb-1 font-weight-bold text-dark d-block tender-item-title"
+                          style="text-decoration: none; line-height: 1.4"
                         >
-                          <div class="min-width-0 pr-2">
-                            <Link
-                              :href="
-                                route(
-                                  'tenders.public.show',
-                                  tender.slug || tender.id
-                                )
-                              "
-                              class="mb-0 font-weight-bold text-dark d-block"
-                              style="text-decoration: none; line-height: 1.3"
-                            >
-                              {{ tender.title }}
-                            </Link>
-                            <div
-                              v-if="
-                                tender.institution &&
-                                tender.institution.institution_name
-                              "
-                              class="text-muted small mb-1"
-                            >
-                              <i class="fas fa-building mr-1 text-success"></i>
-                              {{ tender.institution.institution_name }}
-                            </div>
-                            <p
-                              class="mb-1 text-muted small d-flex flex-wrap align-items-center"
-                            >
-                              <i
-                                class="fas fa-map-marker-alt mr-1 text-success"
-                              ></i>
-                              <span class="mr-3">{{
-                                tender.county && tender.county.name
-                                  ? tender.county.name
-                                  : tender.county_name || ""
-                              }}</span>
+                          {{ tender.title }}
+                        </Link>
 
-                              <span
-                                v-if="tender.published_at || tender.created_at"
-                                class="mr-3 d-flex align-items-center"
-                              >
-                                <i
-                                  class="fas fa-calendar-alt mr-1 text-secondary"
-                                ></i>
-                                <strong class="mr-1">Published:</strong>
-                                <small class="text-muted">{{
-                                  formatDate(
-                                    tender.published_at || tender.created_at
-                                  )
-                                }}</small>
-                              </span>
-
-                              <span
-                                v-if="
-                                  tender.closing_at ||
-                                  tender.closing_date_and_time ||
-                                  tender.expiry_date
-                                "
-                                class="mr-3 d-flex align-items-center"
-                              >
-                                <i class="fas fa-clock mr-1 text-secondary"></i>
-                                <strong class="mr-1">Closing:</strong>
-                                <small class="text-muted">{{
-                                  formatDate(
-                                    tender.closing_at ||
-                                      tender.closing_date_and_time ||
-                                      tender.expiry_date
-                                  )
-                                }}</small>
-                              </span>
-
-                              <span
-                                v-if="tender.budget"
-                                class="d-flex align-items-center"
-                              >
-                                <i
-                                  class="fas fa-money-bill-wave mr-1 text-secondary"
-                                ></i>
-                                <small class="text-muted">{{
-                                  tender.budget
-                                }}</small>
-                              </span>
-                            </p>
-                          </div>
-
-                          <div
-                            class="d-flex align-items-start ml-auto flex-shrink-0"
-                          >
-                            <Link
-                              :href="
-                                route(
-                                  'tenders.public.show',
-                                  tender.slug || tender.id
-                                )
-                              "
-                              class="btn btn-outline-success btn-sm mr-2 mb-1"
-                              style="text-decoration: none"
-                            >
-                              <i class="fas fa-info-circle mr-1"></i> Details
-                            </Link>
-
-                            <button
-                              type="button"
-                              class="btn btn-outline-secondary btn-sm mb-1"
-                              aria-label="favorite"
-                              title="Add to favorites"
-                            >
-                              <i class="fas fa-heart mr-1"></i> Favorites
-                            </button>
-                          </div>
+                        <div
+                          v-if="tender.institution && tender.institution.institution_name"
+                          class="text-muted small mb-1"
+                        >
+                          <i class="fas fa-building mr-1 text-success"></i>
+                          {{ tender.institution.institution_name }}
                         </div>
 
-                        <div class="mt-2">
+                        <p class="mb-1 text-muted small d-flex flex-wrap align-items-center">
+                          <i class="fas fa-map-marker-alt mr-1 text-success"></i>
+                          <span class="mr-3">{{
+                            tender.county && tender.county.name
+                              ? tender.county.name
+                              : tender.county_name || ""
+                          }}</span>
+
+                          <span
+                            v-if="tender.published_at || tender.created_at"
+                            class="mr-3 d-flex align-items-center"
+                          >
+                            <i class="fas fa-calendar-alt mr-1 text-secondary"></i>
+                            <strong class="mr-1">Published:</strong>
+                            <small class="text-muted">{{
+                              formatDate(tender.published_at || tender.created_at)
+                            }}</small>
+                          </span>
+
+                          <span
+                            v-if="tender.closing_at || tender.closing_date_and_time || tender.expiry_date"
+                            class="mr-3 d-flex align-items-center"
+                          >
+                            <i class="fas fa-clock mr-1 text-secondary"></i>
+                            <strong class="mr-1">Closing:</strong>
+                            <small class="text-muted">{{
+                              formatDate(
+                                tender.closing_at ||
+                                tender.closing_date_and_time ||
+                                tender.expiry_date
+                              )
+                            }}</small>
+                          </span>
+
+                          <span v-if="tender.budget" class="d-flex align-items-center">
+                            <i class="fas fa-money-bill-wave mr-1 text-secondary"></i>
+                            <small class="text-muted">{{ tender.budget }}</small>
+                          </span>
+                        </p>
+
+                        <!-- Badges -->
+                        <div class="mb-2">
                           <span class="badge badge-secondary mr-1">
                             {{ tender.status ? tender.status.name : "Status" }}
                           </span>
-                          <span class="badge badge-success ml-1"
-                            >Sponsored</span
+                          <span class="badge badge-success ml-1">Sponsored</span>
+                        </div>
+
+                        <!-- Action buttons — always below the content -->
+                        <div class="tender-item-actions">
+                          <Link
+                            :href="route('tenders.public.show', tender.slug || tender.id)"
+                            class="btn btn-outline-success btn-sm mr-2"
+                            style="text-decoration: none"
                           >
+                            <i class="fas fa-info-circle mr-1"></i> Details
+                          </Link>
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            aria-label="favorite"
+                            title="Add to favorites"
+                          >
+                            <i class="fas fa-heart mr-1"></i> Favorites
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -853,6 +815,20 @@ const submitSearch = () => {
 }
 .min-width-0 {
   min-width: 0;
+}
+
+/* Tender list item — responsive title + actions */
+.tender-item-title {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+.tender-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
 }
 
 /* Browse Tenders card title — responsive, no AdminLTE float conflict */
