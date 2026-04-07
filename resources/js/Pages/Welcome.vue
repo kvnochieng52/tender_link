@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch, toRefs } from "vue";
-import { Head, Link, router } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import PublicNavbar from "@/Components/PublicNavbar.vue";
 
 const props = defineProps({
@@ -419,23 +419,8 @@ const submitSearch = () => {
                 </div>
                 <div class="card-body">
                   <div class="row mb-3">
-                    <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="col-12">
                       <div class="input-group input-group-sm">
-                        <div class="input-group-prepend">
-                          <button
-                            type="button"
-                            class="input-group-text btn-reset"
-                            style="
-                              cursor: pointer;
-                              background: none;
-                              border-right: 0;
-                            "
-                            @click="submitSearch"
-                            aria-label="Search tenders"
-                          >
-                            <i class="fas fa-search text-success"></i>
-                          </button>
-                        </div>
                         <input
                           v-model="keyword"
                           class="form-control"
@@ -444,43 +429,30 @@ const submitSearch = () => {
                         />
                         <div class="input-group-append">
                           <select
+                            v-model="industryFilter"
                             class="form-control form-control-sm"
-                            style="border-left: 0; border-radius: 0 0.25rem 0.25rem 0;"
-                            @change="
-                              (e) =>
-                                e.target.value
-                                  ? router.visit(
-                                      route('welcome', { industry: e.target.value })
-                                    )
-                                  : null
-                            "
+                            style="border-radius: 0;"
                           >
                             <option value="">All Industries</option>
                             <option
                               v-for="industry in industries"
                               :key="industry.id || industry.name"
-                              :value="industry.slug || industry.id"
+                              :value="industry.id"
                             >
                               {{ industry.name }}
                             </option>
                           </select>
                         </div>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="d-flex flex-wrap justify-content-md-end">
-                        <span class="badge badge-pill badge-success mr-2 mb-1"
-                          >County</span
-                        >
-                        <span class="badge badge-pill badge-success mr-2 mb-1"
-                          >Deadline</span
-                        >
-                        <span class="badge badge-pill badge-success mr-2 mb-1"
-                          >Budget</span
-                        >
-                        <span class="badge badge-pill badge-success mb-1"
-                          >Industry</span
-                        >
+                        <div class="input-group-append">
+                          <button
+                            type="button"
+                            class="btn btn-success btn-sm"
+                            @click="submitSearch"
+                            aria-label="Search tenders"
+                          >
+                            <i class="fas fa-search mr-1"></i> Search
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
