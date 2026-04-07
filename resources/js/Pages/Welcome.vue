@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch, toRefs } from "vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 import PublicNavbar from "@/Components/PublicNavbar.vue";
 
 const props = defineProps({
@@ -419,19 +419,27 @@ const submitSearch = () => {
                 </div>
                 <div class="card-body">
                   <div class="mb-3">
-                    <Link
-                      v-for="industry in industries"
-                      :key="industry.id || industry.name"
-                      :href="
-                        route('welcome', {
-                          industry: industry.slug || industry.id,
-                        })
+                    <select
+                      class="form-control form-control-sm"
+                      style="max-width: 320px"
+                      @change="
+                        (e) =>
+                          e.target.value
+                            ? router.visit(
+                                route('welcome', { industry: e.target.value })
+                              )
+                            : null
                       "
-                      class="badge badge-light border mr-2 mb-2 p-2 text-muted"
-                      @click="closeMobileMenu"
                     >
-                      {{ industry.name }}
-                    </Link>
+                      <option value="">All Industries</option>
+                      <option
+                        v-for="industry in industries"
+                        :key="industry.id || industry.name"
+                        :value="industry.slug || industry.id"
+                      >
+                        {{ industry.name }}
+                      </option>
+                    </select>
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-6 mb-2 mb-md-0">
