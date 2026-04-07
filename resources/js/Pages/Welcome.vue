@@ -418,29 +418,6 @@ const submitSearch = () => {
                   </h3>
                 </div>
                 <div class="card-body">
-                  <div class="mb-3">
-                    <select
-                      class="form-control form-control-sm"
-                      style="max-width: 320px"
-                      @change="
-                        (e) =>
-                          e.target.value
-                            ? router.visit(
-                                route('welcome', { industry: e.target.value })
-                              )
-                            : null
-                      "
-                    >
-                      <option value="">All Industries</option>
-                      <option
-                        v-for="industry in industries"
-                        :key="industry.id || industry.name"
-                        :value="industry.slug || industry.id"
-                      >
-                        {{ industry.name }}
-                      </option>
-                    </select>
-                  </div>
                   <div class="row mb-3">
                     <div class="col-md-6 mb-2 mb-md-0">
                       <div class="input-group input-group-sm">
@@ -465,6 +442,29 @@ const submitSearch = () => {
                           placeholder="Search tenders"
                           @keyup.enter="submitSearch"
                         />
+                        <div class="input-group-append">
+                          <select
+                            class="form-control form-control-sm"
+                            style="border-left: 0; border-radius: 0 0.25rem 0.25rem 0;"
+                            @change="
+                              (e) =>
+                                e.target.value
+                                  ? router.visit(
+                                      route('welcome', { industry: e.target.value })
+                                    )
+                                  : null
+                            "
+                          >
+                            <option value="">All Industries</option>
+                            <option
+                              v-for="industry in industries"
+                              :key="industry.id || industry.name"
+                              :value="industry.slug || industry.id"
+                            >
+                              {{ industry.name }}
+                            </option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                     <div class="col-md-6">
