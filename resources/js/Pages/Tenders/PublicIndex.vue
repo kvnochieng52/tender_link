@@ -15,6 +15,11 @@ const props = defineProps({
 const search = ref(props.filters.search || "");
 const industry = ref(props.filters.industry_id || "");
 const county = ref(props.filters.county_id || "");
+
+const formatDate = (value) => {
+  if (!value) return "";
+  return new Date(value).toLocaleString();
+};
 </script>
 
 <template>
@@ -112,68 +117,104 @@ const county = ref(props.filters.county_id || "");
               >
                 <div
                   v-for="t in tenders.data"
-                  :key="t.id"
-                  class="list-group-item mb-2"
+                  :key="t.id || t.title"
+                  class="callout callout-success mb-2"
                 >
-                  <div class="d-flex align-items-start">
-                    <div class="mr-3">
+                  <div class="d-flex align-items-start tender-card-wrap">
+                    <div class="flex-shrink-0 mr-3">
                       <img
                         v-if="t.institution && t.institution.logo"
                         :src="`/storage/${t.institution.logo}`"
-                        alt="logo"
-                        style="
-                          width: 64px;
-                          height: 64px;
-                          object-fit: cover;
-                          border-radius: 6px;
-                        "
+                        :alt="t.institution.institution_name"
+                        class="tender-list-logo"
                       />
-                      <div
-                        v-else
-                        class="bg-light d-flex align-items-center justify-content-center"
-                        style="width: 64px; height: 64px; border-radius: 6px"
+                      <div v-else class="tender-list-logo-placeholder">
+                        <i class="fas fa-building text-muted"></i>
+                      </div>
+                    </div>
+
+                    <div class="flex-grow-1 min-width-0">
+                      <Link
+                        :href="route('tenders.public.show', t.slug || t.id)"
+                        class="mb-1 font-weight-bold text-dark d-block tender-item-title"
+                        style="text-decoration: none; line-height: 1.4"
                       >
-                        No Logo
-                      </div>
-                    </div>
+                        {{ t.title }}
+                      </Link>
 
-                    <div class="flex-grow-1">
-                      <h5 class="mb-1">
-                        <Link
-                          :href="route('tenders.public.show', t.slug || t.id)"
-                          >{{ t.title }}</Link
-                        >
-                      </h5>
-                      <div class="mb-1 text-muted small">
-                        Company:
-                        {{
-                          t.institution ? t.institution.institution_name : ""
-                        }}
+                      <div
+                        v-if="t.institution && t.institution.institution_name"
+                        class="text-muted small mb-1"
+                      >
+                        <i class="fas fa-building mr-1 text-success"></i>
+                        {{ t.institution.institution_name }}
                       </div>
-                      <p class="mb-1 text-secondary small">
-                        {{ t.tender_no ? `Tender No: ${t.tender_no}` : "" }}
+
+                      <p
+                        class="mb-1 text-muted small d-flex flex-wrap align-items-center"
+                      >
+                        <i class="fas fa-map-marker-alt mr-1 text-success"></i>
+                        <span class="mr-3">{{
+                          t.county ? t.county.name : ""
+                        }}</span>
+
+                        <span
+                          v-if="t.published_at || t.created_at"
+                          class="mr-3 d-flex align-items-center"
+                        >
+                          <i
+                            class="fas fa-calendar-alt mr-1 text-secondary"
+                          ></i>
+                          <strong class="mr-1">Published:</strong>
+                          <small class="text-muted">
+                            {{ formatDate(t.published_at || t.created_at) }}
+                          </small>
+                        </span>
+
+                        <span
+                          v-if="
+                            t.closing_at ||
+                            t.closing_date_and_time ||
+                            t.expiry_date
+                          "
+                          class="mr-3 d-flex align-items-center"
+                        >
+                          <i class="fas fa-clock mr-1 text-secondary"></i>
+                          <strong class="mr-1">Closing:</strong>
+                          <small class="text-muted">
+                            {{
+                              formatDate(
+                                t.closing_at ||
+                                  t.closing_date_and_time ||
+                                  t.expiry_date
+                              )
+                            }}
+                          </small>
+                        </span>
+
+                        <span v-if="t.budget" class="d-flex align-items-center">
+                          <i
+                            class="fas fa-money-bill-wave mr-1 text-secondary"
+                          ></i>
+                          <small class="text-muted">{{ t.budget }}</small>
+                        </span>
                       </p>
-                      <div class="mt-2">
-                        <Link
-                          :href="route('tenders.public.show', t.slug || t.id)"
-                          class="btn btn-outline-success btn-sm mr-2"
-                          >Details</Link
-                        >
+
+                      <div class="mb-0">
+                        <span class="badge badge-secondary mr-1">
+                          {{ t.status ? t.status.name : "Status" }}
+                        </span>
                       </div>
                     </div>
 
-                    <div class="ml-3 text-right text-muted small">
-                      <div>{{ t.county ? t.county.name : "" }}</div>
-                      <div>{{ t.status ? t.status.name : "" }}</div>
-                      <div class="mt-2">
-                        {{
-                          t.closing_date_and_time
-                            ? new Date(t.closing_date_and_time).toLocaleString()
-                            : t.expiry_date
-                            ? new Date(t.expiry_date).toLocaleString()
-                            : ""
-                        }}
-                      </div>
+                    <div class="tender-item-actions flex-shrink-0">
+                      <Link
+                        :href="route('tenders.public.show', t.slug || t.id)"
+                        class="btn btn-outline-success btn-sm"
+                        style="text-decoration: none"
+                      >
+                        <i class="fas fa-info-circle mr-1"></i> Details
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -232,3 +273,63 @@ const county = ref(props.filters.county_id || "");
     </footer>
   </div>
 </template>
+
+<style scoped>
+.tender-list-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  background: #fff;
+  padding: 2px;
+}
+.tender-list-logo-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  border: 1px dashed #ced4da;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.min-width-0 {
+  min-width: 0;
+}
+
+.tender-item-title {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.tender-card-wrap {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.tender-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-left: 0.75rem;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+@media (max-width: 575.98px) {
+  .tender-card-wrap {
+    flex-wrap: wrap;
+  }
+  .tender-item-actions {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 0;
+    padding-left: calc(52px + 1rem);
+    margin-top: 0.5rem;
+  }
+}
+</style>
