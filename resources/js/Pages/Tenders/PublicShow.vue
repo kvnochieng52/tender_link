@@ -540,10 +540,10 @@ const submitApplication = async () => {
 
       <!-- ── LOCKED STATE ───────────────────────────────────────────────── -->
       <template v-if="!hasAccess">
-        <div class="row">
+        <div class="row align-items-start">
           <!-- Institution card (always visible on lock screen) -->
-          <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm mb-4">
+          <div class="col-lg-7 mb-4">
+            <div class="card border-0 shadow-sm mb-0">
               <div class="card-body">
                 <div class="d-flex align-items-start mb-3">
                   <img
@@ -577,11 +577,48 @@ const submitApplication = async () => {
                 </div>
               </div>
             </div>
+
+            <!-- Tender details summary (locked preview) -->
+            <div class="card border-0 shadow-sm mt-3">
+              <div class="card-header bg-white border-0 pb-1">
+                <h6 class="font-weight-bold mb-0">Tender Details</h6>
+              </div>
+              <div class="card-body pt-2">
+                <table class="table table-sm table-borderless mb-0">
+                  <tbody>
+                    <tr>
+                      <td class="text-muted" style="width:140px"><i class="fas fa-hashtag mr-1 text-success"></i> Tender No.</td>
+                      <td class="font-weight-bold">{{ tender.tender_no || '—' }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted"><i class="fas fa-industry mr-1 text-success"></i> Industry</td>
+                      <td>{{ tender.industry?.name || '—' }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted"><i class="fas fa-map-marker-alt mr-1 text-success"></i> County</td>
+                      <td>{{ tender.county?.name || '—' }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted"><i class="far fa-calendar-alt mr-1 text-success"></i> Closing</td>
+                      <td class="text-danger font-weight-bold">{{ formatDateTime(tender.closing_date_and_time) }}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-muted"><i class="far fa-calendar-check mr-1 text-success"></i> Expiry</td>
+                      <td>{{ formatDateTime(tender.expiry_date) }}</td>
+                    </tr>
+                    <tr v-if="tender.files?.length">
+                      <td class="text-muted"><i class="fas fa-paperclip mr-1 text-success"></i> Documents</td>
+                      <td>{{ tender.files.length }} file{{ tender.files.length !== 1 ? 's' : '' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <!-- Payment wall -->
-          <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm">
+          <div class="col-lg-5 mb-4">
+            <div class="card border-0 shadow-sm" style="position: sticky; top: 1rem;">
               <div class="card-body text-center py-5">
                 <!-- Not logged in: show lock + login prompt -->
                 <template v-if="!user">
