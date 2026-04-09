@@ -587,28 +587,54 @@ const submitApplication = async () => {
                 <table class="table table-sm table-borderless mb-0">
                   <tbody>
                     <tr>
-                      <td class="text-muted" style="width:140px"><i class="fas fa-hashtag mr-1 text-success"></i> Tender No.</td>
-                      <td class="font-weight-bold">{{ tender.tender_no || '—' }}</td>
+                      <td class="text-muted" style="width: 140px">
+                        <i class="fas fa-hashtag mr-1 text-success"></i> Tender
+                        No.
+                      </td>
+                      <td class="font-weight-bold">
+                        {{ tender.tender_no || "—" }}
+                      </td>
                     </tr>
                     <tr>
-                      <td class="text-muted"><i class="fas fa-industry mr-1 text-success"></i> Industry</td>
-                      <td>{{ tender.industry?.name || '—' }}</td>
+                      <td class="text-muted">
+                        <i class="fas fa-industry mr-1 text-success"></i>
+                        Industry
+                      </td>
+                      <td>{{ tender.industry?.name || "—" }}</td>
                     </tr>
                     <tr>
-                      <td class="text-muted"><i class="fas fa-map-marker-alt mr-1 text-success"></i> County</td>
-                      <td>{{ tender.county?.name || '—' }}</td>
+                      <td class="text-muted">
+                        <i class="fas fa-map-marker-alt mr-1 text-success"></i>
+                        County
+                      </td>
+                      <td>{{ tender.county?.name || "—" }}</td>
                     </tr>
                     <tr>
-                      <td class="text-muted"><i class="far fa-calendar-alt mr-1 text-success"></i> Closing</td>
-                      <td class="text-danger font-weight-bold">{{ formatDateTime(tender.closing_date_and_time) }}</td>
+                      <td class="text-muted">
+                        <i class="far fa-calendar-alt mr-1 text-success"></i>
+                        Closing
+                      </td>
+                      <td class="text-danger font-weight-bold">
+                        {{ formatDateTime(tender.closing_date_and_time) }}
+                      </td>
                     </tr>
                     <tr>
-                      <td class="text-muted"><i class="far fa-calendar-check mr-1 text-success"></i> Expiry</td>
+                      <td class="text-muted">
+                        <i class="far fa-calendar-check mr-1 text-success"></i>
+                        Expiry
+                      </td>
                       <td>{{ formatDateTime(tender.expiry_date) }}</td>
                     </tr>
                     <tr v-if="tender.files?.length">
-                      <td class="text-muted"><i class="fas fa-paperclip mr-1 text-success"></i> Documents</td>
-                      <td>{{ tender.files.length }} file{{ tender.files.length !== 1 ? 's' : '' }}</td>
+                      <td class="text-muted">
+                        <i class="fas fa-paperclip mr-1 text-success"></i>
+                        Documents
+                      </td>
+                      <td>
+                        {{ tender.files.length }} file{{
+                          tender.files.length !== 1 ? "s" : ""
+                        }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -618,7 +644,10 @@ const submitApplication = async () => {
 
           <!-- Payment wall -->
           <div class="col-lg-5 mb-4">
-            <div class="card border-0 shadow-sm" style="position: sticky; top: 1rem;">
+            <div
+              class="card border-0 shadow-sm"
+              style="position: sticky; top: 1rem"
+            >
               <div class="card-body text-center py-5">
                 <!-- Not logged in: show lock + login prompt -->
                 <template v-if="!user">
