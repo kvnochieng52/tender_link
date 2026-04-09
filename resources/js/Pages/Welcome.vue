@@ -567,7 +567,7 @@ const submitSearch = () => {
                           <span class="badge badge-secondary mr-1">
                             {{ tender.status ? tender.status.name : "Status" }}
                           </span>
-                          <span class="badge badge-success ml-1"
+                          <span class="badge badge-warning ml-1"
                             >Sponsored</span
                           >
                         </div>

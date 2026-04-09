@@ -184,6 +184,17 @@ body {
   color: var(--primary) !important;
 }
 
+/* Badge overrides */
+.badge-success {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+
+.badge-warning {
+  background-color: var(--secondary) !important;
+  color: var(--primary) !important;
+}
+
 .text-primary {
   color: var(--primary) !important;
 }
