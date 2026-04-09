@@ -275,9 +275,10 @@ const formatDate = (value) => {
 </template>
 
 <style scoped>
-.tender-list-logo {
-  width: 120px;
-  height: 120px;
+.
+tender-list-logo {
+  width: 150px;
+  height: 150px;
   object-fit: contain;
   border-radius: 6px;
   border: 1px solid #e9ecef;
@@ -285,15 +286,15 @@ const formatDate = (value) => {
   padding: 2px;
 }
 .tender-list-logo-placeholder {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 6px;
   border: 1px dashed #ced4da;
   background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  font-size: 2rem;
 }
 .min-width-0 {
   min-width: 0;
