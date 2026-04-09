@@ -377,7 +377,7 @@ const sellerSteps = [
   padding: 1.15rem 0 1rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
@@ -398,7 +398,7 @@ const sellerSteps = [
 
 /* Hero */
 .mkt-hero {
-  background: linear-gradient(135deg, #0d1f3c 0%, #1a3a5c 60%, #2460a0 100%);
+  background: var(--brand-primary);
   min-height: 380px;
   display: flex;
   align-items: center;
@@ -581,10 +581,10 @@ const sellerSteps = [
   align-items: center;
 }
 .cta-half--buyer {
-  background: linear-gradient(135deg, #1a3a5c, #2460a0);
+  background: var(--brand-primary);
 }
 .cta-half--seller {
-  background: linear-gradient(135deg, #0d2c52, #1a5fa0);
+  background: var(--brand-primary-dark);
 }
 .cta-icon {
   font-size: 2.5rem;

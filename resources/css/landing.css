@@ -1,9 +1,23 @@
 /* Shared landing page styles (header/footer/navigation) */
 
+:root {
+  --brand-primary: #09176f;
+  --brand-primary-dark: #060f49;
+  --brand-secondary: #d5a338;
+  --brand-secondary-dark: #b88722;
+  --brand-primary-soft: rgba(9, 23, 111, 0.08);
+  --brand-primary-soft-strong: rgba(9, 23, 111, 0.14);
+  --brand-primary-border: #d7def6;
+  --brand-primary-border-soft: #e5ebfb;
+  --brand-surface-blue: #f3f6ff;
+  --brand-surface-gold: #fff7e5;
+  --brand-surface-neutral: #fffdf7;
+}
+
 .mobile-nav-toggler {
   display: none;
-  border-color: rgba(40, 167, 69, 0.4);
-  color: #1f8f53;
+  border-color: rgba(9, 23, 111, 0.35);
+  color: var(--brand-primary);
   align-items: center;
   justify-content: center;
 }
@@ -35,8 +49,8 @@
 }
 
 .nav-main-menu .nav-link:hover {
-  color: #1f8f53;
-  background-color: rgba(40, 167, 69, 0.08);
+  color: var(--brand-primary);
+  background-color: var(--brand-primary-soft);
 }
 
 .nav-item-dropdown {
@@ -70,8 +84,8 @@
 }
 
 .dropdown-item:hover {
-  background-color: rgba(40, 167, 69, 0.08);
-  color: #1f8f53;
+  background-color: var(--brand-primary-soft);
+  color: var(--brand-primary);
 }
 
 .brand-logo-full {
@@ -88,7 +102,7 @@
 
 .landing-footer {
   background: #ffffff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   margin: 0 !important;
   padding: 1.15rem 0 1rem;
 }
@@ -102,19 +116,19 @@
 }
 
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-primary);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
 }
 
 .footer-link:hover {
-  color: #28a745;
+  color: var(--brand-secondary-dark);
   text-decoration: underline;
 }
 
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 @media (max-width: 767.98px) {

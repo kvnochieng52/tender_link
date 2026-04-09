@@ -95,7 +95,7 @@ const verificationLinkSent = computed(
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, #f0faf4 0%, #ffffff 65%);
+  background: var(--brand-surface-blue);
   padding: 1.25rem;
 }
 
@@ -111,13 +111,13 @@ const verificationLinkSent = computed(
 
 .auth-card {
   border-radius: 0.9rem;
-  box-shadow: 0 12px 35px rgba(40, 167, 69, 0.15);
+  box-shadow: 0 12px 35px rgba(9, 23, 111, 0.15);
 }
 
 .alert-info-text {
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   background: rgba(240, 250, 244, 0.95);
-  border-color: rgba(40, 167, 69, 0.25) !important;
+  border-color: rgba(9, 23, 111, 0.25) !important;
 }
 
 .auth-actions {

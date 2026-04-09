@@ -1,11 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="420" height="96" viewBox="0 0 420 96" fill="none">
-  <defs>
-    <linearGradient id="tlGrad" x1="12" y1="12" x2="84" y2="84" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#28A745" />
-      <stop offset="1" stop-color="#1F8F53" />
-    </linearGradient>
-  </defs>
-  <rect x="8" y="8" width="88" height="80" rx="18" fill="url(#tlGrad)" />
+  <rect x="8" y="8" width="88" height="80" rx="18" fill="#09176f" />
   <path d="M32 28H72V38H56V70H46V38H32V28Z" fill="white" />
   <path
     d="M66 54C66 47.373 60.627 42 54 42H38V52H54C55.105 52 56 52.895 56 54C56 55.105 55.105 56 54 56H46V66H54C60.627 66 66 60.627 66 54Z"

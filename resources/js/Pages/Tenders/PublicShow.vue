@@ -653,7 +653,7 @@ const submitApplication = async () => {
                       style="
                         width: 72px;
                         height: 72px;
-                        background: rgba(40, 167, 69, 0.1);
+                        background: rgba(9, 23, 111, 0.1);
                       "
                     >
                       <i
@@ -1548,7 +1548,7 @@ const submitApplication = async () => {
 .plan-card {
   position: relative;
   background: #fff;
-  border: 1.5px solid #e8f5e9;
+  border: 1.5px solid #e4ebfb;
   border-radius: 1rem;
   padding: 1.75rem 1.5rem 1.5rem;
   flex: 1 1 160px;
@@ -1562,21 +1562,21 @@ const submitApplication = async () => {
   cursor: pointer;
 }
 .plan-card:hover {
-  box-shadow: 0 6px 24px rgba(40, 167, 69, 0.14);
+  box-shadow: 0 6px 24px rgba(9, 23, 111, 0.14);
   transform: translateY(-3px);
-  border-color: #28a745;
+  border-color: var(--brand-primary);
 }
 .plan-card--featured {
-  border-color: #28a745;
-  background: linear-gradient(160deg, #f0fff4 0%, #fff 100%);
-  box-shadow: 0 4px 18px rgba(40, 167, 69, 0.13);
+  border-color: var(--brand-primary);
+  background: var(--brand-surface-blue);
+  box-shadow: 0 4px 18px rgba(9, 23, 111, 0.13);
 }
 .plan-popular-badge {
   position: absolute;
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
   font-size: 0.68rem;
   font-weight: 700;
@@ -1588,7 +1588,7 @@ const submitApplication = async () => {
 }
 .plan-icon {
   font-size: 1.5rem;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 .plan-card--featured .plan-icon {
   color: #155724;
@@ -1607,7 +1607,7 @@ const submitApplication = async () => {
 .plan-price {
   font-size: 1.3rem;
   font-weight: 800;
-  color: #28a745;
+  color: var(--brand-primary);
   margin-bottom: 0.5rem;
   line-height: 1.2;
 }
@@ -1627,10 +1627,10 @@ const submitApplication = async () => {
 .plan-btn {
   width: 100%;
   padding: 0.45rem 0;
-  border: 1.5px solid #28a745;
+  border: 1.5px solid var(--brand-primary);
   border-radius: 50px;
   background: transparent;
-  color: #28a745;
+  color: var(--brand-primary);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -1639,7 +1639,7 @@ const submitApplication = async () => {
 }
 .plan-btn:hover,
 .plan-btn--featured {
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
 }
 .plan-btn--featured:hover {
@@ -1653,8 +1653,8 @@ const submitApplication = async () => {
 }
 .mobile-nav-toggler {
   display: none;
-  border-color: rgba(40, 167, 69, 0.4);
-  color: #1f8f53;
+  border-color: rgba(9, 23, 111, 0.4);
+  color: var(--brand-secondary-dark);
   align-items: center;
   justify-content: center;
 }
@@ -1686,8 +1686,8 @@ const submitApplication = async () => {
 }
 
 .nav-main-menu .nav-link:hover {
-  color: #1f8f53;
-  background-color: rgba(40, 167, 69, 0.08);
+  color: var(--brand-secondary-dark);
+  background-color: rgba(9, 23, 111, 0.08);
 }
 
 .nav-item-dropdown {
@@ -1721,8 +1721,8 @@ const submitApplication = async () => {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(40, 167, 69, 0.08);
-  color: #1f8f53;
+  background-color: rgba(9, 23, 111, 0.08);
+  color: var(--brand-secondary-dark);
 }
 
 @media (max-width: 767.98px) {
@@ -1793,10 +1793,10 @@ const submitApplication = async () => {
 }
 .tender-hero {
   background: #ffffff;
-  border: 1px solid #c8e6d3 !important;
-  border-left: 5px solid #28a745 !important;
+  border: 1px solid var(--brand-primary-border) !important;
+  border-left: 5px solid var(--brand-primary) !important;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.08) !important;
+  box-shadow: 0 2px 12px rgba(9, 23, 111, 0.08) !important;
 }
 
 .hero-title {
@@ -1831,7 +1831,7 @@ const submitApplication = async () => {
 .hero-meta-sep {
   width: 1px;
   height: 36px;
-  background: #d4edda;
+  background: #fff4d6;
   margin-right: 2.5rem;
   align-self: center;
 }
@@ -1860,8 +1860,8 @@ const submitApplication = async () => {
 .hero-industry-badge {
   font-size: 0.75rem;
   padding: 0.35em 0.75em;
-  background: rgba(40, 167, 69, 0.1);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.1);
+  color: var(--brand-secondary-dark);
   font-weight: 600;
 }
 
@@ -1879,7 +1879,7 @@ const submitApplication = async () => {
   height: 64px;
   object-fit: contain;
   border-radius: 0.5rem;
-  border: 1px solid #d7e6dc;
+  border: 1px solid var(--brand-primary-border);
   background: #fff;
   padding: 4px;
 }
@@ -1888,7 +1888,7 @@ const submitApplication = async () => {
   width: 64px;
   height: 64px;
   border-radius: 0.5rem;
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   color: #fff;
   font-size: 1.5rem;
   font-weight: 700;
@@ -1898,8 +1898,8 @@ const submitApplication = async () => {
 }
 
 .badge-success-light {
-  background: rgba(40, 167, 69, 0.12);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-weight: 600;
 }
 
@@ -1909,8 +1909,8 @@ const submitApplication = async () => {
 
 .choose-file-btn {
   background: transparent;
-  border: 1px solid #28a745;
-  color: #1f8f53;
+  border: 1px solid var(--brand-primary);
+  color: var(--brand-secondary-dark);
   padding: 0.25rem 0.5rem;
   display: inline-flex;
   align-items: center;
@@ -1921,9 +1921,9 @@ const submitApplication = async () => {
   font-size: 0.85rem;
 }
 .choose-file-btn:hover {
-  background: linear-gradient(90deg, #28a745, #1f8f53);
+  background: var(--brand-primary);
   color: #fff;
-  border-color: #1f8f53;
+  border-color: var(--brand-secondary-dark);
 }
 
 /* ── Payment Modal ───────────────────────────────────────────────────── */
@@ -1976,7 +1976,7 @@ const submitApplication = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1.25rem;
-  background: #f8fff9;
+  background: var(--brand-surface-neutral);
   border-bottom: 1px solid #e9ecef;
 }
 .pay-summary-label {
@@ -1987,7 +1987,7 @@ const submitApplication = async () => {
 .pay-summary-amount {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 .pay-summary-currency {
   font-size: 0.7rem;
@@ -2029,12 +2029,12 @@ const submitApplication = async () => {
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .pay-method-btn:hover:not(:disabled) {
-  border-color: #28a745;
+  border-color: var(--brand-primary);
 }
 .pay-method-btn--active {
-  border-color: #28a745 !important;
-  background: #f0fff4;
-  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.15);
+  border-color: var(--brand-primary) !important;
+  background: var(--brand-surface-blue);
+  box-shadow: 0 0 0 2px rgba(9, 23, 111, 0.15);
 }
 .pay-method-btn--disabled {
   opacity: 0.5;
@@ -2099,8 +2099,8 @@ const submitApplication = async () => {
 .pay-polling-ring {
   position: absolute;
   inset: 0;
-  border: 4px solid #e8f5e9;
-  border-top-color: #28a745;
+  border: 4px solid #e4ebfb;
+  border-top-color: var(--brand-primary);
   border-radius: 50%;
   animation: pay-spin 1s linear infinite;
 }
@@ -2134,7 +2134,7 @@ const submitApplication = async () => {
 .pay-poll-dots span {
   width: 8px;
   height: 8px;
-  background: #28a745;
+  background: var(--brand-primary);
   border-radius: 50%;
   animation: pay-dot-bounce 1.2s infinite ease-in-out both;
 }

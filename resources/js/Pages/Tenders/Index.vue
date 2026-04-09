@@ -474,7 +474,7 @@ const formatDateTime = (val) => {
 
 <style scoped>
 .tender-page-hero {
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
 }
 
 .filters-card {

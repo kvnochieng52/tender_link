@@ -73,12 +73,12 @@ const heroSlides = [
     subtitle: "Discover verified public and donor-funded tenders in one place.",
     image: "/images/photo2.jpg",
   },
-  {
-    title: "Construction & Infrastructure Opportunities",
-    subtitle:
-      "Track national and county projects with deadline-focused insights.",
-    image: "/images/photo1.jpg",
-  },
+  // {
+  //   title: "Construction & Infrastructure Opportunities",
+  //   subtitle:
+  //     "Track national and county projects with deadline-focused insights.",
+  //   image: "/images/photo1.jpg",
+  // },
   // {
   //   title: "ICT, Supply & Agro Business Leads",
   //   subtitle:
@@ -202,7 +202,7 @@ const submitSearch = () => {
                   <div class="card-header bg-transparent border-0 pb-2">
                     <h3
                       class="card-title font-weight-bold mb-0"
-                      style="color: #28a745"
+                      style="color: var(--brand-primary)"
                     >
                       Search Tenders
                     </h3>
@@ -213,7 +213,7 @@ const submitSearch = () => {
                         <div class="form-group col-6 mb-2">
                           <label
                             class="small font-weight-600 mb-1"
-                            style="color: #1a3a22"
+                            style="color: var(--brand-primary-dark)"
                             >Industry</label
                           >
                           <select
@@ -233,7 +233,7 @@ const submitSearch = () => {
                         <div class="form-group col-6 mb-2">
                           <label
                             class="small font-weight-600 mb-1"
-                            style="color: #1a3a22"
+                            style="color: var(--brand-primary-dark)"
                             >County</label
                           >
                           <select
@@ -256,7 +256,7 @@ const submitSearch = () => {
                         <div class="form-group col-12 mb-2">
                           <label
                             class="small font-weight-600 mb-1"
-                            style="color: #1a3a22"
+                            style="color: var(--brand-primary-dark)"
                             >Deadline</label
                           >
                           <select
@@ -274,7 +274,7 @@ const submitSearch = () => {
                       <div class="form-group mb-2">
                         <label
                           class="small font-weight-600 mb-1"
-                          style="color: #1a3a22"
+                          style="color: var(--brand-primary-dark)"
                           >Keyword</label
                         >
                         <input
@@ -400,7 +400,7 @@ const submitSearch = () => {
           </div>
 
           <div class="text-center mt-2">
-            <a href="#" class="btn btn-success btn-lg px-5 services-cta-btn">
+            <a href="#" class="btn btn-lg px-5 services-cta-btn">
               <i class="fas fa-handshake mr-2"></i>Get Started With Our Services
             </a>
           </div>
@@ -431,7 +431,7 @@ const submitSearch = () => {
                           <select
                             v-model="industryFilter"
                             class="form-control form-control-sm"
-                            style="border-radius: 0;"
+                            style="border-radius: 0"
                           >
                             <option value="">All Industries</option>
                             <option
@@ -745,7 +745,7 @@ const submitSearch = () => {
 .browse-tenders-title {
   font-size: 1.25rem;
   line-height: 1.3;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   float: none !important;
   white-space: nowrap;
   overflow: hidden;
@@ -763,11 +763,7 @@ const submitSearch = () => {
 }
 
 .hero-panel {
-  background: linear-gradient(
-    135deg,
-    rgba(40, 167, 69, 0.08),
-    rgba(255, 255, 255, 1)
-  );
+  background: var(--brand-surface-blue);
   border: 0;
 }
 
@@ -796,8 +792,8 @@ const submitSearch = () => {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 0.6rem;
-  color: #1a3a22;
-  border: 1px solid rgba(40, 167, 69, 0.25);
+  color: var(--brand-primary-dark);
+  border: 1px solid rgba(9, 23, 111, 0.25);
 }
 
 .search-overlay-card .form-control {
@@ -819,7 +815,7 @@ const submitSearch = () => {
   right: 0;
   bottom: 0;
   padding: 1rem 1.1rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.08));
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .slider-nav {
@@ -831,7 +827,7 @@ const submitSearch = () => {
   border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.85);
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -854,17 +850,17 @@ const submitSearch = () => {
   height: 0.62rem;
   border-radius: 50%;
   border: 0;
-  background: #c5d2c8;
+  background: var(--brand-primary-border);
 }
 
 .hero-dot.active {
-  background: #28a745;
+  background: var(--brand-primary);
 }
 
 .mobile-nav-toggler {
   display: none;
-  border-color: rgba(40, 167, 69, 0.4);
-  color: #1f8f53;
+  border-color: rgba(9, 23, 111, 0.4);
+  color: var(--brand-secondary-dark);
   align-items: center;
   justify-content: center;
 }
@@ -896,8 +892,8 @@ const submitSearch = () => {
 }
 
 .nav-main-menu .nav-link:hover {
-  color: #1f8f53;
-  background-color: rgba(40, 167, 69, 0.08);
+  color: var(--brand-secondary-dark);
+  background-color: rgba(9, 23, 111, 0.08);
 }
 
 .nav-item-dropdown {
@@ -931,8 +927,8 @@ const submitSearch = () => {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(40, 167, 69, 0.08);
-  color: #1f8f53;
+  background-color: rgba(9, 23, 111, 0.08);
+  color: var(--brand-secondary-dark);
 }
 
 .brand-logo-full {
@@ -949,7 +945,7 @@ const submitSearch = () => {
 
 .landing-footer {
   background: #ffffff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   margin: 0 !important;
   padding: 1.15rem 0 1rem;
 }
@@ -963,19 +959,19 @@ const submitSearch = () => {
 }
 
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
 }
 
 .footer-link:hover {
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: underline;
 }
 
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 .icon-circle {
@@ -986,12 +982,12 @@ const submitSearch = () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #28a745;
+  background: var(--brand-primary);
 }
 
 /* ── Our Services Section ──────────────────────────────── */
 .services-section {
-  background: linear-gradient(160deg, #f0faf4 0%, #e8f8ee 100%);
+  background: var(--brand-surface-blue);
   padding: 4rem 0 3rem;
   position: relative;
   overflow: hidden;
@@ -1003,11 +999,7 @@ const submitSearch = () => {
   left: -60px;
   width: 260px;
   height: 260px;
-  background: radial-gradient(
-    circle,
-    rgba(40, 167, 69, 0.08) 0%,
-    transparent 70%
-  );
+  background: transparent;
   border-radius: 50%;
   pointer-events: none;
 }
@@ -1018,17 +1010,13 @@ const submitSearch = () => {
   right: -60px;
   width: 300px;
   height: 300px;
-  background: radial-gradient(
-    circle,
-    rgba(40, 167, 69, 0.07) 0%,
-    transparent 70%
-  );
+  background: transparent;
   border-radius: 50%;
   pointer-events: none;
 }
 .services-badge {
   display: inline-block;
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
   font-size: 0.68rem;
   font-weight: 700;
@@ -1040,11 +1028,11 @@ const submitSearch = () => {
 .services-title {
   font-size: 1.85rem;
   font-weight: 800;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   line-height: 1.25;
 }
 .services-subtitle {
-  color: #5a7060;
+  color: #5b6478;
   font-size: 1rem;
   max-width: 580px;
   margin: 0.5rem auto 0;
@@ -1063,13 +1051,7 @@ const submitSearch = () => {
     left: calc(12.5% + 38px);
     right: calc(12.5% + 38px);
     height: 2px;
-    background: repeating-linear-gradient(
-      90deg,
-      #28a745 0px,
-      #28a745 10px,
-      transparent 10px,
-      transparent 22px
-    );
+    background: var(--brand-primary);
     z-index: 0;
   }
 }
@@ -1078,8 +1060,8 @@ const submitSearch = () => {
   border-radius: 1rem;
   padding: 2rem 1.4rem 1.6rem;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(40, 167, 69, 0.09);
-  border: 1.5px solid #e2f3e8;
+  box-shadow: 0 4px 20px rgba(9, 23, 111, 0.09);
+  border: 1.5px solid #e4ebfb;
   height: 100%;
   position: relative;
   z-index: 1;
@@ -1091,8 +1073,8 @@ const submitSearch = () => {
 }
 .service-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 36px rgba(40, 167, 69, 0.18);
-  border-color: #28a745;
+  box-shadow: 0 14px 36px rgba(9, 23, 111, 0.18);
+  border-color: var(--brand-primary);
 }
 .service-step-badge {
   position: absolute;
@@ -1101,7 +1083,7 @@ const submitSearch = () => {
   transform: translateX(-50%);
   width: 36px;
   height: 36px;
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 800;
@@ -1109,20 +1091,20 @@ const submitSearch = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.35);
+  box-shadow: 0 3px 10px rgba(9, 23, 111, 0.35);
   border: 3px solid #fff;
   letter-spacing: 0.03em;
 }
 .service-icon-wrap {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0.5rem auto 1.2rem;
-  box-shadow: 0 6px 18px rgba(40, 167, 69, 0.28);
+  box-shadow: 0 6px 18px rgba(9, 23, 111, 0.28);
   transition: transform 0.28s ease;
   flex-shrink: 0;
 }
@@ -1136,12 +1118,12 @@ const submitSearch = () => {
 .service-card-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   margin-bottom: 0.65rem;
 }
 .service-card-text {
   font-size: 0.875rem;
-  color: #5a7060;
+  color: #5b6478;
   line-height: 1.6;
   margin-bottom: 1rem;
   flex-grow: 1;
@@ -1150,36 +1132,42 @@ const submitSearch = () => {
   display: inline-block;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: none;
   border-bottom: 1.5px solid transparent;
   transition: border-color 0.2s, color 0.2s;
   margin-top: auto;
 }
 .service-learn-more:hover {
-  color: #1f8f53;
-  border-bottom-color: #1f8f53;
+  color: var(--brand-secondary-dark);
+  border-bottom-color: var(--brand-secondary-dark);
   text-decoration: none;
 }
 .services-cta-btn {
   border-radius: 50px;
   font-weight: 700;
   font-size: 1rem;
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  background: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: var(--brand-primary);
+  box-shadow: 0 6px 20px rgba(9, 23, 111, 0.3);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.2s ease;
 }
 .services-cta-btn:hover {
+  background: var(--brand-secondary-dark);
+  border-color: var(--brand-secondary-dark);
+  color: var(--brand-primary);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(40, 167, 69, 0.42);
+  box-shadow: 0 10px 28px rgba(9, 23, 111, 0.42);
 }
 
 .ready-cta-card {
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
 }
 /* ─────────────────────────────────────────────────────────── */
 
 .feature-card {
-  border-left: 3px solid rgba(40, 167, 69, 0.35);
+  border-left: 3px solid rgba(9, 23, 111, 0.35);
 }
 
 .display-5 {
@@ -1220,7 +1208,15 @@ const submitSearch = () => {
   }
 
   .search-overlay-card {
-    background: rgba(33, 37, 41, 0.86);
+    background: #fff;
+    border: 1px solid rgba(9, 23, 111, 0.18);
+  }
+
+  .search-overlay-card .form-control,
+  .search-overlay-card .custom-select {
+    background: #f3f6ff;
+    border-color: var(--brand-primary-border);
+    color: var(--brand-primary-dark);
   }
 
   .nav-main-menu {

@@ -29,12 +29,11 @@ createInertiaApp({
             .mount(el);
     },
     progress: {
-        // Use AdminLTE primary blue color for consistency
-        color: '#007bff',
+        color: '#d5a338',
         showSpinner: true,
         delay: 0, // Show immediately
         includeCSS: true,
         // Ensure higher z-index to appear above AdminLTE elements
         zIndex: 9999
-    }
+    },
 });

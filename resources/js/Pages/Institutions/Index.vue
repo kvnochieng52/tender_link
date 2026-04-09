@@ -409,7 +409,7 @@ const logoUrl = (institution) => {
 
 <style scoped>
 .institutions-hero {
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
 }
 
 .required-asterisk {
@@ -433,14 +433,14 @@ const logoUrl = (institution) => {
   height: 42px;
   object-fit: cover;
   border-radius: 50%;
-  border: 1px solid #dce6df;
+  border: 1px solid #dce3f7;
 }
 
 .institution-logo-placeholder {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;

@@ -256,7 +256,7 @@ const categoryUrl = (name) =>
                   ? '?redirect=' + encodeURIComponent(redirectUrl)
                   : '')
               "
-              class="btn btn-outline-success btn-sm ml-2 mb-1 mb-md-0"
+              class="btn btn-sm ml-2 mb-1 mb-md-0 login-register-btn"
               @click="closeMobileMenu"
               >Login/Register</Link
             >
@@ -289,8 +289,8 @@ const categoryUrl = (name) =>
 /* ── Mobile nav ─────────────────────────────────────────── */
 .mobile-nav-toggler {
   background: none;
-  border: 1px solid rgba(40, 167, 69, 0.4);
-  color: #28a745;
+  border: 1px solid rgba(9, 23, 111, 0.4);
+  color: var(--brand-primary);
   border-radius: 6px;
   padding: 0.35rem 0.6rem;
   font-size: 1.1rem;
@@ -313,8 +313,8 @@ const categoryUrl = (name) =>
 }
 .nav-main-menu .nav-link:hover,
 .nav-main-menu .nav-link.active {
-  color: #1f8f53;
-  background: rgba(40, 167, 69, 0.07);
+  color: var(--brand-secondary-dark);
+  background: rgba(9, 23, 111, 0.07);
 }
 
 /* ── Dropdown ───────────────────────────────────────────── */
@@ -344,8 +344,8 @@ const categoryUrl = (name) =>
   display: block;
 }
 .dropdown-item:hover {
-  background-color: rgba(40, 167, 69, 0.08);
-  color: #1f8f53;
+  background-color: rgba(9, 23, 111, 0.08);
+  color: var(--brand-secondary-dark);
 }
 .dropdown-divider {
   height: 1px;
@@ -384,7 +384,7 @@ const categoryUrl = (name) =>
     position: static;
     box-shadow: none;
     border: none;
-    border-left: 2px solid #28a745;
+    border-left: 2px solid var(--brand-primary);
     border-radius: 0;
     margin-left: 1rem;
     background: transparent;
@@ -396,5 +396,19 @@ const categoryUrl = (name) =>
     width: 100%;
     padding-bottom: 0.5rem;
   }
+}
+
+/* Login/Register gold button */
+.login-register-btn {
+  background: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+.login-register-btn:hover,
+.login-register-btn:focus {
+  background: var(--brand-secondary-dark);
+  border-color: var(--brand-secondary-dark);
+  color: var(--brand-primary);
 }
 </style>

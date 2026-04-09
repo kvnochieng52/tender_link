@@ -129,7 +129,7 @@ const values = [
               <span class="badge badge-success-soft mb-2"
                 ><i class="fas fa-info-circle mr-1"></i>Who We Are</span
               >
-              <h2 class="font-weight-bold mb-3" style="color: #1a3a22">
+              <h2 class="font-weight-bold mb-3" style="color: var(--brand-primary-dark)">
                 Empowering Kenya's Procurement Ecosystem
               </h2>
               <p class="text-muted">
@@ -186,7 +186,7 @@ const values = [
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-star mr-1"></i>Our Values</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               What Guides Us
             </h2>
             <p class="text-muted mx-auto" style="max-width: 520px">
@@ -228,7 +228,7 @@ const values = [
             <Link
               :href="route('register')"
               class="btn btn-light btn-lg px-5 font-weight-bold"
-              style="color: #28a745"
+              style="color: var(--brand-primary)"
             >
               <i class="fas fa-user-plus mr-2"></i>Register Free
             </Link>
@@ -287,24 +287,24 @@ const values = [
 }
 .landing-footer {
   background: #ffffff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   padding: 1.15rem 0 1rem;
 }
 .footer-links {
   gap: 0.35rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
 }
 .footer-link:hover {
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: underline;
 }
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 /* ── Hero ─────────── */
@@ -338,7 +338,7 @@ const values = [
 
 /* ── Stats ──────────── */
 .stats-bar {
-  background: #1a3a22;
+  background: var(--brand-primary-dark);
 }
 .stat-item {
   padding: 1rem 0.5rem;
@@ -361,54 +361,54 @@ const values = [
 /* ── Values ──────────── */
 .value-card {
   background: #fff;
-  border: 1px solid #e9f5ed;
+  border: 1px solid #e4ebfb;
   border-radius: 0.75rem;
   padding: 1.75rem 1.5rem;
   transition: box-shadow 0.2s;
 }
 .value-card:hover {
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.12);
+  box-shadow: 0 6px 20px rgba(9, 23, 111, 0.12);
 }
 .value-icon-wrap {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(9, 23, 111, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.35rem;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 
 /* ── Team ───────────── */
 .team-card {
   background: #fff;
-  border: 1px solid #e9f5ed;
+  border: 1px solid #e4ebfb;
   border-radius: 0.75rem;
   padding: 2rem 1.25rem;
   transition: box-shadow 0.2s;
 }
 .team-card:hover {
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.12);
+  box-shadow: 0 6px 20px rgba(9, 23, 111, 0.12);
 }
 .team-avatar {
   width: 88px;
   height: 88px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #28a745;
+  border: 3px solid var(--brand-primary);
 }
 
 /* ── CTA ────────────── */
 .about-cta {
-  background: linear-gradient(135deg, #1a5c2e 0%, #28a745 100%);
+  background: var(--brand-primary);
 }
 
 /* ── Badge soft ─────── */
 .badge-success-soft {
-  background: rgba(40, 167, 69, 0.12);
-  color: #1a6130;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35em 0.75em;

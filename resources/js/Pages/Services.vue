@@ -222,7 +222,7 @@ const plans = [
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-cogs mr-1"></i>Core Platform</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               End-to-End Procurement Services
             </h2>
             <p class="text-muted mx-auto" style="max-width: 560px">
@@ -266,14 +266,14 @@ const plans = [
       <section
         id="online-application"
         class="py-5"
-        style="background: linear-gradient(160deg, #f0faf4 0%, #e8f8ee 100%)"
+        style="background: var(--brand-surface-blue)"
       >
         <div class="container">
           <div class="section-header text-center mb-5">
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-plus-circle mr-1"></i>Add-on Services</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               More Tools to Grow With
             </h2>
             <p class="text-muted mx-auto" style="max-width: 520px">
@@ -308,7 +308,7 @@ const plans = [
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-briefcase mr-1"></i>Professional Services</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               Beyond the Platform
             </h2>
             <p class="text-muted mx-auto" style="max-width: 560px">
@@ -332,13 +332,13 @@ const plans = [
                   :style="{ background: svc.badgeColor }"
                   >{{ svc.badge }}</span
                 >
-                <h5 class="font-weight-bold mb-2" style="color: #1a3a22">
+                <h5 class="font-weight-bold mb-2" style="color: var(--brand-primary-dark)">
                   {{ svc.title }}
                 </h5>
                 <p class="text-muted small mb-3">{{ svc.text }}</p>
 
                 <template v-if="svc.features.length">
-                  <p class="small font-weight-bold mb-1" style="color: #1a3a22">
+                  <p class="small font-weight-bold mb-1" style="color: var(--brand-primary-dark)">
                     What we offer:
                   </p>
                   <ul class="extra-svc-list mb-3">
@@ -350,7 +350,7 @@ const plans = [
                 </template>
 
                 <template v-if="svc.pricing.length">
-                  <p class="small font-weight-bold mb-1" style="color: #1a3a22">
+                  <p class="small font-weight-bold mb-1" style="color: var(--brand-primary-dark)">
                     Pricing:
                   </p>
                   <ul class="extra-svc-list">
@@ -400,7 +400,7 @@ const plans = [
             <Link
               :href="route('contact')"
               class="btn btn-light btn-lg px-5 font-weight-bold"
-              style="color: #28a745"
+              style="color: var(--brand-primary)"
             >
               <i class="fas fa-envelope mr-2"></i>Contact Us
             </Link>
@@ -459,24 +459,24 @@ const plans = [
 }
 .landing-footer {
   background: #ffffff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   padding: 1.15rem 0 1rem;
 }
 .footer-links {
   gap: 0.35rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
 }
 .footer-link:hover {
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: underline;
 }
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 /* ── Hero ─────── */
@@ -511,21 +511,21 @@ const plans = [
 /* ── Service cards ─ */
 .svc-card {
   background: #fff;
-  border: 1px solid #e9f5ed;
+  border: 1px solid #e4ebfb;
   border-radius: 0.75rem;
   padding: 2rem 1.5rem 1.5rem;
   position: relative;
   transition: box-shadow 0.2s;
 }
 .svc-card:hover {
-  box-shadow: 0 6px 24px rgba(40, 167, 69, 0.13);
+  box-shadow: 0 6px 24px rgba(9, 23, 111, 0.13);
 }
 .svc-step-badge {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(40, 167, 69, 0.1);
-  color: #28a745;
+  background: rgba(9, 23, 111, 0.1);
+  color: var(--brand-primary);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.2rem 0.55rem;
@@ -535,15 +535,15 @@ const plans = [
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(9, 23, 111, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.35rem;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 .svc-title {
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
 }
 .svc-feature-list {
   list-style: none;
@@ -559,24 +559,24 @@ const plans = [
 /* ── Add-on cards ─── */
 .addon-card {
   background: #fff;
-  border: 1px solid #e9f5ed;
+  border: 1px solid #e4ebfb;
   border-radius: 0.75rem;
   padding: 1.25rem 1.25rem;
   transition: box-shadow 0.2s;
 }
 .addon-card:hover {
-  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.1);
+  box-shadow: 0 4px 16px rgba(9, 23, 111, 0.1);
 }
 .addon-icon-wrap {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(9, 23, 111, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
-  color: #28a745;
+  color: var(--brand-primary);
   margin-top: 0.1rem;
 }
 
@@ -594,15 +594,15 @@ const plans = [
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 .plan-card--highlighted {
-  border-color: #28a745;
-  box-shadow: 0 8px 28px rgba(40, 167, 69, 0.18);
+  border-color: var(--brand-primary);
+  box-shadow: 0 8px 28px rgba(9, 23, 111, 0.18);
 }
 .plan-badge {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  background: rgba(40, 167, 69, 0.1);
-  color: #1a6130;
+  background: rgba(9, 23, 111, 0.1);
+  color: var(--brand-secondary-dark);
   padding: 0.2rem 0.6rem;
   border-radius: 99px;
   margin-bottom: 0.75rem;
@@ -611,13 +611,13 @@ const plans = [
 .plan-name {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   margin-bottom: 0.25rem;
 }
 .plan-price {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #28a745;
+  color: var(--brand-primary);
   margin-bottom: 1.25rem;
 }
 .plan-period {
@@ -639,13 +639,13 @@ const plans = [
 
 /* ── CTA ──────────── */
 .services-cta {
-  background: linear-gradient(135deg, #1a5c2e 0%, #28a745 100%);
+  background: var(--brand-primary);
 }
 
 /* ── Badge soft ───── */
 .badge-success-soft {
-  background: rgba(40, 167, 69, 0.12);
-  color: #1a6130;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35em 0.75em;
@@ -663,19 +663,19 @@ const plans = [
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .extra-svc-card:hover {
-  box-shadow: 0 6px 24px rgba(40, 167, 69, 0.13);
+  box-shadow: 0 6px 24px rgba(9, 23, 111, 0.13);
   transform: translateY(-3px);
 }
 .extra-svc-icon-wrap {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #e8f8ee, #d0f0d8);
+  background: var(--brand-surface-gold);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.35rem;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 .extra-svc-badge {
   font-size: 0.7rem;

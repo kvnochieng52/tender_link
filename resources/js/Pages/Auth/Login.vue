@@ -170,7 +170,7 @@ const submit = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, #f0faf4 0%, #ffffff 65%);
+  background: var(--brand-surface-blue);
   padding: 1.25rem;
 }
 
@@ -186,7 +186,7 @@ const submit = () => {
 
 .auth-card {
   border-radius: 0.9rem;
-  box-shadow: 0 12px 35px rgba(40, 167, 69, 0.15);
+  box-shadow: 0 12px 35px rgba(9, 23, 111, 0.15);
 }
 
 .form-control {
@@ -195,16 +195,16 @@ const submit = () => {
 }
 
 .form-control:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 0.2rem rgba(9, 23, 111, 0.15);
 }
 
 .auth-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
 }
 
 .auth-link:hover {
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: underline;
 }
 

@@ -798,24 +798,24 @@ const submitPayment = async () => {
 <style scoped>
 /* ── Hero cards ──────────────────────────────────────────────────────── */
 .dashboard-hero-card {
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   border-radius: 0.8rem;
 }
 .user-hero-card {
-  background: linear-gradient(135deg, #1f8f53 0%, #155d36 100%);
+  background: var(--brand-secondary-dark);
   border-radius: 0.8rem;
 }
 
 /* ── Admin stat cards ────────────────────────────────────────────────── */
 .stat-card {
-  border-left: 3px solid rgba(40, 167, 69, 0.35);
+  border-left: 3px solid rgba(9, 23, 111, 0.35);
 }
 .stat-icon {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.14);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.14);
+  color: var(--brand-secondary-dark);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -824,8 +824,8 @@ const submitPayment = async () => {
   border-bottom: 0 !important;
 }
 .tender-status {
-  background: rgba(40, 167, 69, 0.14);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.14);
+  color: var(--brand-secondary-dark);
   font-weight: 700;
 }
 
@@ -839,8 +839,8 @@ const submitPayment = async () => {
   height: 56px;
   margin: 0 auto 0.5rem;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.12);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-size: 1.5rem;
   display: flex;
   align-items: center;
@@ -849,7 +849,7 @@ const submitPayment = async () => {
 .current-plan-name {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #1a3027;
+  color: var(--brand-primary-dark);
 }
 .current-plan-meta {
   font-size: 0.82rem;
@@ -871,7 +871,7 @@ const submitPayment = async () => {
 .plan-card {
   position: relative;
   background: #fff;
-  border: 1.5px solid #e8f5e9;
+  border: 1.5px solid #e4ebfb;
   border-radius: 1rem;
   padding: 1.5rem 1.25rem;
   min-width: 180px;
@@ -881,20 +881,20 @@ const submitPayment = async () => {
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .plan-card:hover {
-  box-shadow: 0 4px 24px rgba(40, 167, 69, 0.13);
+  box-shadow: 0 4px 24px rgba(9, 23, 111, 0.13);
   transform: translateY(-2px);
 }
 .plan-card--featured {
-  border-color: #28a745;
-  background: #f0fff4;
-  box-shadow: 0 4px 18px rgba(40, 167, 69, 0.18);
+  border-color: var(--brand-primary);
+  background: var(--brand-surface-blue);
+  box-shadow: 0 4px 18px rgba(9, 23, 111, 0.18);
 }
 .plan-popular-badge {
   position: absolute;
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
@@ -904,15 +904,15 @@ const submitPayment = async () => {
 }
 .plan-icon {
   font-size: 1.6rem;
-  color: #28a745;
+  color: var(--brand-primary);
 }
 .plan-card--featured .plan-icon {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
 }
 .plan-name {
   font-size: 1rem;
   font-weight: 700;
-  color: #1a3027;
+  color: var(--brand-primary-dark);
 }
 .plan-duration {
   font-size: 0.8rem;
@@ -922,7 +922,7 @@ const submitPayment = async () => {
 .plan-price {
   font-size: 1.4rem;
   font-weight: 800;
-  color: #1a3027;
+  color: var(--brand-primary-dark);
   margin-bottom: 0.5rem;
 }
 .plan-currency {
@@ -938,10 +938,10 @@ const submitPayment = async () => {
 }
 .plan-btn {
   width: 100%;
-  border: 2px solid #28a745;
+  border: 2px solid var(--brand-primary);
   border-radius: 999px;
   background: #fff;
-  color: #28a745;
+  color: var(--brand-primary);
   font-size: 0.85rem;
   font-weight: 700;
   padding: 0.45rem 1rem;
@@ -950,7 +950,7 @@ const submitPayment = async () => {
 }
 .plan-btn:hover,
 .plan-btn--featured {
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
 }
 
@@ -994,12 +994,12 @@ const submitPayment = async () => {
   padding: 0.2rem 0.4rem;
 }
 .pay-modal-summary {
-  background: #f6fdf8;
+  background: #f8faff;
   padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e8f5e9;
+  border-bottom: 1px solid #e4ebfb;
 }
 .pay-summary-label {
   font-size: 0.82rem;
@@ -1008,7 +1008,7 @@ const submitPayment = async () => {
 .pay-summary-amount {
   font-size: 1.1rem;
   font-weight: 800;
-  color: #1a3027;
+  color: var(--brand-primary-dark);
 }
 .pay-summary-currency {
   font-size: 0.72rem;
@@ -1024,7 +1024,7 @@ const submitPayment = async () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #8a9a8c;
+  color: #7f889d;
   margin-bottom: 0.5rem;
 }
 .pay-method-options {
@@ -1046,8 +1046,8 @@ const submitPayment = async () => {
   gap: 0.25rem;
 }
 .pay-method-btn--active {
-  border-color: #28a745;
-  background: #f0fff4;
+  border-color: var(--brand-primary);
+  background: var(--brand-surface-blue);
 }
 .pay-method-btn--disabled {
   opacity: 0.45;
@@ -1063,7 +1063,7 @@ const submitPayment = async () => {
   font-weight: 600;
 }
 .pay-method-check {
-  color: #28a745;
+  color: var(--brand-primary);
   font-size: 0.8rem;
 }
 .pay-method-soon {
@@ -1085,7 +1085,7 @@ const submitPayment = async () => {
 .pay-modal-trust {
   text-align: center;
   font-size: 0.72rem;
-  color: #9aab9d;
+  color: #8b93a6;
   padding: 0 1.25rem 1rem;
 }
 
@@ -1103,8 +1103,8 @@ const submitPayment = async () => {
 .pay-polling-ring {
   position: absolute;
   inset: 0;
-  border: 4px solid #e8f5e9;
-  border-top-color: #28a745;
+  border: 4px solid #e4ebfb;
+  border-top-color: var(--brand-primary);
   border-radius: 50%;
   animation: pay-spin 1s linear infinite;
 }
@@ -1138,7 +1138,7 @@ const submitPayment = async () => {
 .pay-poll-dots span {
   width: 8px;
   height: 8px;
-  background: #28a745;
+  background: var(--brand-primary);
   border-radius: 50%;
   animation: pay-dot-bounce 1.2s infinite ease-in-out both;
 }

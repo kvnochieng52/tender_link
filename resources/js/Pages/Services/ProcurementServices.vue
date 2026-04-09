@@ -26,8 +26,8 @@ const tabs = [
 const tabContent = {
   discovery: {
     heading: "Tender Discovery & Alerts",
-    colour: "#28a745",
-    bg: "rgba(40,167,69,0.07)",
+    colour: "var(--brand-primary)",
+    bg: "rgba(9, 23, 111, 0.07)",
     icon: "fas fa-search",
     intro:
       "Our database is refreshed multiple times daily, pulling tenders from government portals, county procurement offices, NGOs, and private institutions across Kenya — all in one searchable place.",
@@ -324,14 +324,14 @@ const addons = [
       <!-- ── More Tools to Grow With ──────────────────────── -->
       <section
         class="py-5"
-        style="background: linear-gradient(160deg, #f0faf4 0%, #e8f8ee 100%)"
+        style="background: var(--brand-surface-blue)"
       >
         <div class="container">
           <div class="section-header text-center mb-5">
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-plus-circle mr-1"></i>Add-on Services</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               More Tools to Grow With
             </h2>
             <p class="text-muted mx-auto" style="max-width: 520px">
@@ -376,7 +376,7 @@ const addons = [
               <Link
                 :href="route('register')"
                 class="btn btn-light btn-lg px-5 font-weight-bold"
-                style="color: #1a3a22"
+                style="color: var(--brand-primary-dark)"
                 ><i class="fas fa-rocket mr-2"></i>Register Free</Link
               >
             </div>
@@ -420,11 +420,11 @@ const addons = [
 }
 .landing-footer {
   background: #fff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   padding: 1.15rem 0 1rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
@@ -433,7 +433,7 @@ const addons = [
   text-decoration: underline;
 }
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 /* Hero */
@@ -498,8 +498,8 @@ const addons = [
 }
 .stage-tab-btn.active {
   background: #fff;
-  color: #1a3a22;
-  border-bottom: 3px solid #28a745;
+  color: var(--brand-primary-dark);
+  border-bottom: 3px solid var(--brand-primary);
 }
 .stage-tab-btn:hover:not(.active) {
   background: #fff;
@@ -507,7 +507,7 @@ const addons = [
 }
 .tab-panel {
   border: 1px solid #e0e0e0;
-  border-top: 3px solid #28a745;
+  border-top: 3px solid var(--brand-primary);
   border-radius: 0 0 0.75rem 0.75rem;
   padding: 2rem 2rem 1.5rem;
   background: #fff;
@@ -555,7 +555,7 @@ const addons = [
 
 /* Pipeline strip */
 .pipeline-strip {
-  background: #1a3a22;
+  background: var(--brand-primary-dark);
 }
 .pipeline-node {
   display: flex;
@@ -576,7 +576,7 @@ const addons = [
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #28a745;
+  border: 2px solid var(--brand-primary);
   color: #fff;
   display: flex;
   align-items: center;
@@ -595,29 +595,29 @@ const addons = [
 /* Add-ons */
 .addon-card {
   background: #fff;
-  border: 1px solid #e9f5ed;
+  border: 1px solid #e4ebfb;
   border-radius: 0.75rem;
   padding: 1.25rem;
   transition: box-shadow 0.2s;
 }
 .addon-card:hover {
-  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.1);
+  box-shadow: 0 4px 16px rgba(9, 23, 111, 0.1);
 }
 .addon-icon-wrap {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.1);
+  background: rgba(9, 23, 111, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
-  color: #28a745;
+  color: var(--brand-primary);
   margin-top: 0.1rem;
 }
 .badge-success-soft {
-  background: rgba(40, 167, 69, 0.12);
-  color: #1a3a22;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-primary-dark);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35em 0.75em;
@@ -626,6 +626,6 @@ const addons = [
 
 /* CTA */
 .proc-cta {
-  background: linear-gradient(135deg, #1a3a22 0%, #28a745 100%);
+  background: var(--brand-primary);
 }
 </style>

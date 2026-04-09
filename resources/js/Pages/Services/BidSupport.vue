@@ -116,7 +116,7 @@ const services = [
                 <Link
                   :href="route('contact')"
                   class="btn btn-light btn-lg px-5 font-weight-bold"
-                  style="color: #1a4a20"
+                  style="color: var(--brand-primary-dark)"
                   ><i class="fas fa-envelope mr-2"></i>Get a Free Quote</Link
                 >
                 <Link
@@ -222,7 +222,7 @@ const services = [
             <span class="badge-soft-green mb-2 d-inline-block"
               ><i class="fas fa-star mr-1"></i>Why Choose Us</span
             >
-            <h2 class="font-weight-bold" style="color: #1a4a20">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               What Sets Our Bid Support Apart
             </h2>
           </div>
@@ -255,7 +255,7 @@ const services = [
             >
               <div class="why-card text-center h-100">
                 <div class="why-icon mx-auto mb-3"><i :class="w.icon"></i></div>
-                <h6 class="font-weight-bold mb-2" style="color: #1a4a20">
+                <h6 class="font-weight-bold mb-2" style="color: var(--brand-primary-dark)">
                   {{ w.title }}
                 </h6>
                 <p class="text-muted small mb-0">{{ w.text }}</p>
@@ -278,7 +278,7 @@ const services = [
           <Link
             :href="route('contact')"
             class="btn btn-light btn-lg px-5 font-weight-bold"
-            style="color: #1a4a20"
+            style="color: var(--brand-primary-dark)"
             ><i class="fas fa-comments mr-2"></i>Start a Conversation</Link
           >
         </div>
@@ -320,11 +320,11 @@ const services = [
 }
 .landing-footer {
   background: #fff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   padding: 1.15rem 0 1rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
@@ -333,7 +333,7 @@ const services = [
   text-decoration: underline;
 }
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 .breadcrumb-dark {
   background: transparent;
@@ -343,7 +343,7 @@ const services = [
   color: rgba(255, 255, 255, 0.4);
 }
 .bid-hero {
-  background: linear-gradient(135deg, #1a4a20 0%, #2d7a38 50%, #34a853 100%);
+  background: var(--brand-primary);
   min-height: 320px;
   display: flex;
   align-items: center;
@@ -391,7 +391,7 @@ const services = [
   font-weight: 600;
 }
 .svc-band--light {
-  background: #f7fdf9;
+  background: #fbfcff;
 }
 .svc-band--white {
   background: #fff;
@@ -423,7 +423,7 @@ const services = [
 }
 .checklist-card {
   background: #fff;
-  border-left: 4px solid #28a745;
+  border-left: 4px solid var(--brand-primary);
   border-radius: 0.75rem;
   padding: 1.75rem 1.5rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -447,15 +447,15 @@ const services = [
   border-bottom: 1px dashed #ddd;
 }
 .badge-soft-green {
-  background: rgba(40, 167, 69, 0.1);
-  color: #1a4a20;
+  background: rgba(9, 23, 111, 0.1);
+  color: var(--brand-primary-dark);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35em 0.75em;
   border-radius: 99px;
 }
 .why-card {
-  background: #f7fdf9;
+  background: #fbfcff;
   border: 1px solid #e0f0e6;
   border-radius: 0.75rem;
   padding: 1.75rem 1.25rem;
@@ -464,7 +464,7 @@ const services = [
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(40, 167, 69, 0.12);
+  background: rgba(9, 23, 111, 0.12);
   color: #1a7a40;
   display: flex;
   align-items: center;
@@ -472,6 +472,6 @@ const services = [
   font-size: 1.4rem;
 }
 .bid-cta {
-  background: linear-gradient(135deg, #1a4a20 0%, #0d2c14 100%);
+  background: var(--brand-primary-dark);
 }
 </style>

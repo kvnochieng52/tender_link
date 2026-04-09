@@ -437,7 +437,7 @@ const faqs = [
   padding: 1.15rem 0 1rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
@@ -458,7 +458,7 @@ const faqs = [
 
 /* Hero */
 .fund-hero {
-  background: linear-gradient(135deg, #5c3d11 0%, #8c5e20 50%, #c8892a 100%);
+  background: var(--brand-secondary-dark);
   min-height: 300px;
   display: flex;
   align-items: center;
@@ -605,7 +605,7 @@ const faqs = [
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5c3d11, #c8892a);
+  background: var(--brand-secondary-dark);
   color: #fff;
   font-weight: 800;
   font-size: 1rem;
@@ -616,7 +616,7 @@ const faqs = [
 .process-line {
   width: 2px;
   flex: 1;
-  background: linear-gradient(#c8892a, rgba(200, 137, 42, 0.2));
+  background: var(--brand-secondary);
   min-height: 32px;
   margin: 4px 0;
 }
@@ -660,6 +660,6 @@ const faqs = [
 
 /* CTA */
 .fund-cta {
-  background: linear-gradient(135deg, #5c3d11 0%, #8c5e20 100%);
+  background: var(--brand-secondary-dark);
 }
 </style>

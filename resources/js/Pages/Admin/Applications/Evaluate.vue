@@ -229,7 +229,7 @@ function modalCompliancePct(app) {
     <!-- ── Header ─────────────────────────────────────────────── -->
     <div
       class="card border-0 shadow-sm mb-3"
-      style="background: linear-gradient(135deg, #1a3c5e 0%, #2d6a9f 100%)"
+      style="background: var(--brand-primary)"
     >
       <div class="card-body">
         <div

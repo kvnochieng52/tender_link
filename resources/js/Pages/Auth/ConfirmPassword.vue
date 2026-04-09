@@ -89,7 +89,7 @@ const submit = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+    background: #f5f7fa;
 }
 
 .login-logo {

@@ -107,7 +107,7 @@ const toggleFaq = (i) => {
             <!-- Left: details -->
             <div class="col-lg-4 mb-4 mb-lg-0">
               <div class="contact-info-card h-100">
-                <h4 class="font-weight-bold mb-4" style="color: #1a3a22">
+                <h4 class="font-weight-bold mb-4" style="color: var(--brand-primary-dark)">
                   Contact Information
                 </h4>
                 <div
@@ -126,7 +126,7 @@ const toggleFaq = (i) => {
 
                 <hr class="my-4 border-success-light" />
 
-                <p class="small font-weight-bold mb-2" style="color: #1a3a22">
+                <p class="small font-weight-bold mb-2" style="color: var(--brand-primary-dark)">
                   Follow us
                 </p>
                 <div class="d-flex" style="gap: 0.65rem">
@@ -150,7 +150,7 @@ const toggleFaq = (i) => {
             <div class="col-lg-8">
               <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-bottom py-3">
-                  <h5 class="mb-0 font-weight-bold" style="color: #1a3a22">
+                  <h5 class="mb-0 font-weight-bold" style="color: var(--brand-primary-dark)">
                     <i class="fas fa-paper-plane text-success mr-2"></i>Send Us
                     a Message
                   </h5>
@@ -284,7 +284,7 @@ const toggleFaq = (i) => {
             <div class="text-center text-muted">
               <i
                 class="fas fa-map-marker-alt fa-3x mb-3"
-                style="color: #28a745"
+                style="color: var(--brand-primary)"
               ></i>
               <p class="mb-0 font-weight-bold">
                 Madonna House Annex, Westlands, Nairobi
@@ -302,7 +302,7 @@ const toggleFaq = (i) => {
             <span class="badge badge-success-soft mb-2"
               ><i class="fas fa-question-circle mr-1"></i>FAQ</span
             >
-            <h2 class="font-weight-bold" style="color: #1a3a22">
+            <h2 class="font-weight-bold" style="color: var(--brand-primary-dark)">
               Frequently Asked Questions
             </h2>
             <p class="text-muted mx-auto" style="max-width: 480px">
@@ -381,24 +381,24 @@ const toggleFaq = (i) => {
 }
 .landing-footer {
   background: #ffffff;
-  border-color: #dfe5e1 !important;
+  border-color: var(--brand-primary-border) !important;
   padding: 1.15rem 0 1rem;
 }
 .footer-links {
   gap: 0.35rem;
 }
 .footer-link {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   font-size: 0.94rem;
   font-weight: 600;
   text-decoration: none;
 }
 .footer-link:hover {
-  color: #28a745;
+  color: var(--brand-primary);
   text-decoration: underline;
 }
 .footer-bottom {
-  border-top: 1px solid #ebf1ed;
+  border-top: 1px solid var(--brand-primary-border-soft);
 }
 
 /* ── Hero ─────── */
@@ -432,7 +432,7 @@ const toggleFaq = (i) => {
 
 /* ── Contact info card ── */
 .contact-info-card {
-  background: #1a3a22;
+  background: var(--brand-primary-dark);
   border-radius: 0.75rem;
   padding: 2rem 1.75rem;
   color: #fff;
@@ -490,8 +490,8 @@ const toggleFaq = (i) => {
 /* ── Map ─────────── */
 .map-placeholder {
   border-radius: 0.75rem;
-  background: #e9f5ed;
-  border: 2px dashed #b2dfbb;
+  background: #e4ebfb;
+  border: 2px dashed #efd79a;
   min-height: 200px;
   padding: 2.5rem;
 }
@@ -508,7 +508,7 @@ const toggleFaq = (i) => {
   padding: 1rem 1.25rem;
   font-weight: 600;
   font-size: 0.92rem;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -550,8 +550,8 @@ const toggleFaq = (i) => {
 
 /* ── Badge soft ───── */
 .badge-success-soft {
-  background: rgba(40, 167, 69, 0.12);
-  color: #1a6130;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.35em 0.75em;

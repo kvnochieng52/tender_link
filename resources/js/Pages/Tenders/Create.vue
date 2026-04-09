@@ -1987,7 +1987,7 @@ const submit = () => {
 
 <style scoped>
 .tender-page-hero {
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   border-radius: 0.8rem;
 }
 
@@ -2022,16 +2022,16 @@ const submit = () => {
   justify-content: center;
   font-weight: 700;
   font-size: 0.85rem;
-  border: 1px solid #d6e9dc;
-  background: #f8fbf9;
+  border: 1px solid var(--brand-primary-border);
+  background: #f7f8fd;
   color: #4f5f56;
 }
 
 .stepper-item.active .stepper-dot,
 .stepper-item.done .stepper-dot {
-  background: #28a745;
+  background: var(--brand-primary);
   color: #fff;
-  border-color: #28a745;
+  border-color: var(--brand-primary);
 }
 
 .stepper-title {
@@ -2065,7 +2065,7 @@ const submit = () => {
 }
 
 .custom-requirement-card {
-  border: 1px solid #d7e9dc;
+  border: 1px solid var(--brand-primary-border);
 }
 
 .custom-requirement-form .card-header h5 {
@@ -2107,8 +2107,8 @@ const submit = () => {
 }
 
 .library-item:hover {
-  border-color: #b8d9c3;
-  background: #fbfefc;
+  border-color: #c4cfef;
+  background: #fcfcff;
 }
 
 .requirements-preview-table td,
@@ -2118,16 +2118,16 @@ const submit = () => {
 
 .new-institution-panel {
   background: #f7faf8;
-  border: 1px solid #e1ede5;
+  border: 1px solid #e7ebf8;
   border-radius: 0.65rem;
   padding: 1rem;
 }
 
 /* Institution profile card */
 .institution-profile-card {
-  border: 1px solid #d4ead9;
+  border: 1px solid var(--brand-primary-border);
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, #f0f9f3 0%, #ffffff 100%);
+  background: #ffffff;
   padding: 1.1rem;
 }
 
@@ -2146,7 +2146,7 @@ const submit = () => {
   height: 72px;
   object-fit: contain;
   border-radius: 0.5rem;
-  border: 1px solid #d4ead9;
+  border: 1px solid var(--brand-primary-border);
   background: #fff;
   padding: 4px;
 }
@@ -2155,7 +2155,7 @@ const submit = () => {
   width: 72px;
   height: 72px;
   border-radius: 0.5rem;
-  background: linear-gradient(135deg, #28a745 0%, #1f8f53 100%);
+  background: var(--brand-primary);
   color: #fff;
   font-size: 2rem;
   font-weight: 700;
@@ -2172,13 +2172,13 @@ const submit = () => {
 .institution-profile-name {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #1a3a22;
+  color: var(--brand-primary-dark);
 }
 
 .institution-type-badge {
   display: inline-block;
-  background: rgba(40, 167, 69, 0.12);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.12);
+  color: var(--brand-secondary-dark);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.15rem 0.55rem;
@@ -2202,7 +2202,7 @@ const submit = () => {
 }
 
 .institution-meta-icon {
-  color: #28a745;
+  color: var(--brand-primary);
   width: 14px;
   flex-shrink: 0;
 }
@@ -2246,23 +2246,23 @@ const submit = () => {
 }
 
 .file-drop-zone {
-  border: 2px dashed rgba(40, 167, 69, 0.4);
+  border: 2px dashed rgba(9, 23, 111, 0.4);
   border-radius: 0.75rem;
   padding: 1.4rem 1rem;
   text-align: center;
-  background: rgba(240, 250, 244, 0.7);
+  background: rgba(243, 246, 255, 0.72);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .file-drop-zone:hover {
-  background: rgba(240, 250, 244, 1);
-  border-color: #28a745;
+  background: rgba(243, 246, 255, 1);
+  border-color: var(--brand-primary);
 }
 
 .file-drop-icon {
   font-size: 1.7rem;
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
   margin-bottom: 0.55rem;
 }
 
@@ -2270,7 +2270,7 @@ const submit = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #e6eee9;
+  border: 1px solid #e6ebf8;
   border-radius: 0.5rem;
   padding: 0.45rem 0.6rem;
   margin-bottom: 0.5rem;
@@ -2279,8 +2279,8 @@ const submit = () => {
 
 .form-control:focus,
 .custom-select:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.14);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 0.2rem rgba(9, 23, 111, 0.14);
 }
 
 .tender-form-sections {

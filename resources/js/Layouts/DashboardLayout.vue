@@ -223,7 +223,7 @@ const logout = () => {
 }
 
 .top-nav-links .nav-link:hover {
-  color: #1f8f53;
+  color: var(--brand-secondary-dark);
 }
 
 .dashboard-body {
@@ -248,7 +248,7 @@ const logout = () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #8fa897;
+  color: #7b8497;
   padding: 0 0.8rem;
 }
 
@@ -256,7 +256,7 @@ const logout = () => {
   display: block;
   border-radius: 0.55rem;
   padding: 0.7rem 0.8rem;
-  color: #415149;
+  color: #3e4a63;
   font-weight: 600;
   margin-bottom: 0.35rem;
   text-decoration: none;
@@ -264,13 +264,13 @@ const logout = () => {
 }
 
 .sidebar-link:hover {
-  background: rgba(40, 167, 69, 0.1);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.1);
+  color: var(--brand-secondary-dark);
 }
 
 .sidebar-link.active {
-  background: rgba(40, 167, 69, 0.15);
-  color: #1f8f53;
+  background: rgba(9, 23, 111, 0.15);
+  color: var(--brand-secondary-dark);
 }
 
 .dashboard-content {
