@@ -276,17 +276,17 @@ const formatDate = (value) => {
 
 <style scoped>
 .tender-list-logo {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
   border-radius: 6px;
   border: 1px solid #e9ecef;
   background: #fff;
-  padding: 4px;
+  padding: 2px;
 }
 .tender-list-logo-placeholder {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 6px;
   border: 1px dashed #ced4da;
   background: #f8f9fa;

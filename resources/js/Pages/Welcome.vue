@@ -680,17 +680,17 @@ const submitSearch = () => {
 
 <style scoped>
 .tender-list-logo {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
   border-radius: 6px;
   border: 1px solid #e9ecef;
   background: #fff;
-  padding: 4px;
+  padding: 2px;
 }
 .tender-list-logo-placeholder {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   border-radius: 6px;
   border: 1px dashed #ced4da;
   background: #f8f9fa;
@@ -736,7 +736,7 @@ const submitSearch = () => {
     flex-direction: row;
     flex-wrap: wrap;
     margin-left: 0;
-    padding-left: calc(80px + 1rem);
+    padding-left: calc(120px + 1rem);
     margin-top: 0.5rem;
   }
 }
