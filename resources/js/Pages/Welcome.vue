@@ -679,8 +679,7 @@ const submitSearch = () => {
 </template>
 
 <style scoped>
-.
-tender-list-logo {
+. tender-list-logo {
   width: 150px;
   height: 150px;
   object-fit: contain;
