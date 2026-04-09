@@ -199,6 +199,11 @@ body {
   color: var(--primary) !important;
 }
 
+/* Callout overrides */
+.callout.callout-success {
+  border-left-color: var(--primary) !important;
+}
+
 /* Tables */
 .table {
   border-radius: 8px;
