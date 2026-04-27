@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TenderStoreRequest;
 use App\Http\Requests\TenderUpdateRequest;
+use App\Jobs\SendTenderNotificationJob;
 use App\Models\County;
 use App\Models\CommonRequirement;
 use App\Models\Industry;
@@ -244,8 +245,9 @@ class TenderController extends Controller
     {
         $userId       = auth()->id();
         $activeStatus = TenderStatus::where('name', 'Active')->first();
+        $tender = null;
 
-        DB::transaction(function () use ($request, $userId, $activeStatus): void {
+        DB::transaction(function () use ($request, $userId, $activeStatus, &$tender): void {
             $institutionId = $request->input('institution_id');
 
             if ($request->boolean('create_new_institution')) {
@@ -339,6 +341,11 @@ class TenderController extends Controller
                 }
             }
         });
+
+        // Dispatch email notification job after successful tender creation
+        if ($tender) {
+            SendTenderNotificationJob::dispatch($tender);
+        }
 
         return redirect()
             ->route('tenders.index')

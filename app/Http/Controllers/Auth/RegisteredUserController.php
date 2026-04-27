@@ -49,6 +49,8 @@ class RegisteredUserController extends Controller
             'telephone' => $request->telephone,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         event(new Registered($user));
