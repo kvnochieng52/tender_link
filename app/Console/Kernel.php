@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\SendDailyTenderNotificationsJob;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -12,7 +13,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Send tender notifications at 8:00 AM daily
+        $schedule->job(new SendDailyTenderNotificationsJob())
+            ->dailyAt('08:00')
+            ->timezone('Africa/Nairobi')
+            ->name('morning-tender-notifications')
+            ->withoutOverlapping();
+
+        // Send tender notifications at 4:00 PM daily
+        $schedule->job(new SendDailyTenderNotificationsJob())
+            ->dailyAt('16:00')
+            ->timezone('Africa/Nairobi')
+            ->name('evening-tender-notifications')
+            ->withoutOverlapping();
     }
 
     /**

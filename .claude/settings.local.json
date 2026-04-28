@@ -4,7 +4,11 @@
       "Bash(php artisan route:list:*)",
       "Read(//c/laragon/www/azam_tv_bulk_sms/resources/js/**)",
       "Read(//c/laragon/www/azam_tv_bulk_sms/resources/js/Layouts/**)",
-      "Bash(mkdir -p ./app/Jobs)"
+      "Bash(mkdir -p ./app/Jobs)",
+      "Bash(php artisan make:migration create_user_notification_preferences_table)",
+      "Bash(php artisan make:job SendDailyTenderNotificationsJob)",
+      "Bash(php artisan make:migration add_last_notified_at_to_tenders_table)",
+      "Bash(php artisan migrate)"
     ],
     "deny": [],
     "ask": []
