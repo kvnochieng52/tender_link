@@ -342,10 +342,10 @@ class TenderController extends Controller
             }
         });
 
-        // Dispatch email notification job after successful tender creation
-        if ($tender) {
-            SendTenderNotificationJob::dispatch($tender);
-        }
+        // Individual notifications disabled - using batch notifications at 8 AM and 4 PM instead
+        // if ($tender) {
+        //     SendTenderNotificationJob::dispatch($tender);
+        // }
 
         return redirect()
             ->route('tenders.index')
