@@ -8,7 +8,8 @@
       "Bash(php artisan make:migration create_user_notification_preferences_table)",
       "Bash(php artisan make:job SendDailyTenderNotificationsJob)",
       "Bash(php artisan make:migration add_last_notified_at_to_tenders_table)",
-      "Bash(php artisan migrate)"
+      "Bash(php artisan migrate)",
+      "Bash(php artisan describe tenders)"
     ],
     "deny": [],
     "ask": []

@@ -41,7 +41,6 @@ class SendDailyTenderNotificationsJob implements ShouldQueue
             $query->whereNull('last_notified_at')
                   ->orWhere('last_notified_at', '<', Carbon::now()->subHours(8));
         })
-        ->where('status', 'active')
         ->where('closing_date_and_time', '>', Carbon::now())
         ->orderBy('created_at', 'desc')
         ->get();
