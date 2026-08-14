@@ -18,6 +18,14 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  tendererProfile: {
+    type: Object,
+    default: null,
+  },
+  draft: {
+    type: Object,
+    default: null,
+  },
   currentUrl: {
     type: String,
     default: "",
@@ -205,30 +213,137 @@ const submitPayment = async () => {
 // Apply UI state (frontend only)
 const toast = useToast();
 const applyMode = ref(false);
+
+// Pre-fill applicant/representative. Precedence:
+//   1. Saved draft (previous half-finished attempt)
+//   2. Tenderer Profile
+//   3. Auth user's basic details
+const tp = props.tendererProfile || {};
+const authUser = page.props.auth?.user || {};
+const hasTendererProfile = computed(() => !!props.tendererProfile);
+
+const draftData = props.draft?.data || {};
+const draftApplicant = draftData.applicant || {};
+const draftRepresentative = draftData.representative || {};
+const hasSavedDraft = ref(!!props.draft);
+const draftUpdatedAt = ref(props.draft?.updated_at || null);
+const draftJustSaved = ref(false);
+const savingDraft = ref(false);
+
 const applicant = ref({
-  company_name: "",
-  address: "",
-  telephone: "",
-  website: "",
-  county: "",
-  email: "",
-  additional_notes: "",
+  company_name:
+    draftApplicant.company_name ??
+    (tp.business_name || tp.trading_name || ""),
+  address: draftApplicant.address ?? (tp.physical_address || ""),
+  telephone:
+    draftApplicant.telephone ?? (tp.contact_phone || authUser.telephone || ""),
+  website: draftApplicant.website ?? (tp.website || ""),
+  county: draftApplicant.county ?? (tp.county_id || ""),
+  email: draftApplicant.email ?? (tp.contact_email || authUser.email || ""),
+  additional_notes: draftApplicant.additional_notes ?? "",
 });
 const representative = ref({
-  full_name: "",
-  position: "",
-  telephone: "",
-  email: "",
+  full_name:
+    draftRepresentative.full_name ??
+    (tp.contact_person_name || authUser.name || ""),
+  position: draftRepresentative.position ?? (tp.contact_person_position || ""),
+  telephone:
+    draftRepresentative.telephone ??
+    (tp.contact_phone || authUser.telephone || ""),
+  email:
+    draftRepresentative.email ??
+    (tp.contact_email || authUser.email || ""),
 });
-const requirementFiles = ref({});
+const requirementFiles = ref(draftData.requirementFiles || {});
 const requirementsList = computed(() => props.tender.requirements || []);
 const countyOptions = computed(() => page.props?.counties || []);
 
-const currentApplyStep = ref(1);
+// ── Confidential Business Questionnaire (per application) ───────────────
+const hasQuestionnaireTemplate = computed(
+  () => !!props.tender.confidential_questionnaire_file_path
+);
+// Fresh upload (File object) — only set when the user picks a new file this session.
+const filledQuestionnaireFile = ref(null);
+// Path + name of a questionnaire already saved to the draft. Non-null means
+// the user has a stored copy from a previous session.
+const savedQuestionnaire = ref(
+  draftData.filledQuestionnaire && draftData.filledQuestionnaire.filepath
+    ? {
+        filepath: draftData.filledQuestionnaire.filepath,
+        name: draftData.filledQuestionnaire.name,
+      }
+    : null
+);
+const questionnaireIsProvided = computed(
+  () => !!filledQuestionnaireFile.value || !!savedQuestionnaire.value
+);
+const onFilledQuestionnaireChange = (e) => {
+  filledQuestionnaireFile.value = e.target.files?.[0] || null;
+  if (filledQuestionnaireFile.value) {
+    // A new upload replaces any previously-saved draft copy.
+    savedQuestionnaire.value = null;
+  }
+};
+const clearFilledQuestionnaire = () => {
+  filledQuestionnaireFile.value = null;
+  savedQuestionnaire.value = null;
+  const el = document.getElementById("filled_questionnaire_input");
+  if (el) el.value = "";
+};
+
+// ── Category selection (for prequalification / multi-lot tenders) ──────
+const categoriesList = computed(() => props.tender.categories || []);
+const hasCategories = computed(() => categoriesList.value.length > 0);
+const categorySearch = ref("");
+const selectedCategoryIds = ref(
+  Array.isArray(draftData.selectedCategoryIds)
+    ? [...draftData.selectedCategoryIds]
+    : []
+);
+
+const filteredCategories = computed(() => {
+  const q = categorySearch.value.trim().toLowerCase();
+  if (!q) return categoriesList.value;
+  return categoriesList.value.filter((c) => {
+    return (
+      (c.title || "").toLowerCase().includes(q) ||
+      (c.tender_no || "").toLowerCase().includes(q)
+    );
+  });
+});
+
+const filteredIdSet = computed(
+  () => new Set(filteredCategories.value.map((c) => c.id))
+);
+
+const allFilteredSelected = computed(() => {
+  if (!filteredCategories.value.length) return false;
+  return filteredCategories.value.every((c) =>
+    selectedCategoryIds.value.includes(c.id)
+  );
+});
+
+const toggleSelectAllFiltered = () => {
+  if (allFilteredSelected.value) {
+    // Deselect only the filtered set
+    selectedCategoryIds.value = selectedCategoryIds.value.filter(
+      (id) => !filteredIdSet.value.has(id)
+    );
+  } else {
+    const merged = new Set([
+      ...selectedCategoryIds.value,
+      ...filteredCategories.value.map((c) => c.id),
+    ]);
+    selectedCategoryIds.value = Array.from(merged);
+  }
+};
+
+const currentApplyStep = ref(props.draft?.current_step || 1);
 
 const startApply = () => {
   applyMode.value = true;
-  currentApplyStep.value = 1;
+  // Resume at the step where the user left off if we hydrated from a draft.
+  currentApplyStep.value = props.draft?.current_step || 1;
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -237,17 +352,104 @@ const cancelApply = () => {
   currentApplyStep.value = 1;
 };
 
+// ── Draft persistence ────────────────────────────────────────────────────
+// Serialise the current form state as a plain-JSON draft payload. Files that
+// are still just-picked File objects have no path yet, so they are dropped
+// from the payload — the user must re-upload them (they'll be picked up as
+// temp files the next time they save).
+const buildDraftPayload = () => ({
+  applicant: { ...applicant.value },
+  representative: { ...representative.value },
+  selectedCategoryIds: [...selectedCategoryIds.value],
+  requirementFiles: Object.fromEntries(
+    Object.entries(requirementFiles.value)
+      .filter(([, rf]) => rf && (rf.filepath || rf.uploaded))
+      .map(([idx, rf]) => [
+        idx,
+        {
+          filepath: rf.filepath,
+          name: rf.name,
+          uploaded: true,
+          requirement_id: rf.requirement_id ?? null,
+        },
+      ])
+  ),
+  filledQuestionnaire: savedQuestionnaire.value
+    ? { ...savedQuestionnaire.value }
+    : null,
+});
+
+const saveDraft = async (opts = { silent: false }) => {
+  // Only meaningful for authenticated users mid-apply.
+  if (!authUser?.id || !applyMode.value) return;
+
+  savingDraft.value = true;
+  try {
+    const res = await axios.post(
+      route("tenders.draft.save", { slug: props.tender.slug }),
+      {
+        data: buildDraftPayload(),
+        current_step: currentApplyStep.value,
+      }
+    );
+    if (res?.data?.draft) {
+      draftUpdatedAt.value = res.data.draft.updated_at;
+      // Refresh any file paths the backend rewrote (e.g. moved from temp/).
+      const returned = res.data.draft.data || {};
+      if (returned.requirementFiles) {
+        Object.entries(returned.requirementFiles).forEach(([idx, rf]) => {
+          if (requirementFiles.value[idx]) {
+            requirementFiles.value[idx].filepath = rf.filepath;
+          }
+        });
+      }
+      if (returned.filledQuestionnaire && savedQuestionnaire.value) {
+        savedQuestionnaire.value.filepath = returned.filledQuestionnaire.filepath;
+      }
+      hasSavedDraft.value = true;
+    }
+    if (!opts.silent) {
+      draftJustSaved.value = true;
+      setTimeout(() => (draftJustSaved.value = false), 2500);
+    }
+  } catch (e) {
+    if (!opts.silent) {
+      toast.error("Could not save your progress. Please try again.");
+    }
+  } finally {
+    savingDraft.value = false;
+  }
+};
+
+const saveAndExit = async () => {
+  await saveDraft({ silent: false });
+  toast.success(
+    "Progress saved. You can return any time to complete this application."
+  );
+  cancelApply();
+};
+
 const goToStep = (n) => {
   currentApplyStep.value = n;
   window.scrollTo({ top: 0, behavior: "smooth" });
+  // Silently save so the user's step position sticks across sessions.
+  saveDraft({ silent: true });
 };
 
+const maxApplyStep = computed(() => (hasQuestionnaireTemplate.value ? 3 : 2));
+
 const nextStep = () => {
-  if (currentApplyStep.value < 2) currentApplyStep.value++;
+  if (currentApplyStep.value < maxApplyStep.value) {
+    currentApplyStep.value++;
+    saveDraft({ silent: true });
+  }
 };
 
 const prevStep = () => {
-  if (currentApplyStep.value > 1) currentApplyStep.value--;
+  if (currentApplyStep.value > 1) {
+    currentApplyStep.value--;
+    saveDraft({ silent: true });
+  }
 };
 
 const onRequirementFileChange = (event, idx, reqId = null) => {
@@ -351,6 +553,13 @@ const removeRequirementFile = async (idx) => {
 };
 
 const submitApplication = async () => {
+  // Category selection (only when tender has categories)
+  if (hasCategories.value && selectedCategoryIds.value.length === 0) {
+    toast.error("Please select at least one category to apply for.");
+    goToStep(1);
+    return;
+  }
+
   // Basic required fields (business)
   const missing = [];
   if (!applicant.value.company_name?.trim())
@@ -391,6 +600,14 @@ const submitApplication = async () => {
     return;
   }
 
+  if (hasQuestionnaireTemplate.value && !questionnaireIsProvided.value) {
+    toast.error(
+      "Please upload your filled Confidential Business Questionnaire."
+    );
+    goToStep(maxApplyStep.value);
+    return;
+  }
+
   const form = new FormData();
   form.append("company_name", applicant.value.company_name || "");
   form.append("telephone", applicant.value.telephone || "");
@@ -417,6 +634,25 @@ const submitApplication = async () => {
       rf && rf.uploaded ? rf.name : ""
     );
   });
+
+  selectedCategoryIds.value.forEach((id) => {
+    form.append("tender_category_ids[]", id);
+  });
+
+  if (filledQuestionnaireFile.value) {
+    form.append("filled_questionnaire_file", filledQuestionnaireFile.value);
+  } else if (savedQuestionnaire.value) {
+    // Resumed from draft — send path + name so the backend knows what to
+    // copy out of the draft directory.
+    form.append(
+      "filled_questionnaire_file_path",
+      savedQuestionnaire.value.filepath
+    );
+    form.append(
+      "filled_questionnaire_file_name",
+      savedQuestionnaire.value.name || ""
+    );
+  }
 
   try {
     // append CSRF token as fallback
@@ -526,13 +762,66 @@ const submitApplication = async () => {
             </div>
           </div>
 
+          <!-- Tender Advert + Self Declaration + CBQ template downloads -->
+          <div
+            v-if="
+              tender.advert_file_path ||
+              tender.self_declaration_file_path ||
+              tender.confidential_questionnaire_file_path
+            "
+            class="tender-documents-strip mt-3"
+          >
+            <span class="tender-documents-label">
+              <i class="fas fa-download mr-1"></i> Documents:
+            </span>
+            <a
+              v-if="tender.advert_file_path"
+              :href="`/storage/${tender.advert_file_path}`"
+              target="_blank"
+              class="btn btn-sm btn-outline-light tender-document-btn"
+            >
+              <i class="fas fa-file-alt mr-1"></i>
+              {{ tender.advert_file_name || "Tender Advert" }}
+            </a>
+            <a
+              v-if="tender.self_declaration_file_path"
+              :href="`/storage/${tender.self_declaration_file_path}`"
+              target="_blank"
+              class="btn btn-sm btn-outline-light tender-document-btn"
+            >
+              <i class="fas fa-file-signature mr-1"></i>
+              {{
+                tender.self_declaration_file_name || "Self Declaration Form"
+              }}
+            </a>
+            <a
+              v-if="tender.confidential_questionnaire_file_path"
+              :href="`/storage/${tender.confidential_questionnaire_file_path}`"
+              target="_blank"
+              class="btn btn-sm btn-outline-light tender-document-btn"
+            >
+              <i class="fas fa-clipboard-list mr-1"></i>
+              {{
+                tender.confidential_questionnaire_file_name ||
+                "Confidential Business Questionnaire"
+              }}
+            </a>
+          </div>
+
           <div v-if="hasAccess" class="d-flex justify-content-end mt-3">
             <button
               v-if="!applyMode && tender.tender_link_process"
               class="btn btn-success"
               @click="startApply"
             >
-              <i class="fas fa-paper-plane mr-1"></i> Apply for this Tender
+              <i
+                :class="
+                  hasSavedDraft
+                    ? 'fas fa-clock-rotate-left mr-1'
+                    : 'fas fa-paper-plane mr-1'
+                "
+              ></i>
+              {{ hasSavedDraft ? "Resume Application" : "Apply for this Tender" }}
             </button>
           </div>
         </div>
@@ -830,27 +1119,45 @@ const submitApplication = async () => {
               <!-- Description -->
               <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 pb-1">
-                  <h5 class="font-weight-bold mb-0">Tender Description</h5>
+                  <h5 class="font-weight-bold mb-0">
+                    About
+                    {{
+                      tender.institution?.institution_name || "the Institution"
+                    }}
+                  </h5>
                 </div>
                 <div class="card-body">
                   <div class="content-html" v-html="tender.description"></div>
                 </div>
               </div>
 
-              <!-- Requirements -->
-              <div class="card border-0 shadow-sm mb-4">
+              <!-- Categories preview -->
+              <div v-if="hasCategories" class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 pb-1">
-                  <h5 class="font-weight-bold mb-0">Key Requirements</h5>
+                  <h5 class="font-weight-bold mb-0">
+                    Categories
+                    <span class="text-muted small ms-2"
+                      >{{ categoriesList.length }} in this tender</span
+                    >
+                  </h5>
                 </div>
                 <div class="card-body">
-                  <div
-                    v-if="tender.key_requirements"
-                    class="content-html"
-                    v-html="tender.key_requirements"
-                  ></div>
-                  <p v-else class="text-muted mb-0">
-                    No key requirements specified.
+                  <p class="text-muted small mb-3">
+                    This tender is split into
+                    {{ categoriesList.length }} categories. Click
+                    <strong>Apply</strong> to pick which ones to submit interest
+                    for.
                   </p>
+                  <ol class="mb-0 pl-3">
+                    <li
+                      v-for="cat in categoriesList"
+                      :key="cat.id"
+                      class="mb-1"
+                    >
+                      <strong>{{ cat.tender_no }}</strong> &mdash;
+                      {{ cat.title }}
+                    </li>
+                  </ol>
                 </div>
               </div>
 
@@ -898,7 +1205,18 @@ const submitApplication = async () => {
                   class="btn btn-success"
                   @click="startApply"
                 >
-                  <i class="fas fa-paper-plane mr-1"></i> Apply for this Tender
+                  <i
+                    :class="
+                      hasSavedDraft
+                        ? 'fas fa-clock-rotate-left mr-1'
+                        : 'fas fa-paper-plane mr-1'
+                    "
+                  ></i>
+                  {{
+                    hasSavedDraft
+                      ? "Resume Application"
+                      : "Apply for this Tender"
+                  }}
                 </button>
               </div>
             </div>
@@ -1044,6 +1362,19 @@ const submitApplication = async () => {
                     >
                       2. Requirements
                     </button>
+                    <button
+                      v-if="hasQuestionnaireTemplate"
+                      :class="[
+                        'btn',
+                        currentApplyStep === 3
+                          ? 'btn-success'
+                          : 'btn-outline-secondary',
+                        'btn-sm',
+                      ]"
+                      @click.prevent="goToStep(3)"
+                    >
+                      3. Business Questionnaire
+                    </button>
                   </div>
                   <button
                     class="btn btn-outline-success btn-sm ms-3"
@@ -1053,10 +1384,163 @@ const submitApplication = async () => {
                   </button>
                 </div>
                 <div class="card-body">
+                  <div
+                    v-if="hasSavedDraft"
+                    class="alert alert-info py-2 px-3 mb-3 d-flex justify-content-between align-items-center small"
+                  >
+                    <span>
+                      <i class="fas fa-clock-rotate-left me-2"></i>
+                      Resumed from a saved draft.
+                      <span v-if="draftUpdatedAt" class="text-muted ms-1">
+                        Last saved
+                        {{ new Date(draftUpdatedAt).toLocaleString() }}
+                      </span>
+                    </span>
+                    <span
+                      v-if="savingDraft || draftJustSaved"
+                      class="text-success small"
+                    >
+                      <i
+                        :class="
+                          savingDraft
+                            ? 'fas fa-spinner fa-spin me-1'
+                            : 'fas fa-check-circle me-1'
+                        "
+                      ></i>
+                      {{ savingDraft ? "Saving…" : "Saved." }}
+                    </span>
+                  </div>
+
                   <form @submit.prevent="submitApplication">
                     <div class="row">
                       <!-- Step 1: Basic Details -->
                       <template v-if="currentApplyStep === 1">
+                        <div class="col-12 mb-3">
+                          <div
+                            v-if="hasTendererProfile"
+                            class="alert alert-success py-2 px-3 mb-0 d-flex justify-content-between align-items-center"
+                            style="font-size: 0.875rem"
+                          >
+                            <span>
+                              <i class="fas fa-info-circle me-2"></i>
+                              These details were pre-filled from your saved
+                              <strong>Tenderer Profile</strong>. Review and adjust
+                              as needed for this tender.
+                            </span>
+                            <a
+                              :href="route('profile.edit')"
+                              target="_blank"
+                              class="btn btn-outline-success btn-sm ms-2"
+                            >
+                              <i class="fas fa-edit me-1"></i> Edit Profile
+                            </a>
+                          </div>
+                          <div
+                            v-else
+                            class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center"
+                            style="font-size: 0.875rem"
+                          >
+                            <span>
+                              <i class="fas fa-lightbulb me-2"></i>
+                              Tip: Complete your
+                              <strong>Tenderer Profile</strong> to pre-fill these
+                              fields on every application.
+                            </span>
+                            <a
+                              :href="route('profile.edit')"
+                              target="_blank"
+                              class="btn btn-outline-warning btn-sm ms-2"
+                            >
+                              Set up Profile
+                            </a>
+                          </div>
+                        </div>
+
+                        <!-- Category picker (only for multi-category tenders) -->
+                        <div v-if="hasCategories" class="col-12 mb-4">
+                          <div class="border rounded p-3 category-picker">
+                            <h6 class="font-weight-bold mb-2">
+                              Select category &amp; submit Interest
+                            </h6>
+                            <p class="text-muted small mb-3">
+                              {{ categoriesList.length }} categories in
+                              {{
+                                tender.institution?.institution_name ||
+                                "this tender"
+                              }}
+                              &mdash; {{ tender.title }}
+                            </p>
+
+                            <input
+                              v-model="categorySearch"
+                              type="search"
+                              class="form-control form-control-sm mb-3 category-search"
+                              placeholder="search bid category"
+                            />
+
+                            <div
+                              v-if="!filteredCategories.length"
+                              class="text-muted small py-2"
+                            >
+                              No categories match your search.
+                            </div>
+
+                            <div v-else>
+                              <label
+                                class="d-flex align-items-center mb-2 pb-2 border-bottom category-select-all"
+                              >
+                                <input
+                                  type="checkbox"
+                                  :checked="allFilteredSelected"
+                                  @change="toggleSelectAllFiltered"
+                                  class="me-2"
+                                />
+                                <span>
+                                  <em>Select all {{ filteredCategories.length }}</em>
+                                  <span
+                                    v-if="categorySearch.trim()"
+                                    class="badge badge-info ms-1"
+                                    >Matched</span
+                                  >
+                                  <em class="ms-1">categories</em>
+                                </span>
+                              </label>
+
+                              <div class="category-list">
+                                <label
+                                  v-for="cat in filteredCategories"
+                                  :key="cat.id"
+                                  class="d-flex align-items-start py-2 px-1 border-bottom category-row"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    :value="cat.id"
+                                    v-model="selectedCategoryIds"
+                                    class="me-2 mt-1"
+                                  />
+                                  <span>
+                                    <strong>{{ cat.tender_no }}</strong>
+                                    -
+                                    {{ cat.title }}
+                                  </span>
+                                </label>
+                              </div>
+
+                              <div
+                                v-if="selectedCategoryIds.length"
+                                class="mt-3 small text-success"
+                              >
+                                <i class="fas fa-check-circle me-1"></i>
+                                {{ selectedCategoryIds.length }} category<span
+                                  v-if="selectedCategoryIds.length > 1"
+                                  >(ies)</span
+                                >
+                                selected.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                         <div class="col-12 mb-2">
                           <label class="font-weight-semibold"
                             >Company / Organization Name
@@ -1172,7 +1656,7 @@ const submitApplication = async () => {
                         </div>
 
                         <div
-                          class="col-12 d-flex justify-content-end mt-2"
+                          class="col-12 d-flex justify-content-end mt-2 flex-wrap"
                           style="gap: 0.75rem"
                         >
                           <button
@@ -1181,6 +1665,15 @@ const submitApplication = async () => {
                             @click="cancelApply"
                           >
                             Cancel
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-outline-info btn-sm"
+                            :disabled="savingDraft"
+                            @click="saveAndExit"
+                          >
+                            <i class="fas fa-save me-1"></i>
+                            Save &amp; Continue Later
                           </button>
                           <button
                             type="button"
@@ -1331,7 +1824,10 @@ const submitApplication = async () => {
                           ></textarea>
                         </div>
 
-                        <div class="col-12 d-flex justify-content-between mt-2">
+                        <div
+                          class="col-12 d-flex justify-content-between mt-2 flex-wrap"
+                          style="gap: 0.75rem"
+                        >
                           <button
                             type="button"
                             class="btn btn-outline-secondary btn-sm"
@@ -1339,13 +1835,165 @@ const submitApplication = async () => {
                           >
                             Back
                           </button>
-                          <div class="d-flex" style="gap: 0.75rem">
+                          <div class="d-flex flex-wrap" style="gap: 0.75rem">
                             <button
                               type="button"
                               class="btn btn-outline-secondary btn-sm"
                               @click="cancelApply"
                             >
                               Cancel
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-outline-info btn-sm"
+                              :disabled="savingDraft"
+                              @click="saveAndExit"
+                            >
+                              <i class="fas fa-save me-1"></i>
+                              Save &amp; Continue Later
+                            </button>
+                            <button
+                              v-if="hasQuestionnaireTemplate"
+                              type="button"
+                              class="btn btn-success btn-sm"
+                              @click="nextStep"
+                            >
+                              Next: Business Questionnaire
+                            </button>
+                            <button
+                              v-else
+                              type="submit"
+                              class="btn btn-success btn-sm"
+                            >
+                              Submit Application
+                            </button>
+                          </div>
+                        </div>
+                      </template>
+
+                      <!-- Step 3: Confidential Business Questionnaire -->
+                      <template
+                        v-if="currentApplyStep === 3 && hasQuestionnaireTemplate"
+                      >
+                        <div class="col-12 mb-3">
+                          <h6 class="mb-2">Confidential Business Questionnaire</h6>
+                          <p class="text-muted small mb-3">
+                            Download the questionnaire template below, fill it
+                            in, then upload the completed copy. A filled
+                            questionnaire is required to submit your
+                            application.
+                          </p>
+
+                          <div class="border rounded p-3 mb-3 bg-light">
+                            <div class="d-flex align-items-center">
+                              <i
+                                class="fas fa-clipboard-list text-success mr-2"
+                                style="font-size: 1.25rem"
+                              ></i>
+                              <div class="flex-grow-1">
+                                <div class="font-weight-semibold">
+                                  {{
+                                    tender.confidential_questionnaire_file_name ||
+                                    "Confidential Business Questionnaire"
+                                  }}
+                                </div>
+                                <small class="text-muted">
+                                  Template supplied by
+                                  {{
+                                    tender.institution?.institution_name ||
+                                    "the institution"
+                                  }}
+                                </small>
+                              </div>
+                              <a
+                                :href="`/storage/${tender.confidential_questionnaire_file_path}`"
+                                target="_blank"
+                                class="btn btn-sm btn-outline-success ms-2"
+                              >
+                                <i class="fas fa-download mr-1"></i> Download
+                                template
+                              </a>
+                            </div>
+                          </div>
+
+                          <label class="font-weight-semibold small mb-1">
+                            Upload filled questionnaire
+                            <span class="text-danger">*</span>
+                          </label>
+                          <input
+                            id="filled_questionnaire_input"
+                            type="file"
+                            class="form-control form-control-sm"
+                            accept=".pdf,.doc,.docx"
+                            @change="onFilledQuestionnaireChange"
+                          />
+                          <small class="text-muted d-block mt-1">
+                            Accepted: PDF, DOC, DOCX. Max 10 MB.
+                          </small>
+
+                          <div
+                            v-if="filledQuestionnaireFile"
+                            class="d-flex align-items-center mt-2 small border rounded p-2 bg-white"
+                          >
+                            <i class="fas fa-file-alt text-success mr-2"></i>
+                            <span class="flex-grow-1">
+                              {{ filledQuestionnaireFile.name }}
+                            </span>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-link text-danger p-0 ml-2"
+                              @click="clearFilledQuestionnaire"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div
+                            v-else-if="savedQuestionnaire"
+                            class="d-flex align-items-center mt-2 small border rounded p-2 bg-white"
+                          >
+                            <i class="fas fa-file-alt text-success mr-2"></i>
+                            <span class="flex-grow-1">
+                              {{ savedQuestionnaire.name }}
+                              <span class="text-muted ms-1">(from saved draft)</span>
+                            </span>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-link text-danger p-0 ml-2"
+                              @click="clearFilledQuestionnaire"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+
+                        <div
+                          class="col-12 d-flex justify-content-between mt-2 flex-wrap"
+                          style="gap: 0.75rem"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm"
+                            @click="prevStep"
+                          >
+                            Back
+                          </button>
+                          <div class="d-flex flex-wrap" style="gap: 0.75rem">
+                            <button
+                              type="button"
+                              class="btn btn-outline-secondary btn-sm"
+                              @click="cancelApply"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-outline-info btn-sm"
+                              :disabled="savingDraft"
+                              @click="saveAndExit"
+                            >
+                              <i class="fas fa-save me-1"></i>
+                              Save &amp; Continue Later
                             </button>
                             <button
                               type="submit"
@@ -1604,6 +2252,47 @@ const submitApplication = async () => {
 </template>
 
 <style scoped>
+.tender-documents-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.tender-documents-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-right: 0.25rem;
+}
+.tender-document-btn {
+  font-size: 0.8rem;
+}
+
+.category-picker {
+  background: #f9fafb;
+}
+.category-search {
+  background: #f2f4f7;
+  border: 1px solid #e5e7eb;
+}
+.category-select-all {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.category-row {
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.category-row:hover {
+  background: #fff;
+}
+.category-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .plans-row {
   display: flex;
   flex-wrap: wrap;

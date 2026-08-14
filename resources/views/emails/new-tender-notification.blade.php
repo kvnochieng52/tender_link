@@ -115,12 +115,6 @@
             </div>
             @endif
 
-            @if($tender->key_requirements)
-            <div style="margin-top: 15px;">
-                <span class="detail-label">Key Requirements:</span>
-                <p style="margin-top: 5px;">{{ Str::limit($tender->key_requirements, 200) }}</p>
-            </div>
-            @endif
         </div>
 
         <center>

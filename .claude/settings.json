@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -uroot -e \"SELECT VERSION\\(\\);\")",
+      "Bash(cp /Users/kevin.ochieng/projects/tender_link/.env.example /Users/kevin.ochieng/projects/tender_link/.env)"
+    ],
+    "additionalDirectories": [
+      "/Users/kevin.ochieng/projects/tender_link"
+    ]
+  }
+}

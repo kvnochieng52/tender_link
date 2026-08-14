@@ -11,7 +11,9 @@ use App\Models\Industry;
 use App\Models\Institution;
 use App\Models\InstitutionType;
 use App\Models\Plan;
+use App\Models\ApplicationDraft;
 use App\Models\Tender;
+use App\Models\TenderCategory;
 use App\Models\TenderFile;
 use App\Models\TenderRequirement;
 use App\Models\TenderStatus;
@@ -20,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 use Inertia\Inertia;
@@ -38,6 +41,7 @@ class TenderController extends Controller
                 'status:id,name',
                 'files:id,tender_id,file_name,filepath',
                 'requirements:id,tender_id,title,notes,mandatory,source,source_id',
+                'categories:id,tender_id,tender_no,title,position',
             ])
             ->where('slug', $slug)
             ->firstOrFail();
@@ -58,12 +62,25 @@ class TenderController extends Controller
 
         $plans = Plan::where('is_active', true)->orderBy('amount')->get();
 
+        $draft = $user
+            ? ApplicationDraft::where('user_id', $user->id)
+                ->where('tender_id', $tender->id)
+                ->first()
+            : null;
+
         return Inertia::render('Tenders/PublicShow', [
-            'tender'     => $tender,
-            'hasAccess'  => $hasAccess,
-            'plans'      => $plans,
-            'counties'   => County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
-            'currentUrl' => request()->url(),
+            'tender'          => $tender,
+            'hasAccess'       => $hasAccess,
+            'plans'           => $plans,
+            'counties'        => County::query()->where('active', true)->select(['id', 'name'])->orderBy('name')->get(),
+            'tendererProfile' => $user?->tendererProfile,
+            'draft'           => $draft ? [
+                'id'           => $draft->id,
+                'data'         => $draft->data,
+                'current_step' => $draft->current_step,
+                'updated_at'   => $draft->updated_at,
+            ] : null,
+            'currentUrl'      => request()->url(),
         ]);
     }
 
@@ -139,6 +156,7 @@ class TenderController extends Controller
     public function publicSearch(Request $request): Response
     {
         $query = Tender::query()
+            ->open()
             ->with([
                 'institution:id,institution_name,logo',
                 'industry:id,name',
@@ -292,10 +310,40 @@ class TenderController extends Controller
                 $institution->update($updateData);
             }
 
+            $advertPath = null;
+            $advertName = null;
+            if ($request->hasFile('advert_file')) {
+                $advertFile = $request->file('advert_file');
+                $advertPath = $advertFile->store('tenders/adverts', 'public');
+                $advertName = $advertFile->getClientOriginalName();
+            }
+
+            $selfDeclarationPath = null;
+            $selfDeclarationName = null;
+            if ($request->hasFile('self_declaration_file')) {
+                $selfDeclarationFile = $request->file('self_declaration_file');
+                $selfDeclarationPath = $selfDeclarationFile->store('tenders/self_declarations', 'public');
+                $selfDeclarationName = $selfDeclarationFile->getClientOriginalName();
+            }
+
+            $cbqPath = null;
+            $cbqName = null;
+            if ($request->hasFile('confidential_questionnaire_file')) {
+                $cbqFile = $request->file('confidential_questionnaire_file');
+                $cbqPath = $cbqFile->store('tenders/confidential_questionnaires', 'public');
+                $cbqName = $cbqFile->getClientOriginalName();
+            }
+
             $tender = Tender::create([
                 'title'                 => $request->input('title'),
                 'slug'                  => $this->generateUniqueSlug($request->input('title')),
                 'tender_no'             => $request->input('tender_no'),
+                'advert_file_path'          => $advertPath,
+                'advert_file_name'          => $advertName,
+                'self_declaration_file_path' => $selfDeclarationPath,
+                'self_declaration_file_name' => $selfDeclarationName,
+                'confidential_questionnaire_file_path' => $cbqPath,
+                'confidential_questionnaire_file_name' => $cbqName,
                 'institution_id'        => $institutionId,
                 'industry_id'           => $request->input('industry_id'),
                 'county_id'             => $request->input('county_id'),
@@ -340,6 +388,18 @@ class TenderController extends Controller
                     ]);
                 }
             }
+
+            // Persist tender categories if provided
+            if ($request->filled('categories')) {
+                foreach ($request->input('categories') as $idx => $cat) {
+                    TenderCategory::create([
+                        'tender_id' => $tender->id,
+                        'tender_no' => $cat['tender_no'] ?? '',
+                        'title'     => $cat['title'] ?? '',
+                        'position'  => $idx,
+                    ]);
+                }
+            }
         });
 
         // Individual notifications disabled - using batch notifications at 8 AM and 4 PM instead
@@ -359,7 +419,7 @@ class TenderController extends Controller
     public function edit(string $encryptedId): Response
     {
         $id     = Crypt::decryptString($encryptedId);
-        $tender = Tender::with(['files', 'requirements', 'institution.institutionType'])->findOrFail($id);
+        $tender = Tender::with(['files', 'requirements', 'categories', 'institution.institutionType'])->findOrFail($id);
 
         return Inertia::render('Tenders/Edit', [
             'tender'           => $tender,
@@ -432,7 +492,7 @@ class TenderController extends Controller
                 $institution->update($updateData);
             }
 
-            $tender->update([
+            $tenderUpdate = [
                 'title'                 => $request->input('title'),
                 'tender_no'             => $request->input('tender_no'),
                 'institution_id'        => $institutionId,
@@ -446,7 +506,51 @@ class TenderController extends Controller
                 'tender_link_process'   => $request->boolean('tender_link_process', false),
                 'tender_fee_amount'     => $request->input('tender_fee_amount'),
                 'updated_by'            => $userId,
-            ]);
+            ];
+
+            // Advert: replace, remove, or leave alone.
+            if ($request->hasFile('advert_file')) {
+                if ($tender->advert_file_path) {
+                    Storage::disk('public')->delete($tender->advert_file_path);
+                }
+                $advertFile = $request->file('advert_file');
+                $tenderUpdate['advert_file_path'] = $advertFile->store('tenders/adverts', 'public');
+                $tenderUpdate['advert_file_name'] = $advertFile->getClientOriginalName();
+            } elseif ($request->boolean('remove_advert') && $tender->advert_file_path) {
+                Storage::disk('public')->delete($tender->advert_file_path);
+                $tenderUpdate['advert_file_path'] = null;
+                $tenderUpdate['advert_file_name'] = null;
+            }
+
+            // Self declaration: replace, remove, or leave alone.
+            if ($request->hasFile('self_declaration_file')) {
+                if ($tender->self_declaration_file_path) {
+                    Storage::disk('public')->delete($tender->self_declaration_file_path);
+                }
+                $sdFile = $request->file('self_declaration_file');
+                $tenderUpdate['self_declaration_file_path'] = $sdFile->store('tenders/self_declarations', 'public');
+                $tenderUpdate['self_declaration_file_name'] = $sdFile->getClientOriginalName();
+            } elseif ($request->boolean('remove_self_declaration') && $tender->self_declaration_file_path) {
+                Storage::disk('public')->delete($tender->self_declaration_file_path);
+                $tenderUpdate['self_declaration_file_path'] = null;
+                $tenderUpdate['self_declaration_file_name'] = null;
+            }
+
+            // Confidential Business Questionnaire template: replace, remove, or leave alone.
+            if ($request->hasFile('confidential_questionnaire_file')) {
+                if ($tender->confidential_questionnaire_file_path) {
+                    Storage::disk('public')->delete($tender->confidential_questionnaire_file_path);
+                }
+                $cbqFile = $request->file('confidential_questionnaire_file');
+                $tenderUpdate['confidential_questionnaire_file_path'] = $cbqFile->store('tenders/confidential_questionnaires', 'public');
+                $tenderUpdate['confidential_questionnaire_file_name'] = $cbqFile->getClientOriginalName();
+            } elseif ($request->boolean('remove_confidential_questionnaire') && $tender->confidential_questionnaire_file_path) {
+                Storage::disk('public')->delete($tender->confidential_questionnaire_file_path);
+                $tenderUpdate['confidential_questionnaire_file_path'] = null;
+                $tenderUpdate['confidential_questionnaire_file_name'] = null;
+            }
+
+            $tender->update($tenderUpdate);
 
             // Sync tender requirements
             if ($request->filled('requirements')) {
@@ -464,6 +568,35 @@ class TenderController extends Controller
                         'created_by' => $userId,
                         'updated_by' => $userId,
                     ]);
+                }
+            }
+
+            // Sync tender categories: preserve existing IDs so applications keep their links
+            $incomingCategories = $request->input('categories', []);
+            $keepIds = collect($incomingCategories)
+                ->pluck('id')
+                ->filter()
+                ->map(fn ($v) => (int) $v)
+                ->all();
+
+            TenderCategory::where('tender_id', $tender->id)
+                ->when($keepIds, fn ($q) => $q->whereNotIn('id', $keepIds))
+                ->delete();
+
+            foreach ($incomingCategories as $idx => $cat) {
+                $payload = [
+                    'tender_id' => $tender->id,
+                    'tender_no' => $cat['tender_no'] ?? '',
+                    'title'     => $cat['title'] ?? '',
+                    'position'  => $idx,
+                ];
+
+                if (! empty($cat['id'])) {
+                    TenderCategory::where('id', $cat['id'])
+                        ->where('tender_id', $tender->id)
+                        ->update($payload);
+                } else {
+                    TenderCategory::create($payload);
                 }
             }
 

@@ -48,10 +48,22 @@ class TenderUpdateRequest extends FormRequest
             'requirements.*.notes'   => ['nullable', 'string'],
             'requirements.*.mandatory' => ['nullable', 'boolean'],
 
+            'categories'             => ['nullable', 'array'],
+            'categories.*.id'        => ['nullable', 'integer', 'exists:tender_categories,id'],
+            'categories.*.tender_no' => ['required_with:categories', 'string', 'max:100'],
+            'categories.*.title'     => ['required_with:categories', 'string', 'max:500'],
+
             'files'             => ['nullable', 'array'],
             'files.*'           => ['nullable', 'file', 'max:10240'],
             'remove_file_ids'   => ['nullable', 'array'],
             'remove_file_ids.*' => ['nullable', 'integer', 'exists:tender_files,id'],
+
+            'advert_file'                       => ['nullable', 'file', 'max:10240'],
+            'self_declaration_file'             => ['nullable', 'file', 'max:10240'],
+            'confidential_questionnaire_file'   => ['nullable', 'file', 'max:10240'],
+            'remove_advert'                     => ['nullable', 'boolean'],
+            'remove_self_declaration'           => ['nullable', 'boolean'],
+            'remove_confidential_questionnaire' => ['nullable', 'boolean'],
         ];
     }
 }

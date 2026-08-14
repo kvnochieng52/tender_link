@@ -2,15 +2,15 @@
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import UpdatePasswordForm from "./Partials/UpdatePasswordForm.vue";
 import UpdateProfileInformationForm from "./Partials/UpdateProfileInformationForm.vue";
+import UpdateTendererProfileForm from "./Partials/UpdateTendererProfileForm.vue";
 import { Head } from "@inertiajs/vue3";
 
 defineProps({
-  mustVerifyEmail: {
-    type: Boolean,
-  },
-  status: {
-    type: String,
-  },
+  mustVerifyEmail: { type: Boolean },
+  status: { type: String },
+  tendererProfile: { type: Object, default: null },
+  counties: { type: Array, default: () => [] },
+  industries: { type: Array, default: () => [] },
 });
 </script>
 
@@ -51,6 +51,22 @@ defineProps({
                 <UpdateProfileInformationForm
                   :must-verify-email="mustVerifyEmail"
                   :status="status"
+                />
+              </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 font-weight-bold">
+                  <i class="fas fa-briefcase mr-2 text-success"></i>
+                  Tenderer / Business Profile
+                </h5>
+              </div>
+              <div class="card-body">
+                <UpdateTendererProfileForm
+                  :tenderer-profile="tendererProfile"
+                  :counties="counties"
+                  :industries="industries"
                 />
               </div>
             </div>

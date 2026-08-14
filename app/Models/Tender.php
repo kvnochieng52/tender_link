@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,12 @@ class Tender extends Model
         'title',
         'slug',
         'tender_no',
+        'advert_file_path',
+        'advert_file_name',
+        'self_declaration_file_path',
+        'self_declaration_file_name',
+        'confidential_questionnaire_file_path',
+        'confidential_questionnaire_file_name',
         'institution_id',
         'industry_id',
         'county_id',
@@ -35,6 +42,24 @@ class Tender extends Model
         'expiry_date'           => 'datetime',
         'tender_link_process'   => 'boolean',
     ];
+
+    /**
+     * Restrict a query to tenders that should appear on public list pages:
+     * closing deadline is still in the future AND the status is not
+     * explicitly Closed/Cancelled. Tenders with no deadline set are treated
+     * as still open (defensive default).
+     */
+    public function scopeOpen(Builder $query): Builder
+    {
+        return $query
+            ->where(function ($q) {
+                $q->whereNull('closing_date_and_time')
+                    ->orWhere('closing_date_and_time', '>', now());
+            })
+            ->whereDoesntHave('status', function ($q) {
+                $q->whereIn('name', ['Closed', 'Cancelled']);
+            });
+    }
 
     public function institution(): BelongsTo
     {
@@ -59,6 +84,11 @@ class Tender extends Model
     public function requirements(): HasMany
     {
         return $this->hasMany(\App\Models\TenderRequirement::class);
+    }
+
+    public function categories(): HasMany
+    {
+        return $this->hasMany(TenderCategory::class)->orderBy('position')->orderBy('id');
     }
 
     public function status(): BelongsTo

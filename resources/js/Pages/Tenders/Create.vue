@@ -93,12 +93,47 @@ const form = useForm({
   closing_date_and_time: "",
   expiry_date: "",
   description: "",
-  key_requirements: "",
   files: [],
   requirements: [],
+  categories: [],
+  advert_file: null,
+  self_declaration_file: null,
+  confidential_questionnaire_file: null,
   tender_link_process: false,
   tender_fee_amount: null,
 });
+
+const onAdvertFileChange = (e) => {
+  form.advert_file = e.target.files?.[0] || null;
+};
+const clearAdvertFile = () => {
+  form.advert_file = null;
+  const el = document.getElementById("advert_file_input");
+  if (el) el.value = "";
+};
+const onSelfDeclarationFileChange = (e) => {
+  form.self_declaration_file = e.target.files?.[0] || null;
+};
+const clearSelfDeclarationFile = () => {
+  form.self_declaration_file = null;
+  const el = document.getElementById("self_declaration_file_input");
+  if (el) el.value = "";
+};
+const onCbqFileChange = (e) => {
+  form.confidential_questionnaire_file = e.target.files?.[0] || null;
+};
+const clearCbqFile = () => {
+  form.confidential_questionnaire_file = null;
+  const el = document.getElementById("confidential_questionnaire_file_input");
+  if (el) el.value = "";
+};
+
+const addCategoryRow = () => {
+  form.categories.push({ tender_no: "", title: "" });
+};
+const removeCategoryRow = (idx) => {
+  form.categories.splice(idx, 1);
+};
 
 const closingDateConfig = {
   enableTime: true,
@@ -455,9 +490,7 @@ const nextToRequirements = () => {
   }
 
   if (!requirementsSourceText.value.trim()) {
-    const source =
-      cleanRichText(form.key_requirements) || cleanRichText(form.description);
-    requirementsSourceText.value = source;
+    requirementsSourceText.value = cleanRichText(form.description);
   }
 
   currentStep.value = 2;
@@ -629,8 +662,11 @@ const submit = () => {
         "closing_date_and_time",
         "expiry_date",
         "description",
-        "key_requirements",
-        "files"
+        "files",
+        "categories",
+        "advert_file",
+        "self_declaration_file",
+        "confidential_questionnaire_file"
       );
     },
   });
@@ -745,6 +781,121 @@ const submit = () => {
                     v-if="submitted && !form.tender_no?.trim()"
                     class="text-danger"
                     >This field is required.</small
+                  >
+                </div>
+              </div>
+
+              <!-- Tender Advert + Self Declaration uploads -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Tender Advert
+                    <span class="optional-label">(PDF, DOC, JPG — optional)</span>
+                  </label>
+                  <input
+                    id="advert_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    @change="onAdvertFileChange"
+                  />
+                  <div
+                    v-if="form.advert_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{ form.advert_file.name }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearAdvertFile"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.advert_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.advert_file }}</small
+                  >
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Self Declaration Form
+                    <span class="optional-label">(PDF, DOC — optional)</span>
+                  </label>
+                  <input
+                    id="self_declaration_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx"
+                    @change="onSelfDeclarationFileChange"
+                  />
+                  <div
+                    v-if="form.self_declaration_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{
+                      form.self_declaration_file.name
+                    }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearSelfDeclarationFile"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.self_declaration_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.self_declaration_file }}</small
+                  >
+                </div>
+              </div>
+
+              <!-- Confidential Business Questionnaire template -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Confidential Business Questionnaire
+                    <span class="optional-label">(PDF, DOC — optional)</span>
+                  </label>
+                  <input
+                    id="confidential_questionnaire_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx"
+                    @change="onCbqFileChange"
+                  />
+                  <small class="text-muted d-block mt-1">
+                    Applicants download this template and submit a filled copy
+                    with their application.
+                  </small>
+                  <div
+                    v-if="form.confidential_questionnaire_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{
+                      form.confidential_questionnaire_file.name
+                    }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearCbqFile"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.confidential_questionnaire_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.confidential_questionnaire_file }}</small
                   >
                 </div>
               </div>
@@ -871,25 +1022,94 @@ const submit = () => {
                 </div>
               </div>
 
-              <div class="col-md-12">
-                <div class="form-group mb-0">
-                  <label class="font-weight-semibold"
-                    >Key Requirements
-                    <span class="optional-label">(optional)</span></label
-                  >
-                  <QuillEditor
-                    v-model:content="form.key_requirements"
-                    contentType="html"
-                    theme="snow"
-                    :options="quillOptions"
-                    class="wysiwyg-editor"
-                    placeholder="Mandatory qualifications and conditions"
+            </div>
+          </div>
+        </div>
+
+        <!-- Categories (optional) -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div
+            class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center"
+          >
+            <div>
+              <h5 class="font-weight-bold mb-0">
+                Categories
+                <span class="optional-label">(optional)</span>
+              </h5>
+              <small class="text-muted d-block mt-1">
+                Add sub-tender categories (e.g. lots in a prequalification).
+                Applicants will select which categories to bid for. Leave empty
+                for a single-item tender.
+              </small>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-success"
+              @click="addCategoryRow"
+            >
+              <i class="fas fa-plus mr-1"></i> Add Category
+            </button>
+          </div>
+          <div class="card-body">
+            <div v-if="!form.categories.length" class="text-muted small">
+              No categories added. This tender will be treated as a single item.
+            </div>
+
+            <div v-else>
+              <div
+                v-for="(cat, idx) in form.categories"
+                :key="idx"
+                class="row align-items-start mb-2 pb-2 border-bottom"
+              >
+                <div class="col-md-3">
+                  <label class="font-weight-semibold small mb-1">
+                    Category Number
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    v-model="cat.tender_no"
+                    type="text"
+                    class="form-control form-control-sm"
+                    :class="{
+                      'is-invalid': form.errors[`categories.${idx}.tender_no`],
+                    }"
+                    placeholder="e.g. NP/2026-2029/01"
                   />
                   <small
-                    v-if="form.errors.key_requirements"
+                    v-if="form.errors[`categories.${idx}.tender_no`]"
                     class="text-danger"
-                    >{{ form.errors.key_requirements }}</small
+                    >{{ form.errors[`categories.${idx}.tender_no`] }}</small
                   >
+                </div>
+                <div class="col-md-8">
+                  <label class="font-weight-semibold small mb-1">
+                    Category Title
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    v-model="cat.title"
+                    type="text"
+                    class="form-control form-control-sm"
+                    :class="{
+                      'is-invalid': form.errors[`categories.${idx}.title`],
+                    }"
+                    placeholder="e.g. Supply of milk and/or dairy products"
+                  />
+                  <small
+                    v-if="form.errors[`categories.${idx}.title`]"
+                    class="text-danger"
+                    >{{ form.errors[`categories.${idx}.title`] }}</small
+                  >
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger mt-4"
+                    :title="'Remove category ' + (idx + 1)"
+                    @click="removeCategoryRow(idx)"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
                 </div>
               </div>
             </div>

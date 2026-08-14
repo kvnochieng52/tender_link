@@ -13,6 +13,7 @@ class Application extends Model
 
     protected $fillable = [
         'tender_id',
+        'tender_category_id',
         'user_id',
         'company_name',
         'telephone',
@@ -25,6 +26,8 @@ class Application extends Model
         'representative_telephone',
         'representative_email',
         'additional_notes',
+        'filled_questionnaire_file_path',
+        'filled_questionnaire_file_name',
         'application_status_id',
         'rating',
         'evaluation_notes',
@@ -42,6 +45,11 @@ class Application extends Model
     public function tender(): BelongsTo
     {
         return $this->belongsTo(Tender::class);
+    }
+
+    public function tenderCategory(): BelongsTo
+    {
+        return $this->belongsTo(TenderCategory::class);
     }
 
     public function files(): HasMany

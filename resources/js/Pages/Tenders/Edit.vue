@@ -138,11 +138,79 @@ const form = useForm({
     : "",
   tender_status_id: props.tender.tender_status_id ?? "",
   description: props.tender.description ?? "",
-  key_requirements: props.tender.key_requirements ?? "",
   tender_link_process: props.tender.tender_link_process ?? false,
   tender_fee_amount: props.tender.tender_fee_amount ?? null,
   requirements: [],
+  categories: (props.tender.categories || []).map((c) => ({
+    id: c.id,
+    tender_no: c.tender_no,
+    title: c.title,
+  })),
+  advert_file: null,
+  self_declaration_file: null,
+  confidential_questionnaire_file: null,
+  remove_advert: false,
+  remove_self_declaration: false,
+  remove_confidential_questionnaire: false,
 });
+
+const addCategoryRow = () => {
+  form.categories.push({ id: null, tender_no: "", title: "" });
+};
+const removeCategoryRow = (idx) => {
+  form.categories.splice(idx, 1);
+};
+
+const onAdvertFileChange = (e) => {
+  form.advert_file = e.target.files?.[0] || null;
+  form.remove_advert = false;
+};
+const clearNewAdvertFile = () => {
+  form.advert_file = null;
+  const el = document.getElementById("advert_file_input");
+  if (el) el.value = "";
+};
+const removeExistingAdvert = () => {
+  form.remove_advert = true;
+  clearNewAdvertFile();
+};
+const undoRemoveAdvert = () => {
+  form.remove_advert = false;
+};
+
+const onSelfDeclarationFileChange = (e) => {
+  form.self_declaration_file = e.target.files?.[0] || null;
+  form.remove_self_declaration = false;
+};
+const clearNewSelfDeclarationFile = () => {
+  form.self_declaration_file = null;
+  const el = document.getElementById("self_declaration_file_input");
+  if (el) el.value = "";
+};
+const removeExistingSelfDeclaration = () => {
+  form.remove_self_declaration = true;
+  clearNewSelfDeclarationFile();
+};
+const undoRemoveSelfDeclaration = () => {
+  form.remove_self_declaration = false;
+};
+
+const onCbqFileChange = (e) => {
+  form.confidential_questionnaire_file = e.target.files?.[0] || null;
+  form.remove_confidential_questionnaire = false;
+};
+const clearNewCbqFile = () => {
+  form.confidential_questionnaire_file = null;
+  const el = document.getElementById("confidential_questionnaire_file_input");
+  if (el) el.value = "";
+};
+const removeExistingCbq = () => {
+  form.remove_confidential_questionnaire = true;
+  clearNewCbqFile();
+};
+const undoRemoveCbq = () => {
+  form.remove_confidential_questionnaire = false;
+};
 
 const institutionIsValid = computed(() => {
   if (form.create_new_institution) {
@@ -843,6 +911,284 @@ const submit = () => {
                 </div>
               </div>
 
+              <!-- Tender Advert -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Tender Advert
+                    <span class="optional-label">(PDF, DOC, JPG — optional)</span>
+                  </label>
+
+                  <div
+                    v-if="tender.advert_file_path && !form.remove_advert && !form.advert_file"
+                    class="d-flex align-items-center border rounded p-2 mb-2 bg-light small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <a
+                      :href="`/storage/${tender.advert_file_path}`"
+                      target="_blank"
+                      class="flex-grow-1 text-truncate"
+                    >
+                      {{ tender.advert_file_name || "View current advert" }}
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="removeExistingAdvert"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="form.remove_advert"
+                    class="alert alert-warning py-1 px-2 small mb-2 d-flex justify-content-between align-items-center"
+                  >
+                    <span>
+                      <i class="fas fa-trash-alt mr-1"></i>
+                      Existing advert will be removed when you save.
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link p-0"
+                      @click="undoRemoveAdvert"
+                    >
+                      Undo
+                    </button>
+                  </div>
+
+                  <input
+                    id="advert_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    @change="onAdvertFileChange"
+                  />
+                  <small class="text-muted d-block mt-1">
+                    <template v-if="tender.advert_file_path && !form.remove_advert">
+                      Upload a new file to replace the current advert.
+                    </template>
+                    <template v-else>
+                      Upload the tender advert document.
+                    </template>
+                  </small>
+
+                  <div
+                    v-if="form.advert_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{ form.advert_file.name }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearNewAdvertFile"
+                    >
+                      Cancel upload
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.advert_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.advert_file }}</small
+                  >
+                </div>
+              </div>
+
+              <!-- Self Declaration Form -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Self Declaration Form
+                    <span class="optional-label">(PDF, DOC — optional)</span>
+                  </label>
+
+                  <div
+                    v-if="tender.self_declaration_file_path && !form.remove_self_declaration && !form.self_declaration_file"
+                    class="d-flex align-items-center border rounded p-2 mb-2 bg-light small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <a
+                      :href="`/storage/${tender.self_declaration_file_path}`"
+                      target="_blank"
+                      class="flex-grow-1 text-truncate"
+                    >
+                      {{
+                        tender.self_declaration_file_name ||
+                        "View current self declaration"
+                      }}
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="removeExistingSelfDeclaration"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="form.remove_self_declaration"
+                    class="alert alert-warning py-1 px-2 small mb-2 d-flex justify-content-between align-items-center"
+                  >
+                    <span>
+                      <i class="fas fa-trash-alt mr-1"></i>
+                      Existing self declaration will be removed when you save.
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link p-0"
+                      @click="undoRemoveSelfDeclaration"
+                    >
+                      Undo
+                    </button>
+                  </div>
+
+                  <input
+                    id="self_declaration_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx"
+                    @change="onSelfDeclarationFileChange"
+                  />
+                  <small class="text-muted d-block mt-1">
+                    <template
+                      v-if="
+                        tender.self_declaration_file_path &&
+                        !form.remove_self_declaration
+                      "
+                    >
+                      Upload a new file to replace the current self declaration.
+                    </template>
+                    <template v-else>
+                      Upload the self declaration form.
+                    </template>
+                  </small>
+
+                  <div
+                    v-if="form.self_declaration_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{
+                      form.self_declaration_file.name
+                    }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearNewSelfDeclarationFile"
+                    >
+                      Cancel upload
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.self_declaration_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.self_declaration_file }}</small
+                  >
+                </div>
+              </div>
+
+              <!-- Confidential Business Questionnaire template -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="font-weight-semibold">
+                    Confidential Business Questionnaire
+                    <span class="optional-label">(PDF, DOC — optional)</span>
+                  </label>
+
+                  <div
+                    v-if="
+                      tender.confidential_questionnaire_file_path &&
+                      !form.remove_confidential_questionnaire &&
+                      !form.confidential_questionnaire_file
+                    "
+                    class="d-flex align-items-center border rounded p-2 mb-2 bg-light small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <a
+                      :href="`/storage/${tender.confidential_questionnaire_file_path}`"
+                      target="_blank"
+                      class="flex-grow-1 text-truncate"
+                    >
+                      {{
+                        tender.confidential_questionnaire_file_name ||
+                        "View current questionnaire template"
+                      }}
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="removeExistingCbq"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="form.remove_confidential_questionnaire"
+                    class="alert alert-warning py-1 px-2 small mb-2 d-flex justify-content-between align-items-center"
+                  >
+                    <span>
+                      <i class="fas fa-trash-alt mr-1"></i>
+                      Existing questionnaire template will be removed when you
+                      save.
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link p-0"
+                      @click="undoRemoveCbq"
+                    >
+                      Undo
+                    </button>
+                  </div>
+
+                  <input
+                    id="confidential_questionnaire_file_input"
+                    type="file"
+                    class="form-control"
+                    accept=".pdf,.doc,.docx"
+                    @change="onCbqFileChange"
+                  />
+                  <small class="text-muted d-block mt-1">
+                    <template
+                      v-if="
+                        tender.confidential_questionnaire_file_path &&
+                        !form.remove_confidential_questionnaire
+                      "
+                    >
+                      Upload a new file to replace the current template.
+                    </template>
+                    <template v-else>
+                      Applicants download this and submit a filled copy with
+                      their application.
+                    </template>
+                  </small>
+
+                  <div
+                    v-if="form.confidential_questionnaire_file"
+                    class="d-flex align-items-center mt-2 small"
+                  >
+                    <i class="fas fa-file-alt text-success mr-2"></i>
+                    <span class="flex-grow-1">{{
+                      form.confidential_questionnaire_file.name
+                    }}</span>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link text-danger p-0 ml-2"
+                      @click="clearNewCbqFile"
+                    >
+                      Cancel upload
+                    </button>
+                  </div>
+                  <small
+                    v-if="form.errors.confidential_questionnaire_file"
+                    class="text-danger d-block"
+                    >{{ form.errors.confidential_questionnaire_file }}</small
+                  >
+                </div>
+              </div>
+
               <!-- Industry -->
               <div class="col-md-6">
                 <div class="form-group">
@@ -992,26 +1338,94 @@ const submit = () => {
                 </div>
               </div>
 
-              <!-- Key Requirements -->
-              <div class="col-md-12">
-                <div class="form-group mb-0">
-                  <label class="font-weight-semibold"
-                    >Key Requirements
-                    <span class="optional-label">(optional)</span></label
-                  >
-                  <QuillEditor
-                    v-model:content="form.key_requirements"
-                    contentType="html"
-                    theme="snow"
-                    :options="quillOptions"
-                    class="wysiwyg-editor"
-                    placeholder="Mandatory qualifications and conditions"
+            </div>
+          </div>
+        </div>
+
+        <!-- Categories (optional) -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div
+            class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center"
+          >
+            <div>
+              <h5 class="font-weight-bold mb-0">
+                Categories
+                <span class="optional-label">(optional)</span>
+              </h5>
+              <small class="text-muted d-block mt-1">
+                Add sub-tender categories (e.g. lots in a prequalification).
+                Applicants will select which categories to bid for. Leave empty
+                for a single-item tender.
+              </small>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-success"
+              @click="addCategoryRow"
+            >
+              <i class="fas fa-plus mr-1"></i> Add Category
+            </button>
+          </div>
+          <div class="card-body">
+            <div v-if="!form.categories.length" class="text-muted small">
+              No categories added. This tender will be treated as a single item.
+            </div>
+
+            <div v-else>
+              <div
+                v-for="(cat, idx) in form.categories"
+                :key="cat.id || 'new-' + idx"
+                class="row align-items-start mb-2 pb-2 border-bottom"
+              >
+                <div class="col-md-3">
+                  <label class="font-weight-semibold small mb-1">
+                    Category Number
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    v-model="cat.tender_no"
+                    type="text"
+                    class="form-control form-control-sm"
+                    :class="{
+                      'is-invalid': form.errors[`categories.${idx}.tender_no`],
+                    }"
+                    placeholder="e.g. NP/2026-2029/01"
                   />
                   <small
-                    v-if="form.errors.key_requirements"
+                    v-if="form.errors[`categories.${idx}.tender_no`]"
                     class="text-danger"
-                    >{{ form.errors.key_requirements }}</small
+                    >{{ form.errors[`categories.${idx}.tender_no`] }}</small
                   >
+                </div>
+                <div class="col-md-8">
+                  <label class="font-weight-semibold small mb-1">
+                    Category Title
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    v-model="cat.title"
+                    type="text"
+                    class="form-control form-control-sm"
+                    :class="{
+                      'is-invalid': form.errors[`categories.${idx}.title`],
+                    }"
+                    placeholder="e.g. Supply of milk and/or dairy products"
+                  />
+                  <small
+                    v-if="form.errors[`categories.${idx}.title`]"
+                    class="text-danger"
+                    >{{ form.errors[`categories.${idx}.title`] }}</small
+                  >
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger mt-4"
+                    :title="'Remove category ' + (idx + 1)"
+                    @click="removeCategoryRow(idx)"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
                 </div>
               </div>
             </div>

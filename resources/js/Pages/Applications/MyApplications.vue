@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch } from "vue";
 import { Head, Link, router } from "@inertiajs/vue3";
+import { useToast } from "vue-toastification";
+import axios from "axios";
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 
 const props = defineProps({
@@ -8,7 +10,49 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
 });
 
+const toast = useToast();
+
 const formatDate = (v) => (v ? new Date(v).toLocaleString() : "—");
+
+const canAmend = (app) => {
+  if (!app.tender?.closing_date_and_time) return false;
+  return new Date(app.tender.closing_date_and_time) > new Date();
+};
+
+const unsubmittingId = ref(null);
+
+const unsubmit = async (app) => {
+  if (!canAmend(app)) return;
+  if (
+    !window.confirm(
+      "Withdraw this submission so you can amend it? Your submitted data will become an editable draft on the tender page. You must re-submit before the deadline."
+    )
+  ) {
+    return;
+  }
+
+  unsubmittingId.value = app.id;
+  try {
+    const res = await axios.post(route("applications.unsubmit", { id: app.id }));
+    if (res?.data?.success) {
+      toast.success(res.data.message || "Submission withdrawn.");
+      if (res.data.redirect_url) {
+        window.location.href = res.data.redirect_url;
+      } else {
+        router.reload();
+      }
+    } else {
+      toast.error(res?.data?.message || "Could not withdraw submission.");
+    }
+  } catch (e) {
+    toast.error(
+      e?.response?.data?.message ||
+        "Could not withdraw submission. Please try again."
+    );
+  } finally {
+    unsubmittingId.value = null;
+  }
+};
 
 const search = ref(props.filters.q ?? "");
 
@@ -63,8 +107,9 @@ watch(search, () => {
               <tr>
                 <th>#</th>
                 <th>Tender</th>
+                <th>Category</th>
                 <th>Company</th>
-                <th>Docs Uploaded</th>
+                <th>Docs</th>
                 <th>Closing Date</th>
                 <th>Submitted</th>
                 <th class="text-right">Actions</th>
@@ -89,6 +134,15 @@ watch(search, () => {
                   </Link>
                   <span v-else class="text-muted">—</span>
                 </td>
+                <td>
+                  <span v-if="app.tender_category" class="small">
+                    <strong>{{ app.tender_category.tender_no }}</strong>
+                    <span class="text-muted d-block">
+                      {{ app.tender_category.title }}
+                    </span>
+                  </span>
+                  <span v-else class="text-muted small">—</span>
+                </td>
                 <td>{{ app.company_name }}</td>
                 <td>
                   <span class="badge badge-info">
@@ -96,21 +150,54 @@ watch(search, () => {
                   </span>
                 </td>
                 <td>
-                  {{
-                    app.tender
-                      ? formatDate(app.tender.closing_date_and_time)
-                      : "—"
-                  }}
+                  <div>
+                    {{
+                      app.tender
+                        ? formatDate(app.tender.closing_date_and_time)
+                        : "—"
+                    }}
+                  </div>
+                  <small v-if="canAmend(app)" class="text-success">
+                    <i class="fas fa-unlock-alt me-1"></i>Editable until deadline
+                  </small>
+                  <small v-else class="text-muted">
+                    <i class="fas fa-lock me-1"></i>Closed
+                  </small>
                 </td>
                 <td>{{ formatDate(app.created_at) }}</td>
                 <td class="text-right">
-                  <Link
-                    v-if="app.tender"
-                    :href="route('tenders.public.show', app.tender.slug)"
-                    class="btn btn-sm btn-outline-success"
+                  <div
+                    class="d-flex justify-content-end flex-wrap"
+                    style="gap: 0.35rem"
                   >
-                    View Tender
-                  </Link>
+                    <Link
+                      v-if="app.tender"
+                      :href="route('tenders.public.show', app.tender.slug)"
+                      class="btn btn-sm btn-outline-success"
+                    >
+                      View Tender
+                    </Link>
+                    <button
+                      v-if="canAmend(app)"
+                      type="button"
+                      class="btn btn-sm btn-outline-warning"
+                      :disabled="unsubmittingId === app.id"
+                      @click="unsubmit(app)"
+                    >
+                      <i
+                        :class="
+                          unsubmittingId === app.id
+                            ? 'fas fa-spinner fa-spin me-1'
+                            : 'fas fa-pen me-1'
+                        "
+                      ></i>
+                      {{
+                        unsubmittingId === app.id
+                          ? "Withdrawing…"
+                          : "Unsubmit &amp; Amend"
+                      }}
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

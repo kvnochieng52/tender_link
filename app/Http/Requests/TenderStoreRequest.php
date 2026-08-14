@@ -37,6 +37,10 @@ class TenderStoreRequest extends FormRequest
             'requirements.*.notes' => ['nullable', 'string'],
             'requirements.*.mandatory' => ['nullable', 'boolean'],
 
+            'categories' => ['nullable', 'array'],
+            'categories.*.tender_no' => ['required_with:categories', 'string', 'max:100'],
+            'categories.*.title'     => ['required_with:categories', 'string', 'max:500'],
+
             'create_new_institution' => ['nullable', 'boolean'],
             'edit_institution' => ['nullable', 'boolean'],
             'institution_id' => ['required_unless:create_new_institution,1', 'nullable', 'exists:institutions,id'],
@@ -52,6 +56,10 @@ class TenderStoreRequest extends FormRequest
 
             'files' => ['required', 'array', 'min:1'],
             'files.*' => ['required', 'file', 'max:10240'],
+
+            'advert_file'                    => ['nullable', 'file', 'max:10240'],
+            'self_declaration_file'          => ['nullable', 'file', 'max:10240'],
+            'confidential_questionnaire_file' => ['nullable', 'file', 'max:10240'],
         ];
     }
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\County;
+use App\Models\Industry;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,11 +20,14 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
 
-        //sleep(2);
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'status'          => session('status'),
+            'tendererProfile' => $user->tendererProfile,
+            'counties'        => County::query()->where('active', true)->orderBy('name')->get(['id', 'name']),
+            'industries'      => Industry::query()->where('active', true)->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

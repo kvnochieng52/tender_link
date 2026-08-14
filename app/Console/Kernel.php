@@ -26,6 +26,13 @@ class Kernel extends ConsoleKernel
             ->timezone('Africa/Nairobi')
             ->name('evening-tender-notifications')
             ->withoutOverlapping();
+
+        // Remind tenderers about drafts whose tender closes soon.
+        $schedule->command('drafts:remind')
+            ->dailyAt('09:00')
+            ->timezone('Africa/Nairobi')
+            ->name('draft-reminders')
+            ->withoutOverlapping();
     }
 
     /**

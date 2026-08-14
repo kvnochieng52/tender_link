@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TendererProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\TenderController;
@@ -27,6 +28,7 @@ use App\Models\County;
 
 Route::get('/', function () {
     $latest = Tender::query()
+        ->open()
         ->with(['county:id,name', 'industry:id,name', 'status:id,name', 'institution:id,institution_name,logo'])
         ->latest()
         ->take(6)
@@ -99,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile/tenderer', [TendererProfileController::class, 'update'])->name('profile.tenderer.update');
 });
 
 // Admin-only routes
@@ -141,5 +144,11 @@ Route::get('/tenders/{slug}', [TenderController::class, 'publicShow'])->name('te
 Route::post('/tenders/{slug}/upload-file', [\App\Http\Controllers\ApplicationController::class, 'uploadTempFile'])->name('tenders.upload_file');
 Route::post('/tenders/{slug}/apply', [\App\Http\Controllers\ApplicationController::class, 'store'])->name('tenders.apply');
 Route::post('/tenders/{slug}/delete-temp-file', [\App\Http\Controllers\ApplicationController::class, 'deleteTempFile'])->name('tenders.delete_temp_file');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/tenders/{slug}/draft', [\App\Http\Controllers\ApplicationDraftController::class, 'save'])->name('tenders.draft.save');
+    Route::delete('/tenders/{slug}/draft', [\App\Http\Controllers\ApplicationDraftController::class, 'discard'])->name('tenders.draft.discard');
+    Route::post('/applications/{id}/unsubmit', [\App\Http\Controllers\ApplicationController::class, 'unsubmit'])->name('applications.unsubmit');
+});
 
 require __DIR__ . '/auth.php';
