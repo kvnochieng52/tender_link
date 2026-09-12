@@ -118,7 +118,10 @@ class TenderController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('tender_no', 'like', "%{$search}%");
+                    ->orWhere('tender_no', 'like', "%{$search}%")
+                    ->orWhereHas('institution', function ($iq) use ($search) {
+                        $iq->where('institution_name', 'like', "%{$search}%");
+                    });
             });
         }
 

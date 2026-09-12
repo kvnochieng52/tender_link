@@ -115,6 +115,41 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/institutions', [InstitutionController::class, 'store'])->name('institutions.store');
     Route::post('/institutions/{institution}', [InstitutionController::class, 'update'])->name('institutions.update');
     Route::get('/admin/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'all'])->name('admin.applications.all');
+    Route::get('/admin/tenders/{encryptedId}/workspace', [\App\Http\Controllers\Admin\TenderWorkspaceController::class, 'show'])->name('admin.tenders.workspace');
+
+    // Workspace — evaluation criteria
+    Route::post('/admin/tenders/{encryptedId}/criteria', [\App\Http\Controllers\Admin\TenderCriteriaController::class, 'store'])->name('admin.tenders.criteria.store');
+    Route::patch('/admin/tenders/{encryptedId}/criteria/{criterionId}', [\App\Http\Controllers\Admin\TenderCriteriaController::class, 'update'])->name('admin.tenders.criteria.update');
+    Route::delete('/admin/tenders/{encryptedId}/criteria/{criterionId}', [\App\Http\Controllers\Admin\TenderCriteriaController::class, 'destroy'])->name('admin.tenders.criteria.destroy');
+
+    // Workspace — evaluation scoring
+    Route::post('/admin/tenders/{encryptedId}/scores', [\App\Http\Controllers\Admin\TenderEvaluationController::class, 'save'])->name('admin.tenders.scores.save');
+
+    // Workspace — clarifications
+    Route::post('/admin/tenders/{encryptedId}/clarifications', [\App\Http\Controllers\Admin\TenderClarificationController::class, 'store'])->name('admin.tenders.clarifications.store');
+    Route::patch('/admin/tenders/{encryptedId}/clarifications/{clarificationId}/answer', [\App\Http\Controllers\Admin\TenderClarificationController::class, 'answer'])->name('admin.tenders.clarifications.answer');
+
+    // Workspace — per-application actions
+    Route::post('/admin/tenders/{encryptedId}/applications/{applicationId}/shortlist', [\App\Http\Controllers\Admin\TenderApplicationActionsController::class, 'toggleShortlist'])->name('admin.tenders.applications.shortlist');
+    Route::patch('/admin/tenders/{encryptedId}/applications/{applicationId}/due-diligence', [\App\Http\Controllers\Admin\TenderApplicationActionsController::class, 'saveDueDiligence'])->name('admin.tenders.applications.dd');
+    Route::patch('/admin/tenders/{encryptedId}/applications/{applicationId}/recommendation', [\App\Http\Controllers\Admin\TenderApplicationActionsController::class, 'saveRecommendation'])->name('admin.tenders.applications.recommend');
+
+    // Workspace — award
+    Route::post('/admin/tenders/{encryptedId}/award', [\App\Http\Controllers\Admin\TenderAwardController::class, 'save'])->name('admin.tenders.award.save');
+    Route::delete('/admin/tenders/{encryptedId}/award', [\App\Http\Controllers\Admin\TenderAwardController::class, 'destroy'])->name('admin.tenders.award.destroy');
+
+    // Workspace — communications (submission ack, clarification, missing docs, shortlisting, DD, award, unsuccessful)
+    Route::post('/admin/tenders/{encryptedId}/communications', [\App\Http\Controllers\Admin\TenderCommunicationController::class, 'send'])->name('admin.tenders.communications.send');
+
+    // Workspace — explicit disqualification
+    Route::post('/admin/tenders/{encryptedId}/applications/{applicationId}/disqualify', [\App\Http\Controllers\Admin\TenderApplicationActionsController::class, 'disqualify'])->name('admin.tenders.applications.disqualify');
+
+    // Workspace — section weights + reports + auto-recommend
+    Route::patch('/admin/tenders/{encryptedId}/weights', [\App\Http\Controllers\Admin\TenderCriteriaController::class, 'saveWeights'])->name('admin.tenders.weights.save');
+    Route::get('/admin/tenders/{encryptedId}/reports/applications.csv', [\App\Http\Controllers\Admin\TenderReportController::class, 'applicationsCsv'])->name('admin.tenders.reports.applications_csv');
+    Route::get('/admin/tenders/{encryptedId}/reports/evaluation.html', [\App\Http\Controllers\Admin\TenderReportController::class, 'evaluationReport'])->name('admin.tenders.reports.evaluation_html');
+    Route::post('/admin/tenders/{encryptedId}/recommend-top', [\App\Http\Controllers\Admin\TenderReportController::class, 'autoRecommend'])->name('admin.tenders.recommend_top');
+
     Route::get('/admin/tenders/{encryptedId}/applications', [\App\Http\Controllers\Admin\ApplicationController::class, 'index'])->name('admin.tenders.applications.index');
     Route::get('/admin/tenders/{encryptedId}/evaluate', [\App\Http\Controllers\Admin\ApplicationController::class, 'evaluate'])->name('admin.tenders.evaluate');
     Route::patch('/admin/tenders/{encryptedId}/process-status', [\App\Http\Controllers\Admin\ApplicationController::class, 'updateTenderProcessStatus'])->name('admin.tenders.process-status');

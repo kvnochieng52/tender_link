@@ -11,11 +11,20 @@ const fileUrl = (p) => (p ? `/storage/${p}` : "#");
 
 <template>
   <DashboardLayout>
-    <Head :title="`Application: ${application.company_name}`" />
+    <Head :title="`Application: ${application.application_no || application.company_name}`" />
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white d-flex align-items-center">
         <div>
-          <h4 class="mb-0">{{ application.company_name }}</h4>
+          <h4 class="mb-0">
+            {{ application.company_name }}
+            <code
+              v-if="application.application_no"
+              class="text-success ms-2"
+              style="font-size: 1rem"
+            >
+              {{ application.application_no }}
+            </code>
+          </h4>
           <small class="text-muted"
             >Submitted:
             {{ new Date(application.created_at).toLocaleString() }}</small

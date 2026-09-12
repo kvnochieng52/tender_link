@@ -165,9 +165,9 @@ const formatDateTime = (val) => {
               </div>
               <input
                 v-model="search"
-                type="text"
+                type="search"
                 class="form-control"
-                placeholder="Search title or tender no…"
+                placeholder="Search title, tender no or institution…"
               />
             </div>
           </div>
@@ -324,6 +324,17 @@ const formatDateTime = (val) => {
                     >
                       <i class="fas fa-download"></i>
                     </button>
+                    <Link
+                      :href="
+                        route('admin.tenders.workspace', {
+                          encryptedId: tender.encrypted_id,
+                        })
+                      "
+                      class="btn btn-success"
+                      title="Open Tender Workspace"
+                    >
+                      <i class="fas fa-briefcase mr-1"></i>Workspace
+                    </Link>
                     <Link
                       :href="
                         route('admin.tenders.applications.index', {

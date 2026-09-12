@@ -27,6 +27,9 @@ class TendererProfileUpdateRequest extends FormRequest
             'contact_person_position'  => ['nullable', 'string', 'max:100'],
             'contact_phone'            => ['nullable', 'string', 'max:30'],
             'contact_email'            => ['required', 'email', 'max:255'],
+            'certifications'           => ['nullable', 'string', 'max:4000'],
+            'years_of_experience'      => ['nullable', 'integer', 'min:0', 'max:200'],
+            'annual_turnover'          => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

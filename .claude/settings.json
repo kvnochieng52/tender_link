@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "Bash(mysql -uroot -e \"SELECT VERSION\\(\\);\")",
-      "Bash(cp /Users/kevin.ochieng/projects/tender_link/.env.example /Users/kevin.ochieng/projects/tender_link/.env)"
+      "Bash(cp /Users/kevin.ochieng/projects/tender_link/.env.example /Users/kevin.ochieng/projects/tender_link/.env)",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/ApplicationController.php)",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Models/Application.php)",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Mail/ApplicationSubmittedMail.php)",
+      "Bash(mysql -uroot tender_link -e \"SELECT id, name FROM application_statuses; SELECT id, name FROM application_process_statuses;\")",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderWorkspaceController.php)",
+      "Bash(mysql -uroot tender_link -e \"SHOW COLUMNS FROM tenderer_profiles WHERE Field IN \\('certifications','years_of_experience','annual_turnover'\\); SHOW COLUMNS FROM applications LIKE 'bid_amount';\")",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/TenderController.php)",
+      "Bash(mysql -uroot tender_link -e \"SHOW COLUMNS FROM applications LIKE 'application_no'; SHOW INDEX FROM applications WHERE Column_name = 'application_no';\")",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderApplicationActionsController.php)",
+      "Bash(mysql -uroot tender_link -e ' *)",
+      "Bash(mysql -uroot tender_link -e \"SELECT COUNT\\(*\\) FROM industries; SELECT COUNT\\(*\\) FROM counties; SELECT COUNT\\(*\\) FROM institution_types; SELECT COUNT\\(*\\) FROM tender_statuses; SELECT id, name FROM industries LIMIT 5; SELECT id, name FROM counties LIMIT 5; SELECT id, name FROM institution_types LIMIT 5; SELECT id, name FROM tender_statuses LIMIT 5;\")",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/database/seeders/SampleWorkspaceDataSeeder.php)",
+      "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderCommunicationController.php)",
+      "Bash(sed -n '55,72p' /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderCommunicationController.php)",
+      "Bash(mysql -uroot tender_link -e \"SHOW COLUMNS FROM tenders WHERE Field IN \\('compliance_weight','technical_weight','financial_weight','criteria_locked_at'\\); SHOW COLUMNS FROM evaluation_criteria WHERE Field IN \\('is_mandatory','scoring_method'\\);\")"
     ],
     "additionalDirectories": [
       "/Users/kevin.ochieng/projects/tender_link"

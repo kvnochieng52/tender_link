@@ -9,6 +9,7 @@ use App\Models\ApplicationFile;
 use App\Models\Tender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -84,6 +85,11 @@ class ApplicationController extends Controller
             'filled_questionnaire_file' => ['nullable', 'file', 'max:10240'],
             'filled_questionnaire_file_path' => ['nullable', 'string'],
             'filled_questionnaire_file_name' => ['nullable', 'string'],
+            'bid_amount' => ['nullable', 'numeric', 'min:0'],
+            'disclaimer_accepted' => ['required', 'accepted'],
+        ], [
+            'disclaimer_accepted.required' => 'You must acknowledge the disclaimer before submitting.',
+            'disclaimer_accepted.accepted' => 'You must acknowledge the disclaimer before submitting.',
         ]);
 
         // Enforce presence when the tender requires a CBQ.
@@ -139,6 +145,8 @@ class ApplicationController extends Controller
             'representative_telephone' => $validated['representative_telephone'] ?? null,
             'representative_email' => $validated['representative_email'] ?? null,
             'additional_notes' => $validated['additional_notes'] ?? null,
+            'bid_amount' => $validated['bid_amount'] ?? null,
+            'disclaimer_accepted_at' => now(),
         ];
 
         $paths = $request->input('requirement_file_paths', []);
@@ -157,9 +165,38 @@ class ApplicationController extends Controller
         $createdApplications = [];
         $lastTargetIndex = count($targets) - 1;
 
+        // Compute the next per-tender sequence for application_no, transactionally.
+        // We parse existing application_no values to find the max seq and use it
+        // as the starting point so gaps left by unsubmitted rows never collide.
+        $tenderYear = $tender->created_at?->format('Y') ?? date('Y');
+        $nextSeq = 1;
+        DB::transaction(function () use ($tender, &$nextSeq) {
+            $existing = Application::where('tender_id', $tender->id)
+                ->whereNotNull('application_no')
+                ->lockForUpdate()
+                ->pluck('application_no');
+
+            $maxSeq = 0;
+            foreach ($existing as $ref) {
+                // Grab the trailing digits after the last hyphen.
+                if (preg_match('/-(\d+)$/', (string) $ref, $m)) {
+                    $maxSeq = max($maxSeq, (int) $m[1]);
+                }
+            }
+            $nextSeq = $maxSeq + 1;
+        });
+
         foreach ($targets as $t => $categoryId) {
+            $applicationNo = sprintf(
+                'TP/%s/%03d-APP-%03d',
+                $tenderYear,
+                $tender->id,
+                $nextSeq++,
+            );
+
             $application = Application::create($applicantPayload + [
                 'tender_category_id' => $categoryId,
+                'application_no'     => $applicationNo,
             ]);
             $createdApplications[] = $application;
 

@@ -29,7 +29,7 @@ class ApplicationSubmittedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your tender application has been received - ' . $this->tender->title,
+            subject: 'Acknowledgement of Receipt - ' . $this->tender->title,
         );
     }
 

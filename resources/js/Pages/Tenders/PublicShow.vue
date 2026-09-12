@@ -241,6 +241,7 @@ const applicant = ref({
   county: draftApplicant.county ?? (tp.county_id || ""),
   email: draftApplicant.email ?? (tp.contact_email || authUser.email || ""),
   additional_notes: draftApplicant.additional_notes ?? "",
+  bid_amount: draftApplicant.bid_amount ?? "",
 });
 const representative = ref({
   full_name:
@@ -290,6 +291,11 @@ const clearFilledQuestionnaire = () => {
   const el = document.getElementById("filled_questionnaire_input");
   if (el) el.value = "";
 };
+
+// ── Disclaimer acknowledgment ────────────────────────────────────────────
+// Required before submission. Not persisted in the draft so the tenderer
+// re-acknowledges each session (legally safer).
+const disclaimerAccepted = ref(false);
 
 // ── Category selection (for prequalification / multi-lot tenders) ──────
 const categoriesList = computed(() => props.tender.categories || []);
@@ -608,6 +614,14 @@ const submitApplication = async () => {
     return;
   }
 
+  if (!disclaimerAccepted.value) {
+    toast.error(
+      "Please acknowledge the disclaimer before submitting your application."
+    );
+    goToStep(maxApplyStep.value);
+    return;
+  }
+
   const form = new FormData();
   form.append("company_name", applicant.value.company_name || "");
   form.append("telephone", applicant.value.telephone || "");
@@ -620,6 +634,7 @@ const submitApplication = async () => {
   form.append("representative_telephone", representative.value.telephone || "");
   form.append("representative_email", representative.value.email || "");
   form.append("additional_notes", applicant.value.additional_notes || "");
+  form.append("bid_amount", applicant.value.bid_amount || "");
 
   requirementsList.value.forEach((req, idx) => {
     form.append(`requirement_titles[${idx}]`, req.title || "");
@@ -638,6 +653,8 @@ const submitApplication = async () => {
   selectedCategoryIds.value.forEach((id) => {
     form.append("tender_category_ids[]", id);
   });
+
+  form.append("disclaimer_accepted", disclaimerAccepted.value ? "1" : "0");
 
   if (filledQuestionnaireFile.value) {
     form.append("filled_questionnaire_file", filledQuestionnaireFile.value);
@@ -1813,6 +1830,23 @@ const submitApplication = async () => {
                           </div>
                         </div>
 
+                        <div class="col-md-6 mb-2">
+                          <label class="font-weight-semibold">
+                            Bid Amount (KES)
+                            <small class="text-muted font-weight-normal">
+                              — optional but recommended
+                            </small>
+                          </label>
+                          <input
+                            v-model="applicant.bid_amount"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="form-control form-control-sm"
+                            placeholder="Your quoted bid amount"
+                          />
+                        </div>
+
                         <div class="col-12 mb-2">
                           <label class="font-weight-semibold"
                             >Additional Notes</label
@@ -1822,6 +1856,32 @@ const submitApplication = async () => {
                             class="form-control form-control-sm"
                             rows="3"
                           ></textarea>
+                        </div>
+
+                        <!-- Disclaimer — Step 2 is terminal only when no CBQ -->
+                        <div
+                          v-if="!hasQuestionnaireTemplate"
+                          class="col-12 mb-3"
+                        >
+                          <div class="border rounded p-3 bg-light">
+                            <label
+                              class="d-flex align-items-start mb-0"
+                              style="gap: 0.5rem; cursor: pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                v-model="disclaimerAccepted"
+                                class="mt-1"
+                              />
+                              <span class="small">
+                                I/We understand that participation in this
+                                supplier prequalification does not guarantee
+                                business. The Client reserves the right, at its
+                                sole discretion, to accept or reject any bid, in
+                                whole or in part, without liability.
+                              </span>
+                            </label>
+                          </div>
                         </div>
 
                         <div
@@ -1964,6 +2024,29 @@ const submitApplication = async () => {
                             >
                               Remove
                             </button>
+                          </div>
+                        </div>
+
+                        <!-- Disclaimer -->
+                        <div class="col-12 mb-3">
+                          <div class="border rounded p-3 bg-light">
+                            <label
+                              class="d-flex align-items-start mb-0"
+                              style="gap: 0.5rem; cursor: pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                v-model="disclaimerAccepted"
+                                class="mt-1"
+                              />
+                              <span class="small">
+                                I/We understand that participation in this
+                                supplier prequalification does not guarantee
+                                business. The Client reserves the right, at its
+                                sole discretion, to accept or reject any bid, in
+                                whole or in part, without liability.
+                              </span>
+                            </label>
                           </div>
                         </div>
 

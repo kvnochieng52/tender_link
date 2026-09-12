@@ -33,6 +33,10 @@ class Tender extends Model
         'key_requirements',
         'tender_link_process',
         'tender_fee_amount',
+        'compliance_weight',
+        'technical_weight',
+        'financial_weight',
+        'criteria_locked_at',
         'created_by',
         'updated_by',
     ];
@@ -41,6 +45,10 @@ class Tender extends Model
         'closing_date_and_time' => 'datetime',
         'expiry_date'           => 'datetime',
         'tender_link_process'   => 'boolean',
+        'compliance_weight'     => 'decimal:2',
+        'technical_weight'      => 'decimal:2',
+        'financial_weight'      => 'decimal:2',
+        'criteria_locked_at'    => 'datetime',
     ];
 
     /**
@@ -89,6 +97,26 @@ class Tender extends Model
     public function categories(): HasMany
     {
         return $this->hasMany(TenderCategory::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function evaluationCriteria(): HasMany
+    {
+        return $this->hasMany(EvaluationCriterion::class)->orderBy('category')->orderBy('position')->orderBy('id');
+    }
+
+    public function clarifications(): HasMany
+    {
+        return $this->hasMany(TenderClarification::class)->latest();
+    }
+
+    public function award(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TenderAward::class);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(TenderActivityLog::class)->latest();
     }
 
     public function status(): BelongsTo

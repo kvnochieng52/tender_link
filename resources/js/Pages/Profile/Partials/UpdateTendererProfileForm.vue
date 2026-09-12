@@ -22,6 +22,9 @@ const form = useForm({
   postal_address: p.postal_address ?? "",
   website: p.website ?? "",
   business_description: p.business_description ?? "",
+  certifications: p.certifications ?? "",
+  years_of_experience: p.years_of_experience ?? "",
+  annual_turnover: p.annual_turnover ?? "",
   contact_person_name: p.contact_person_name ?? "",
   contact_person_position: p.contact_person_position ?? "",
   contact_phone: p.contact_phone ?? "",
@@ -245,6 +248,63 @@ const submit = () => {
         ></textarea>
         <div v-if="form.errors.business_description" class="invalid-feedback">
           {{ form.errors.business_description }}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Capability & Experience ─────────────────────────────────── -->
+    <h6 class="text-uppercase text-muted small font-weight-bold mb-3 mt-3">
+      Capability &amp; Experience
+    </h6>
+    <div class="row">
+      <div class="col-md-4 form-group mb-3">
+        <label class="small font-weight-bold mb-1">Years of Experience</label>
+        <input
+          v-model="form.years_of_experience"
+          type="number"
+          min="0"
+          max="200"
+          class="form-control form-control-sm"
+          :class="{ 'is-invalid': form.errors.years_of_experience }"
+          placeholder="e.g. 8"
+        />
+        <div v-if="form.errors.years_of_experience" class="invalid-feedback">
+          {{ form.errors.years_of_experience }}
+        </div>
+      </div>
+
+      <div class="col-md-4 form-group mb-3">
+        <label class="small font-weight-bold mb-1">
+          Annual Turnover (KES)
+        </label>
+        <input
+          v-model="form.annual_turnover"
+          type="number"
+          min="0"
+          step="0.01"
+          class="form-control form-control-sm"
+          :class="{ 'is-invalid': form.errors.annual_turnover }"
+          placeholder="e.g. 12500000"
+        />
+        <div v-if="form.errors.annual_turnover" class="invalid-feedback">
+          {{ form.errors.annual_turnover }}
+        </div>
+      </div>
+
+      <div class="col-md-12 form-group mb-3">
+        <label class="small font-weight-bold mb-1">Certifications</label>
+        <textarea
+          v-model="form.certifications"
+          rows="3"
+          class="form-control form-control-sm"
+          :class="{ 'is-invalid': form.errors.certifications }"
+          placeholder="One per line — e.g. ISO 9001:2015, KEBS Diamond Mark, NCA-3"
+        ></textarea>
+        <small class="text-muted d-block mt-1">
+          Enter each certification / accreditation on its own line.
+        </small>
+        <div v-if="form.errors.certifications" class="invalid-feedback">
+          {{ form.errors.certifications }}
         </div>
       </div>
     </div>

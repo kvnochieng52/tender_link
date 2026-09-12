@@ -106,6 +106,7 @@ watch(search, () => {
             <thead>
               <tr>
                 <th>#</th>
+                <th>Application #</th>
                 <th>Tender</th>
                 <th>Category</th>
                 <th>Company</th>
@@ -123,6 +124,11 @@ watch(search, () => {
                     idx +
                     1
                   }}
+                </td>
+                <td>
+                  <code class="text-success small">
+                    {{ app.application_no || `App #${app.id}` }}
+                  </code>
                 </td>
                 <td>
                   <Link

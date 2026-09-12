@@ -28,10 +28,15 @@ class TendererProfile extends Model
         'contact_person_position',
         'contact_phone',
         'contact_email',
+        'certifications',
+        'years_of_experience',
+        'annual_turnover',
     ];
 
     protected $casts = [
         'year_of_registration' => 'integer',
+        'years_of_experience'  => 'integer',
+        'annual_turnover'      => 'decimal:2',
     ];
 
     public function user(): BelongsTo
