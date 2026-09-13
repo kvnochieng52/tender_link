@@ -18,6 +18,9 @@ const user = computed(() => usePage().props.auth.user);
 // ── Admin static data ──────────────────────────────────────────────────
 const dashboardStats = computed(() => props.adminStats);
 
+const tenderIsExpired = (dateStr) =>
+  dateStr && new Date(dateStr).getTime() <= Date.now();
+
 const recentTendersFormatted = computed(() =>
   props.recentTenders.map((t) => ({
     id: t.id,
@@ -28,7 +31,8 @@ const recentTendersFormatted = computed(() =>
     deadline: t.closing_date_and_time
       ? deadlineLabel(t.closing_date_and_time)
       : "—",
-    status: t.status?.name || "—",
+    status: tenderIsExpired(t.closing_date_and_time) ? "Expired" : (t.status?.name || "—"),
+    expired: tenderIsExpired(t.closing_date_and_time),
   }))
 );
 
@@ -236,7 +240,10 @@ const submitPayment = async () => {
           :key="item.title"
           class="col-md-6 col-xl-3 mb-3"
         >
-          <div class="card border-0 shadow-sm h-100 stat-card">
+          <div
+            class="card border-0 shadow-sm h-100 stat-card"
+            :class="`stat-card--${item.color || 'primary'}`"
+          >
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -246,7 +253,10 @@ const submitPayment = async () => {
                   </h3>
                   <p class="mb-0 small text-muted">{{ item.note }}</p>
                 </div>
-                <span class="stat-icon"><i :class="item.icon"></i></span>
+                <span
+                  class="stat-icon"
+                  :class="`stat-icon--${item.color || 'primary'}`"
+                ><i :class="item.icon"></i></span>
               </div>
             </div>
           </div>
@@ -285,9 +295,10 @@ const submitPayment = async () => {
                     {{ tender.deadline }}
                   </p>
                 </div>
-                <span class="badge badge-pill tender-status mt-2 mt-md-0">{{
-                  tender.status
-                }}</span>
+                <span
+                  class="badge badge-pill mt-2 mt-md-0"
+                  :class="tender.expired ? 'badge-danger' : 'tender-status'"
+                >{{ tender.status }}</span>
               </div>
             </div>
           </div>
@@ -810,6 +821,11 @@ const submitPayment = async () => {
 .stat-card {
   border-left: 3px solid rgba(9, 23, 111, 0.35);
 }
+.stat-card--success { border-left-color: #28a745; }
+.stat-card--danger  { border-left-color: #dc3545; }
+.stat-card--info    { border-left-color: #17a2b8; }
+.stat-card--primary { border-left-color: rgba(9, 23, 111, 0.35); }
+
 .stat-icon {
   width: 2.25rem;
   height: 2.25rem;
@@ -820,6 +836,10 @@ const submitPayment = async () => {
   align-items: center;
   justify-content: center;
 }
+.stat-icon--success { background: rgba(40, 167, 69, 0.14);  color: #28a745; }
+.stat-icon--danger  { background: rgba(220, 53, 69, 0.14);  color: #dc3545; }
+.stat-icon--info    { background: rgba(23, 162, 184, 0.14); color: #17a2b8; }
+.stat-icon--primary { background: rgba(9, 23, 111, 0.14);   color: var(--brand-secondary-dark); }
 .tender-row:last-child {
   border-bottom: 0 !important;
 }

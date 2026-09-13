@@ -27,27 +27,33 @@ class DashboardController extends Controller
             $adminStats = [
                 [
                     'title' => 'Active Tenders',
-                    'value' => Tender::whereHas('status', fn($q) => $q->where('name', 'Active'))->count(),
+                    'value' => Tender::whereHas('status', fn($q) => $q->where('name', 'Active'))
+                        ->where(fn($q) => $q->whereNull('closing_date_and_time')->orWhere('closing_date_and_time', '>', now()))
+                        ->count(),
                     'note'  => 'Open opportunities',
                     'icon'  => 'fas fa-briefcase',
+                    'color' => 'success',
+                ],
+                [
+                    'title' => 'Expired Tenders',
+                    'value' => Tender::where('closing_date_and_time', '<=', now())->count(),
+                    'note'  => 'Past closing date',
+                    'icon'  => 'fas fa-hourglass-end',
+                    'color' => 'danger',
                 ],
                 [
                     'title' => 'Total Applications',
                     'value' => Application::count(),
                     'note'  => 'All submissions',
                     'icon'  => 'fas fa-file-signature',
-                ],
-                [
-                    'title' => 'Closed Tenders',
-                    'value' => Tender::whereHas('status', fn($q) => $q->where('name', 'Closed'))->count(),
-                    'note'  => 'Completed',
-                    'icon'  => 'fas fa-clipboard-check',
+                    'color' => 'primary',
                 ],
                 [
                     'title' => 'Institutions',
                     'value' => Institution::count(),
                     'note'  => 'Registered bodies',
                     'icon'  => 'fas fa-building',
+                    'color' => 'info',
                 ],
             ];
 

@@ -17,7 +17,9 @@
       "Bash(php -l /Users/kevin.ochieng/projects/tender_link/database/seeders/SampleWorkspaceDataSeeder.php)",
       "Bash(php -l /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderCommunicationController.php)",
       "Bash(sed -n '55,72p' /Users/kevin.ochieng/projects/tender_link/app/Http/Controllers/Admin/TenderCommunicationController.php)",
-      "Bash(mysql -uroot tender_link -e \"SHOW COLUMNS FROM tenders WHERE Field IN \\('compliance_weight','technical_weight','financial_weight','criteria_locked_at'\\); SHOW COLUMNS FROM evaluation_criteria WHERE Field IN \\('is_mandatory','scoring_method'\\);\")"
+      "Bash(mysql -uroot tender_link -e \"SHOW COLUMNS FROM tenders WHERE Field IN \\('compliance_weight','technical_weight','financial_weight','criteria_locked_at'\\); SHOW COLUMNS FROM evaluation_criteria WHERE Field IN \\('is_mandatory','scoring_method'\\);\")",
+      "Bash(mysql -u root tender_link -e \"UPDATE plans SET amount = 1 WHERE LOWER\\(plan_name\\) LIKE '%bronze%';\")",
+      "Bash(mysql -u root tender_link -e \"SELECT id, plan_name, amount FROM plans;\")"
     ],
     "additionalDirectories": [
       "/Users/kevin.ochieng/projects/tender_link"
