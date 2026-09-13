@@ -214,6 +214,13 @@ const submitPayment = async () => {
 const toast = useToast();
 const applyMode = ref(false);
 
+// Deadline enforcement — applications close at closing_date_and_time.
+const isTenderClosed = computed(() => {
+  const d = props.tender?.closing_date_and_time;
+  if (!d) return false;
+  return new Date(d).getTime() <= Date.now();
+});
+
 // Pre-fill applicant/representative. Precedence:
 //   1. Saved draft (previous half-finished attempt)
 //   2. Tenderer Profile
@@ -347,6 +354,12 @@ const toggleSelectAllFiltered = () => {
 const currentApplyStep = ref(props.draft?.current_step || 1);
 
 const startApply = () => {
+  if (isTenderClosed.value) {
+    toast.error(
+      "This tender has closed. Applications are no longer being accepted."
+    );
+    return;
+  }
   applyMode.value = true;
   // Resume at the step where the user left off if we hydrated from a draft.
   currentApplyStep.value = props.draft?.current_step || 1;
@@ -559,6 +572,15 @@ const removeRequirementFile = async (idx) => {
 };
 
 const submitApplication = async () => {
+  // Deadline enforcement — refuse to submit after the closing date.
+  if (isTenderClosed.value) {
+    toast.error(
+      "This tender has closed. Applications are no longer being accepted."
+    );
+    applyMode.value = false;
+    return;
+  }
+
   // Category selection (only when tender has categories)
   if (hasCategories.value && selectedCategoryIds.value.length === 0) {
     toast.error("Please select at least one category to apply for.");
@@ -747,6 +769,17 @@ const submitApplication = async () => {
 
           <h1 class="hero-title mb-3">{{ tender.title }}</h1>
 
+          <div
+            v-if="isTenderClosed"
+            class="alert alert-danger py-2 px-3 mb-3 d-inline-flex align-items-center"
+            style="font-size: 0.9rem"
+          >
+            <i class="fas fa-lock me-2"></i>
+            <strong class="me-1">Tender Closed:</strong>
+            Applications are no longer being accepted. Closed
+            {{ formatDateTime(tender.closing_date_and_time) }}.
+          </div>
+
           <div class="hero-meta-row">
             <div class="hero-meta-item">
               <span class="hero-meta-label">Tender No.</span>
@@ -826,20 +859,31 @@ const submitApplication = async () => {
           </div>
 
           <div v-if="hasAccess" class="d-flex justify-content-end mt-3">
-            <button
-              v-if="!applyMode && tender.tender_link_process"
-              class="btn btn-success"
-              @click="startApply"
-            >
-              <i
-                :class="
-                  hasSavedDraft
-                    ? 'fas fa-clock-rotate-left mr-1'
-                    : 'fas fa-paper-plane mr-1'
-                "
-              ></i>
-              {{ hasSavedDraft ? "Resume Application" : "Apply for this Tender" }}
-            </button>
+            <template v-if="!applyMode && tender.tender_link_process">
+              <button
+                v-if="!isTenderClosed"
+                class="btn btn-success"
+                @click="startApply"
+              >
+                <i
+                  :class="
+                    hasSavedDraft
+                      ? 'fas fa-clock-rotate-left mr-1'
+                      : 'fas fa-paper-plane mr-1'
+                  "
+                ></i>
+                {{ hasSavedDraft ? "Resume Application" : "Apply for this Tender" }}
+              </button>
+              <button
+                v-else
+                type="button"
+                class="btn btn-danger"
+                disabled
+              >
+                <i class="fas fa-lock mr-1"></i>
+                Tender Closed — No Longer Accepting Applications
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -1217,24 +1261,35 @@ const submitApplication = async () => {
                 </div>
               </div>
               <div class="mt-3 d-flex justify-content-end">
-                <button
-                  v-if="!applyMode && tender.tender_link_process"
-                  class="btn btn-success"
-                  @click="startApply"
-                >
-                  <i
-                    :class="
+                <template v-if="!applyMode && tender.tender_link_process">
+                  <button
+                    v-if="!isTenderClosed"
+                    class="btn btn-success"
+                    @click="startApply"
+                  >
+                    <i
+                      :class="
+                        hasSavedDraft
+                          ? 'fas fa-clock-rotate-left mr-1'
+                          : 'fas fa-paper-plane mr-1'
+                      "
+                    ></i>
+                    {{
                       hasSavedDraft
-                        ? 'fas fa-clock-rotate-left mr-1'
-                        : 'fas fa-paper-plane mr-1'
-                    "
-                  ></i>
-                  {{
-                    hasSavedDraft
-                      ? "Resume Application"
-                      : "Apply for this Tender"
-                  }}
-                </button>
+                        ? "Resume Application"
+                        : "Apply for this Tender"
+                    }}
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="btn btn-danger"
+                    disabled
+                  >
+                    <i class="fas fa-lock mr-1"></i>
+                    Tender Closed
+                  </button>
+                </template>
               </div>
             </div>
 

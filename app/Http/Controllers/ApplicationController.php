@@ -61,6 +61,16 @@ class ApplicationController extends Controller
     {
         $tender = Tender::where('slug', $slug)->firstOrFail();
 
+        // Reject submissions once the closing date has passed. The deadline is
+        // the canonical cutoff — draft state can remain accessible so the user
+        // still sees their work, but no new applications can be created.
+        if ($tender->closing_date_and_time && $tender->closing_date_and_time->isPast()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This tender has closed. Applications are no longer being accepted.',
+            ], 422);
+        }
+
         // Filled questionnaire is mandatory when the tender ships a CBQ template.
         // Accept EITHER a fresh upload OR a stored path from a resumed draft.
         $questionnaireRequired = (bool) $tender->confidential_questionnaire_file_path;

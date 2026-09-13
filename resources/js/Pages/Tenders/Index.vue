@@ -13,6 +13,61 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
 });
 
+// --- Expired helpers ---
+const isExpired = (tender) => {
+  if (!tender.closing_date_and_time) return false;
+  return new Date(tender.closing_date_and_time).getTime() <= Date.now();
+};
+
+// --- Bulk selection ---
+const selectedIds = ref([]);
+const allOnPageChecked = computed(() => {
+  const ids = props.tenders.data.map((t) => t.encrypted_id);
+  return ids.length > 0 && ids.every((id) => selectedIds.value.includes(id));
+});
+
+const toggleAll = () => {
+  const ids = props.tenders.data.map((t) => t.encrypted_id);
+  if (allOnPageChecked.value) {
+    selectedIds.value = selectedIds.value.filter((id) => !ids.includes(id));
+  } else {
+    ids.forEach((id) => {
+      if (!selectedIds.value.includes(id)) selectedIds.value.push(id);
+    });
+  }
+};
+
+const toggleOne = (encryptedId) => {
+  const i = selectedIds.value.indexOf(encryptedId);
+  if (i === -1) selectedIds.value.push(encryptedId);
+  else selectedIds.value.splice(i, 1);
+};
+
+// --- Delete actions ---
+const deletingId = ref(null);
+const confirmDelete = (tender) => {
+  if (!confirm(`Delete tender "${tender.title}"? This cannot be undone.`)) return;
+  deletingId.value = tender.encrypted_id;
+  router.delete(route("tenders.destroy", { encryptedId: tender.encrypted_id }), {
+    onFinish: () => { deletingId.value = null; },
+  });
+};
+
+const bulkDeleting = ref(false);
+const confirmBulkDelete = () => {
+  if (selectedIds.value.length === 0) return;
+  if (!confirm(`Delete ${selectedIds.value.length} selected tender(s)? This cannot be undone.`)) return;
+  bulkDeleting.value = true;
+  router.post(
+    route("tenders.bulk_destroy"),
+    { ids: selectedIds.value },
+    {
+      onSuccess: () => { selectedIds.value = []; },
+      onFinish: () => { bulkDeleting.value = false; },
+    }
+  );
+};
+
 const search = ref(props.filters.search ?? "");
 const statusId = ref(props.filters.status_id ?? "");
 const industryId = ref(props.filters.industry_id ?? "");
@@ -225,6 +280,32 @@ const formatDateTime = (val) => {
       </div>
     </div>
 
+    <!-- Bulk action bar -->
+    <div
+      v-if="selectedIds.length > 0"
+      class="alert alert-warning d-flex align-items-center justify-content-between py-2 px-3 mb-3 border-0 shadow-sm"
+    >
+      <span class="font-weight-semibold">
+        {{ selectedIds.length }} tender(s) selected
+      </span>
+      <div class="d-flex gap-2">
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          @click="selectedIds = []"
+        >
+          Clear selection
+        </button>
+        <button
+          class="btn btn-sm btn-danger"
+          :disabled="bulkDeleting"
+          @click="confirmBulkDelete"
+        >
+          <i class="fas fa-trash mr-1"></i>
+          {{ bulkDeleting ? "Deleting…" : "Delete selected" }}
+        </button>
+      </div>
+    </div>
+
     <!-- Table -->
     <div class="card border-0 shadow-sm table-card">
       <div class="card-body p-0">
@@ -243,6 +324,14 @@ const formatDateTime = (val) => {
           <table class="table table-hover mb-0 tender-table">
             <thead class="thead-light">
               <tr>
+                <th style="width:36px">
+                  <input
+                    type="checkbox"
+                    :checked="allOnPageChecked"
+                    @change="toggleAll"
+                    title="Select all on this page"
+                  />
+                </th>
                 <th>#</th>
                 <th>Tender No</th>
                 <th>Title</th>
@@ -253,7 +342,18 @@ const formatDateTime = (val) => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(tender, idx) in tenders.data" :key="tender.id">
+              <tr
+                v-for="(tender, idx) in tenders.data"
+                :key="tender.id"
+                :class="{ 'table-danger': isExpired(tender) && !selectedIds.includes(tender.encrypted_id), 'table-warning': selectedIds.includes(tender.encrypted_id) }"
+              >
+                <td>
+                  <input
+                    type="checkbox"
+                    :checked="selectedIds.includes(tender.encrypted_id)"
+                    @change="toggleOne(tender.encrypted_id)"
+                  />
+                </td>
                 <td class="text-muted small">
                   {{ (tenders.current_page - 1) * tenders.per_page + idx + 1 }}
                 </td>
@@ -281,6 +381,11 @@ const formatDateTime = (val) => {
                 </td>
                 <td>
                   <span
+                    v-if="isExpired(tender)"
+                    class="badge badge-danger"
+                  >Expired</span>
+                  <span
+                    v-else
                     class="badge"
                     :class="statusBadgeClass(tender.status?.name)"
                     >{{ tender.status?.name ?? "—" }}</span
@@ -368,6 +473,15 @@ const formatDateTime = (val) => {
                     >
                       <i class="fas fa-edit"></i>
                     </Link>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      title="Delete tender"
+                      :disabled="deletingId === tender.encrypted_id"
+                      @click="confirmDelete(tender)"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </div>
                 </td>
               </tr>

@@ -111,6 +111,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/tenders', [TenderController::class, 'store'])->name('tenders.store');
     Route::get('/tenders/{encryptedId}/edit', [TenderController::class, 'edit'])->name('tenders.edit');
     Route::put('/tenders/{encryptedId}', [TenderController::class, 'update'])->name('tenders.update');
+    Route::delete('/tenders/{encryptedId}', [TenderController::class, 'destroy'])->name('tenders.destroy');
+    Route::post('/tenders/bulk-delete', [TenderController::class, 'bulkDestroy'])->name('tenders.bulk_destroy');
     Route::get('/institutions', [InstitutionController::class, 'index'])->name('institutions.index');
     Route::post('/institutions', [InstitutionController::class, 'store'])->name('institutions.store');
     Route::post('/institutions/{institution}', [InstitutionController::class, 'update'])->name('institutions.update');

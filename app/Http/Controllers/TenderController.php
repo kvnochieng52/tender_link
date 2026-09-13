@@ -631,6 +631,63 @@ class TenderController extends Controller
             ->with('success', 'Tender updated successfully.');
     }
 
+    /* ------------------------------------------------------------------ */
+    /*  DESTROY (single)                                                    */
+    /* ------------------------------------------------------------------ */
+
+    public function destroy(string $encryptedId): RedirectResponse
+    {
+        $id     = Crypt::decryptString($encryptedId);
+        $tender = Tender::findOrFail($id);
+
+        $this->deleteTenderFiles($tender);
+        $tender->delete();
+
+        return redirect()->route('tenders.index')
+            ->with('success', "Tender \"{$tender->title}\" deleted.");
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  BULK DESTROY                                                         */
+    /* ------------------------------------------------------------------ */
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $encryptedIds = $request->input('ids', []);
+
+        if (empty($encryptedIds)) {
+            return redirect()->route('tenders.index')
+                ->with('error', 'No tenders selected.');
+        }
+
+        $ids = collect($encryptedIds)->map(fn ($eid) => Crypt::decryptString($eid))->all();
+
+        $tenders = Tender::whereIn('id', $ids)->get();
+
+        foreach ($tenders as $tender) {
+            $this->deleteTenderFiles($tender);
+            $tender->delete();
+        }
+
+        $count = $tenders->count();
+
+        return redirect()->route('tenders.index')
+            ->with('success', "{$count} tender(s) deleted.");
+    }
+
+    private function deleteTenderFiles(Tender $tender): void
+    {
+        foreach (['advert_file_path', 'self_declaration_file_path', 'confidential_questionnaire_file_path'] as $col) {
+            if ($tender->$col) {
+                Storage::disk('public')->delete($tender->$col);
+            }
+        }
+
+        foreach ($tender->files as $file) {
+            Storage::disk('public')->delete($file->filepath);
+        }
+    }
+
     private function generateUniqueSlug(string $title): string
     {
         $base = Str::slug($title, '-');
