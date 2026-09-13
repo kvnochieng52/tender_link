@@ -989,6 +989,26 @@ const submitApplication = async () => {
                   </tbody>
                 </table>
               </div>
+
+              <!-- Categories list (always public) -->
+              <div v-if="hasCategories" class="px-3 pb-3">
+                <div class="border-top pt-3">
+                  <p class="text-muted small font-weight-bold mb-2 text-uppercase" style="letter-spacing:.04em; font-size:.72rem;">
+                    <i class="fas fa-list mr-1 text-success"></i>
+                    Bid Categories ({{ categoriesList.length }})
+                  </p>
+                  <div class="categories-pill-list">
+                    <span
+                      v-for="cat in categoriesList"
+                      :key="cat.id"
+                      class="category-pill"
+                    >
+                      <span class="category-pill-no">{{ cat.tender_no }}</span>
+                      {{ cat.title }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

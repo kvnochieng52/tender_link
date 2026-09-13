@@ -19,7 +19,7 @@ class PlansTableSeeder extends Seeder
             [
                 'plan_name' => 'Bronze',
                 'period' => 7,
-                'amount' => 250,
+                'amount' => 1,
                 'description' => 'Bronze - 1 week access',
                 'is_active' => true,
                 'created_by' => 1,
