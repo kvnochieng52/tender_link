@@ -2428,6 +2428,30 @@ const submitApplication = async () => {
   font-size: 0.8rem;
 }
 
+.categories-pill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.category-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #374151;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  line-height: 1.4;
+}
+.category-pill-no {
+  font-weight: 700;
+  color: #15803d;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
 .category-picker {
   background: #f9fafb;
 }
